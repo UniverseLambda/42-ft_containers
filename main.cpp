@@ -12,5 +12,9 @@ int main(void) {
 
 	i = 50;
 
+	ft::vector<int> test;
+
+	(void)test;
+
 	return i;
 }
