@@ -104,7 +104,7 @@ namespace ft {
 
 
 			for (size_type i = 0; i < mSize; ++i) {
-				mData[i] = rhs.mData[i];
+				mAlloc.construct(&mData[i], rhs.mData[i]);
 			}
 
 			return (*this);
@@ -236,7 +236,7 @@ namespace ft {
 		}
 
 		void reserve(size_type newCapacity) {
-			if (newCapacity < mCapacity) {
+			if (newCapacity <= mCapacity) {
 				return;
 			}
 
@@ -249,7 +249,7 @@ namespace ft {
 
 			move_data(newData);
 
-			mAlloc.deallocate(newData, mCapacity);
+			mAlloc.deallocate(mData, mCapacity);
 
 			mData = newData;
 			mCapacity = newCapacity;
@@ -327,7 +327,42 @@ namespace ft {
 
 		void pop_back() {
 			--mSize;
-			mAlloc.destroy(mData[mSize]);
+			mAlloc.destroy(&mData[mSize]);
+		}
+
+		void resize(size_type count, _Tp value = _Tp()) {
+			reserve(count);
+			if (count < mSize) {
+				for (size_type i = count; i < mSize; ++i) {
+					pop_back();
+				}
+			} else {
+				for (size_type i = mSize; i < count; ++i) {
+					push_back(value);
+				}
+			}
+		}
+
+		void swap(vector &other) {
+			allocator_type allocator;
+			size_type capacity;
+			pointer data;
+			size_type size;
+
+			allocator = mAlloc;
+			capacity = mCapacity;
+			data = mData;
+			size = mSize;
+
+			mAlloc = other.mAlloc;
+			mCapacity = other.mCapacity;
+			mData = other.mData;
+			mSize = other.mSize;
+
+			other.mAlloc = allocator;
+			other.mCapacity = capacity;
+			other.mData = data;
+			other.mSize = size;
 		}
 
 	private:
@@ -406,54 +441,6 @@ namespace ft {
 			size_type retValue = (mSize < count) ? mSize : count;
 			mSize = count;
 			return retValue;
-		}
-
-		void resize(size_type count) {
-			reserve(count);
-			if (count < mSize) {
-				for (size_type i = count; i < mSize; ++i) {
-					pop_back();
-				}
-			} else {
-				for (mSize; mSize < count; ++mSize) {
-					mAlloc.construct(&mData[mSize]);
-				}
-			}
-		}
-
-		void resize(size_type count, _Tp value = _Tp()) {
-			reserve(count);
-			if (count < mSize) {
-				for (size_type i = count; i < mSize; ++i) {
-					pop_back();
-				}
-			} else {
-				for (size_type i = mSize; i < count; ++i) {
-					push_back(value);
-				}
-			}
-		}
-
-		void swap(vector &other) {
-			allocator_type allocator;
-			size_type capacity;
-			pointer data;
-			size_type size;
-
-			allocator = mAlloc;
-			capacity = mCapacity;
-			data = mData;
-			size = mSize;
-
-			mAlloc = other.mAlloc;
-			mCapacity = other.mCapacity;
-			mData = other.mData;
-			mSize = other.mSize;
-
-			other.mAlloc = allocator;
-			other.mCapacity = capacity;
-			other.mData = data;
-			other.mSize = size;
 		}
 	};
 

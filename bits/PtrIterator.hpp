@@ -31,7 +31,7 @@ namespace ft {
 			}
 
 			bool operator!=(const PtrIterator &rhs) const {
-				return !(*this != rhs);
+				return !(*this == rhs);
 			}
 
 			typename _ItTrait::reference operator*() const {
