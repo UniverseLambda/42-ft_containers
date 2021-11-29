@@ -60,7 +60,7 @@ std::ostream &operator<<(std::ostream &os, ValiditySanitizer::Origin origin) {
 void checkVector(const ft::vector<ValiditySanitizer> &validity, size_t testIdx) {
 	typedef ft::vector<ValiditySanitizer>::const_iterator iter;
 
-	std::cout << "== CHECK " << testIdx << " ==" << std::endl;
+	std::cout << "== CHECK " << testIdx << " (current size: " << validity.size() << ") ==" << std::endl;
 	for (iter it = validity.begin(); it != validity.end(); ++it) {
 		std::cout << "Checking " << it->idx << std::endl;
 		it->check();
@@ -69,21 +69,29 @@ void checkVector(const ft::vector<ValiditySanitizer> &validity, size_t testIdx) 
 
 void vectorTest() {
 	ft::vector<ValiditySanitizer> validity;
+	ft::vector<ValiditySanitizer> validity1;
+	std::size_t testIdx = 0;
 
 	for (size_t i = 0; i < 5; ++i) {
 		validity.push_back(ValiditySanitizer(i));
 	}
 
-	checkVector(validity, 0);
-	validity.insert(validity.begin() + 5, ValiditySanitizer(666));
-	checkVector(validity, 1);
-	validity.insert(validity.begin() + 5, 6, ValiditySanitizer(667));
-	checkVector(validity, 2);
-	validity.insert(validity.begin() + 2, 42, ValiditySanitizer(69420));
-	checkVector(validity, 3);
-	validity.insert(validity.begin() + 2, 0, ValiditySanitizer(99999));
-	checkVector(validity, 4);
+	for (size_t i = 0; i < 10; ++i) {
+		validity1.push_back(ValiditySanitizer(i + 1000));
+	}
 
+	checkVector(validity, testIdx++);
+	validity.insert(validity.begin() + 5, ValiditySanitizer(666));
+	checkVector(validity, testIdx++);
+	validity.insert(validity.begin() + 5, 6, ValiditySanitizer(667));
+	checkVector(validity, testIdx++);
+	validity.insert(validity.begin() + 2, 42, ValiditySanitizer(69420));
+	checkVector(validity, testIdx++);
+	validity.insert(validity.begin() + 2, 0, ValiditySanitizer(99999));
+	checkVector(validity, testIdx++);
+
+	validity.insert(validity.begin() + 9, validity1.begin(), validity1.end());
+	checkVector(validity, testIdx++);
 }
 
 int main(void) {
