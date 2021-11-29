@@ -38,8 +38,8 @@ namespace ft {
 				return *mPtr;
 			}
 
-			typename _ItTrait::reference operator->() const {
-				return *mPtr;
+			typename _ItTrait::pointer operator->() const {
+				return mPtr;
 			}
 
 			PtrIterator &operator++() {

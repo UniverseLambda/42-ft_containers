@@ -268,7 +268,10 @@ namespace ft {
 		}
 
 		iterator insert(iterator pos, const _Tp &value) {
-			return insert(pos, 1, value);
+			size_type idx = pos - begin();
+
+			insert(pos, 1, value);
+			return iterator(mData + idx);
 		}
 
 		void insert(iterator pos, size_type count, const _Tp &value) {
@@ -276,7 +279,9 @@ namespace ft {
 
 			make_hole(idx, count);
 
-			mAlloc.construct(&mData[idx], value);
+			for (size_type i = 0; i < count; ++i) {
+				mAlloc.construct(&mData[idx + i], value);
+			}
 		}
 
 		template<typename _InputIt>
@@ -388,6 +393,10 @@ namespace ft {
 		}
 
 		void make_hole(size_type idx, size_type holeSize = 1) {
+			if (holeSize == 0) {
+				return;
+			}
+
 			if (mSize + holeSize > mCapacity) {
 				size_type newCapacity = calc_capacity(mSize + holeSize);
 
@@ -408,6 +417,9 @@ namespace ft {
 				}
 
 				for (size_type i = 0; i < holeSize; ++i) {
+					if ((i + idx) >= mSize) {
+						break;
+					}
 					mAlloc.destroy(&mData[idx + i]);
 				}
 			}
