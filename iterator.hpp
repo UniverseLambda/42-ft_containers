@@ -37,3 +37,7 @@ namespace ft {
 		typedef random_access_iterator_tag iterator_category;
 	};
 } // namespace ft
+
+#define __FT_BITS_INC
+#include "bits/ReverseIterator.hpp"
+#undef __FT_BITS_INC
