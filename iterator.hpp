@@ -46,3 +46,7 @@ namespace ft {
 		typedef _Reference reference;
 	};
 } // namespace ft
+
+#define __FT_BITS_INC
+#include "bits/ReverseIterator.hpp"
+#undef __FT_BITS_INC
