@@ -1,4 +1,7 @@
 #include "iterator.hpp"
+#include "type_traits.hpp"
+#include "algorithm.hpp"
+#include "utility.hpp"
 
 #include <vector>
 
