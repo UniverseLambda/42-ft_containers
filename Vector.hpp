@@ -4,6 +4,10 @@
 
 #include "bits/PtrIterator.hpp"
 
+#include "iterator.hpp"
+
+#include "algorithm.hpp"
+
 #include <stdexcept>
 #include <limits>
 
@@ -21,10 +25,8 @@ namespace ft {
 		typedef typename _Allocator::const_pointer const_pointer;
 		typedef __clsaad_impl::PtrIterator<value_type, vector<value_type, allocator_type> > iterator;
 		typedef __clsaad_impl::PtrIterator<const value_type, vector<value_type, allocator_type> > const_iterator;
-
-		// FIXME: Merge reverse_iterator changes
-		// typedef reverse_iterator reverse_iterator;
-		// typedef reverse_iterator const_reverse_iterator;
+		typedef ft::reverse_iterator<iterator> reverse_iterator;
+		typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
 	private:
 		allocator_type mAlloc;
@@ -205,22 +207,21 @@ namespace ft {
 			return const_iterator(mData + mSize);
 		}
 
-		// iterator rbegin() {
-		// 	return reverse_iterator(end());
-		// }
+		iterator rbegin() {
+			return reverse_iterator(end());
+		}
 
-		// FXIME: Merge reverse_iterator changes
-		// const_iterator rbegin() const {
-		// 	return const_reverse_iterator(end());
-		// }
+		const_iterator rbegin() const {
+			return const_reverse_iterator(end());
+		}
 
-		// iterator rend() {
-		// 	return reverse_iterator(begin());
-		// }
+		iterator rend() {
+			return reverse_iterator(begin());
+		}
 
-		// const_iterator rend() const {
-		// 	return reverse_iterator(begin());
-		// }
+		const_iterator rend() const {
+			return reverse_iterator(begin());
+		}
 
 		bool empty() const {
 			return (mSize == 0);
@@ -406,5 +407,114 @@ namespace ft {
 			mSize = count;
 			return retValue;
 		}
+
+		void resize(size_type count) {
+			reserve(count);
+			if (count < mSize) {
+				for (size_type i = count; i < mSize; ++i) {
+					pop_back();
+				}
+			} else {
+				for (mSize; mSize < count; ++mSize) {
+					mAlloc.construct(&mData[mSize]);
+				}
+			}
+		}
+
+		void resize(size_type count, _Tp value = _Tp()) {
+			reserve(count);
+			if (count < mSize) {
+				for (size_type i = count; i < mSize; ++i) {
+					pop_back();
+				}
+			} else {
+				for (size_type i = mSize; i < count; ++i) {
+					push_back(value);
+				}
+			}
+		}
+
+		void swap(vector &other) {
+			allocator_type allocator;
+			size_type capacity;
+			pointer data;
+			size_type size;
+
+			allocator = mAlloc;
+			capacity = mCapacity;
+			data = mData;
+			size = mSize;
+
+			mAlloc = other.mAlloc;
+			mCapacity = other.mCapacity;
+			mData = other.mData;
+			mSize = other.mSize;
+
+			other.mAlloc = allocator;
+			other.mCapacity = capacity;
+			other.mData = data;
+			other.mSize = size;
+		}
 	};
+
+	template<typename _Tp, typename _Alloc>
+	bool operator==(const vector<_Tp, _Alloc> &v0, const vector<_Tp, _Alloc> &v1) {
+		if (v0.size() != v1.size()) {
+			return false;
+		}
+
+		return equal(v0.begin(), v0.end(), v1.begin());
+	}
+
+	template<typename _Tp, typename _Alloc>
+	bool operator!=(const vector<_Tp, _Alloc> &v0, const vector<_Tp, _Alloc> &v1) {
+		return !(v0 == v1);
+	}
+
+	template<typename _Tp, typename _Alloc>
+	bool operator<(const vector<_Tp, _Alloc> &v0, const vector<_Tp, _Alloc> &v1) {
+		typedef typename vector<_Tp, _Alloc>::const_iterator iter;
+
+		iter it0 = v0.begin();
+		iter it1 = v1.begin();
+
+		for (; it0 != v0.end() && it1 != v1.end(); ++it0, ++it1) {
+			if (!(*it0 < *it1)) {
+				return false;
+			}
+		}
+
+		return it0 == v0.end() && it1 != v1.end();
+	}
+
+	template<typename _Tp, typename _Alloc>
+	bool operator<=(const vector<_Tp, _Alloc> &v0, const vector<_Tp, _Alloc> &v1) {
+		typedef typename vector<_Tp, _Alloc>::const_iterator iter;
+
+		iter it0 = v0.begin();
+		iter it1 = v1.begin();
+
+		for (; it0 != v0.end() && it1 != v1.end(); ++it0, ++it1) {
+			if (*it1 < *it0) {
+				return false;
+			}
+		}
+
+		return it0 == v0.end();
+	}
+
+	template<typename _Tp, typename _Alloc>
+	bool operator>(const vector<_Tp, _Alloc> &v0, const vector<_Tp, _Alloc> &v1) {
+		return v1 < v0;
+	}
+
+	template<typename _Tp, typename _Alloc>
+	bool operator>=(const vector<_Tp, _Alloc> &v0, const vector<_Tp, _Alloc> &v1) {
+		return v1 <= v0;
+	}
+
+	template<typename _Tp, typename _Alloc>
+	void swap(vector<_Tp, _Alloc> &v0, vector<_Tp, _Alloc> &v1) {
+		v0.swap(v1);
+	}
 } // namespace ft
