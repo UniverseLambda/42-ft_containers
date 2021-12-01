@@ -8,9 +8,14 @@
 
 namespace ft {
 	template<typename _Iter>
-	struct reverse_iterator {
+	struct reverse_iterator:
+		public iterator<
+			typename iterator_traits<_Iter>::iterator_category,
+			typename iterator_traits<_Iter>::value_type,
+			typename iterator_traits<_Iter>::difference_type,
+			typename iterator_traits<_Iter>::pointer,
+			typename iterator_traits<_Iter>::reference> {
 		typedef _Iter iterator_type;
-		typedef typename iterator_traits<_Iter>::iterator_category iterator_category;
 		typedef typename iterator_traits<_Iter>::value_type value_type;
 		typedef typename iterator_traits<_Iter>::difference_type difference_type;
 		typedef typename iterator_traits<_Iter>::pointer pointer;
@@ -33,12 +38,16 @@ namespace ft {
 			return (*this);
 		}
 
-		iterator_type base() {
+		iterator_type base() const {
 			return current;
 		}
 
 		reference operator*() const {
-			return &*(current - 1);
+			iterator_type it = current;
+
+			--it;
+
+			return *it;
 		}
 
 		pointer operator->() const {
@@ -74,13 +83,17 @@ namespace ft {
 		}
 
 		reverse_iterator operator+(difference_type n) const {
-			reverse_iterator res(current - n);
+			reverse_iterator res(current);
+
+			res += n;
 
 			return res;
 		}
 
 		reverse_iterator operator-(difference_type n) const {
-			reverse_iterator res(current + n);
+			reverse_iterator res(current);
+
+			res -= n;
 
 			return res;
 		}
@@ -92,7 +105,9 @@ namespace ft {
 		}
 
 		reverse_iterator operator-=(difference_type n) const {
-			current += n;
+			for (difference_type i = 0; i != n; ((n < 0) ? --i : ++i)) {
+				++current;
+			}
 			return (*this);
 		}
 	};

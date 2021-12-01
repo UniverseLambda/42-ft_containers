@@ -16,7 +16,6 @@ namespace ft {
 			typename _ItTrait::pointer mPtr;
 
 		public:
-
 			PtrIterator(): mPtr(NULL) {}
 			PtrIterator(typename _ItTrait::pointer ptr): mPtr(ptr) {}
 			PtrIterator(const PtrIterator &cpy): mPtr(cpy.mPtr) {}

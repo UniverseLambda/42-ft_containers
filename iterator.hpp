@@ -32,8 +32,8 @@ namespace ft {
 	struct iterator_traits<const _Tp *> {
 		typedef std::ptrdiff_t difference_type;
 		typedef _Tp value_type;
-		typedef _Tp *pointer;
-		typedef _Tp &reference;
+		typedef const _Tp *pointer;
+		typedef const _Tp &reference;
 		typedef random_access_iterator_tag iterator_category;
 	};
 

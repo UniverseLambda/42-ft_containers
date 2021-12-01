@@ -54,7 +54,7 @@ namespace ft {
 			mSize(count) {
 
 			for (size_type i = 0; i < count; ++i) {
-				mAlloc.construct(&(mData[i]), value);
+				mAlloc.construct(&mData[i], value);
 			}
 		}
 
@@ -116,7 +116,7 @@ namespace ft {
 				if (i < validCopies) {
 					mData[i] = value;
 				} else {
-					mAlloc.allocate(&(mData[i]), value);
+					mAlloc.construct(&mData[i], value);
 				}
 			}
 		}
@@ -126,12 +126,12 @@ namespace ft {
 			size_type previousSize = mSize;
 
 			mSize = 0;
-			for (size_type i = 0; i < previousSize && first != last; ++first, ++i) {
+			for (size_type i = 0; i < previousSize && first != last; ++first, ++i, ++mSize) {
 				mData[i] = *first;
 			}
 
 			for (; first != last; ++first) {
-				push_data(*first);
+				push_back(*first);
 			}
 
 			while (previousSize-- > mSize) {
@@ -207,19 +207,19 @@ namespace ft {
 			return const_iterator(mData + mSize);
 		}
 
-		iterator rbegin() {
+		reverse_iterator rbegin() {
 			return reverse_iterator(end());
 		}
 
-		const_iterator rbegin() const {
+		const_reverse_iterator rbegin() const {
 			return const_reverse_iterator(end());
 		}
 
-		iterator rend() {
+		reverse_iterator rend() {
 			return reverse_iterator(begin());
 		}
 
-		const_iterator rend() const {
+		const_reverse_iterator rend() const {
 			return reverse_iterator(begin());
 		}
 
@@ -232,7 +232,7 @@ namespace ft {
 		}
 
 		size_type max_size() const {
-			return std::numeric_limits<difference_type>::max();
+			return std::numeric_limits<difference_type>::max() / sizeof(_Tp);
 		}
 
 		void reserve(size_type newCapacity) {
@@ -240,7 +240,7 @@ namespace ft {
 				return;
 			}
 
-			if (newCapacity >= max_size()) {
+			if (newCapacity > max_size()) {
 				throw std::length_error("Vector::reserve: requested capacity greater than max_size()");
 			}
 
@@ -376,9 +376,9 @@ namespace ft {
 #if defined(__GNUC__) || defined(__clang__)
 			adjustedCapacity = (1 << (64 - __builtin_clzl(capacity - 1)));
 #else
-			adjustedCapacity = mCapacity;
+			adjustedCapacity = 8;
 
-			while (adjustedCapacity < capacity) {
+			while (adjustedCapacity < capacity && adjustedCapacity != 0) {
 				adjustedCapacity << 2;
 			}
 #endif
@@ -442,7 +442,7 @@ namespace ft {
 				free_data();
 				mCapacity = calc_capacity(count);
 				mAlloc.allocate(mCapacity);
-				mSize = 0;
+				mSize = count;
 				return 0;
 			}
 
@@ -462,7 +462,7 @@ namespace ft {
 			return false;
 		}
 
-		return equal(v0.begin(), v0.end(), v1.begin());
+		return ft::equal(v0.begin(), v0.end(), v1.begin());
 	}
 
 	template<typename _Tp, typename _Alloc>
@@ -478,12 +478,18 @@ namespace ft {
 		iter it1 = v1.begin();
 
 		for (; it0 != v0.end() && it1 != v1.end(); ++it0, ++it1) {
-			if (!(*it0 < *it1)) {
-				return false;
+			if (!(*it0 == *it1)) {
+				return *it0 < *it1;
 			}
 		}
 
-		return it0 == v0.end() && it1 != v1.end();
+		if (it0 == v0.end()) {
+			if (it1 == v1.end())
+				return false;
+			return true;
+		}
+
+		return false;
 	}
 
 	template<typename _Tp, typename _Alloc>
