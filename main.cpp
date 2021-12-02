@@ -5,6 +5,8 @@
 
 #include "Vector.hpp"
 
+#include "Stack.hpp"
+
 #include <ostream>
 #include <iostream>
 
@@ -353,6 +355,12 @@ void vectorTest() {
 
 int main(void) {
 	vectorTest();
+
+	ft::stack<ValiditySanitizer> s;
+	s.push(ValiditySanitizer(1));
+	s.push(ValiditySanitizer(2));
+	s.pop();
+	s.pop();
 
 	return 0;
 }
