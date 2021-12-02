@@ -1,4 +1,5 @@
 **/*
+!bits/
 !*.hpp
 !*.cpp
 !Makefile
