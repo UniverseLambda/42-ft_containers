@@ -7,6 +7,8 @@
 
 #include "Stack.hpp"
 
+#include "Map.hpp"
+
 #include <ostream>
 #include <iostream>
 
