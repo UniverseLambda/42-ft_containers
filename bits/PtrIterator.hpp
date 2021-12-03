@@ -74,7 +74,7 @@ namespace ft {
 				return (*this);
 			}
 
-			PtrIterator operator+(typename _ItTrait::difference_type n) {
+			PtrIterator operator+(typename _ItTrait::difference_type n) const {
 				PtrIterator<_Tp, _Container> cpy(*this);
 
 				cpy += n;
@@ -88,7 +88,7 @@ namespace ft {
 				return (*this);
 			}
 
-			PtrIterator operator-(typename _ItTrait::difference_type n) {
+			PtrIterator operator-(typename _ItTrait::difference_type n) const {
 				PtrIterator<_Tp, _Container> cpy(*this);
 
 				cpy -= n;
@@ -96,14 +96,14 @@ namespace ft {
 				return cpy;
 			}
 
-			typename _ItTrait::difference_type operator-(PtrIterator<_Tp, _Container> rhs) {
+			typename _ItTrait::difference_type operator-(PtrIterator<_Tp, _Container> rhs) const {
 				return
 					(reinterpret_cast<typename _ItTrait::difference_type>(mPtr)
 						- reinterpret_cast<typename _ItTrait::difference_type>(rhs.mPtr))
 					/ sizeof(*mPtr);
 			}
 
-			typename _ItTrait::value_type &operator[](typename _ItTrait::difference_type n) {
+			typename _ItTrait::value_type &operator[](typename _ItTrait::difference_type n) const {
 				return mPtr[n];
 			}
 
@@ -122,6 +122,12 @@ namespace ft {
 			bool operator>=(PtrIterator<_Tp, _Container> rhs) {
 				return !(*this < rhs);
 			}
+
 		};
+
+		template<typename _Tp, typename _Container>
+		PtrIterator<_Tp, _Container> operator+(typename _Container::difference_type lhs, const PtrIterator<_Tp, _Container> &rhs) {
+			return rhs + lhs;
+		}
 	} // namespace __clsaad_impl
 } // namespace ft

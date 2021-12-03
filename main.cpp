@@ -8,6 +8,10 @@
 #include <ostream>
 #include <iostream>
 
+#ifndef DSP_CHECK_VAL
+# define DSP_CHECK_VAL true
+#endif
+
 #define VECTOR_TEST(X) X; \
 						checkVector(validity, testIdx++)
 
@@ -83,12 +87,14 @@ void checkVector(const ft::vector<ValiditySanitizer> &validity, std::size_t test
 
 	std::cout << "== CHECK " << testIdx << " (current size: " << validity.size() << " out of " << validity.capacity() << ") ==" << std::endl;
 	for (iter it = validity.begin(); it != validity.end(); ++idx, ++it) {
-		if (idx < 31) {
-			std::cout << "Checking [" << idx << "] " << it->idx << std::endl;
-		} else if (idx == 31) {
-			std::cout << "(...)" << std::endl;
-		} else if ((it + 1 == validity.end()) || (it + 2 == validity.end())) {
-			std::cout << "Checking [" << idx << "] " << it->idx << std::endl;
+		if (DSP_CHECK_VAL) {
+			if (idx < 31) {
+				std::cout << "Checking [" << idx << "] " << it->idx << std::endl;
+			} else if (idx == 31) {
+				std::cout << "(...)" << std::endl;
+			} else if ((it + 1 == validity.end()) || (it + 2 == validity.end())) {
+				std::cout << "Checking [" << idx << "] " << it->idx << std::endl;
+			}
 		}
 		it->check();
 	}
@@ -322,10 +328,12 @@ void vectorTest() {
 	VECTOR_TEST(validity.reserve(129));
 	VECTOR_TEST(try {
 		validity.reserve(validity.max_size() + 1);
-		std::cout << "/!\\ No exception caught (shit)" << std::endl;
+		std::cout << "\x1B[91m" << "/!\\ No exception caught (shit)" << "\x1B[0m" << std::endl;
 	} catch (std::exception &e) {
-		std::cout << "/!\\ Caught an exception: " << e.what() << " (that's good)" << std::endl;
+		std::cout << "\x1B[92m" << "/!\\ Caught an exception: " << e.what() << " (that's good)" << "\x1B[0m" << std::endl;
 	});
+
+	VECTOR_TEST(std::cout << "Shitty vector test: " << (2 + validity.begin())->idx << std::endl);
 
 
 	// Capacity, already tested......
