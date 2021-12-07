@@ -13,7 +13,9 @@ namespace ft {
 
 		template<typename _Key, typename _Value>
 		struct BSTNode {
+			BSTNode **root;
 			BSTNode *parent;
+			static BSTNode *const nullValue;
 
 			_Key key;
 			_Value value;
@@ -22,11 +24,12 @@ namespace ft {
 			BSTNode *leftNode;
 			BSTNode *rightNode;
 
-			BSTNode(BSTNode *parent, _Key key, _Value value):
+			BSTNode(BSTNode **root, BSTNode *parent, _Key key, _Value value, BSTNodeColor color = RED):
+				root(root),
 				parent(parent),
 				key(key),
 				value(value),
-				nodeColor(RED),
+				nodeColor(color),
 				leftNode(NULL),
 				rightNode(NULL) {
 				if (!parent) {
@@ -43,19 +46,27 @@ namespace ft {
 					value = aValue;
 				}
 
-				if (key < aKey) {
-					push_on_node(leftNode);
+				if (aKey < key) {
+					push_on_node(leftNode, aKey, aValue);
 				} else {
-					push_on_node(rightNode);
+					push_on_node(rightNode, aKey, aValue);
 				}
 			}
 
-			_Value &find_value(const _Key &aKey) const {
+			_Value &find_value(const _Key &aKey) {
 				if (aKey == key) {
 					return value;
 				}
 
-				return find_on_node((aKey < key) ? leftNode : rightNode);
+				return find_on_node((aKey < key) ? leftNode : rightNode, aKey);
+			}
+
+			const _Value &find_value(const _Key &aKey) const {
+				if (aKey == key) {
+					return value;
+				}
+
+				return find_on_node((aKey < key) ? leftNode : rightNode, aKey);
 			}
 
 			void right_rotate() {
@@ -69,10 +80,15 @@ namespace ft {
 
 				leftNode = pivot->rightNode;
 				pivot->rightNode = this;
+				pivot->parent = parent;
 
 				if (parent) {
 					parent->node_storage(this) = pivot;
+				} else if (root) {
+					*root = pivot;
 				}
+
+				parent = pivot;
 			}
 
 			void left_rotate() {
@@ -86,11 +102,15 @@ namespace ft {
 
 				rightNode = pivot->leftNode;
 				pivot->leftNode = this;
+				pivot->parent = parent;
 
 				if (parent) {
 					parent->node_storage(this) = pivot;
+				} else if (root) {
+					*root = pivot;
 				}
 
+				parent = pivot;
 			}
 
 		private:
@@ -99,25 +119,41 @@ namespace ft {
 			}
 
 			inline BSTNode *&node_storage(BSTNode *node) {
-				return (node == leftNode) ? leftNode : ((node == rightNode) ? rightNode : NULL);
+				if (node == leftNode) {
+					return leftNode;
+				}
+
+				if (node == rightNode) {
+					return rightNode;
+				}
+
+
+				std::__throw_runtime_error("internal error");
 			}
 
-			inline void push_on_node(const _Key &aKey, const _Value &aValue, BSTNode *&node) {
+			inline void push_on_node(BSTNode *&node, const _Key &aKey, const _Value &aValue) {
 				if (!node) {
-					node = new BSTNode(this, aKey, aValue, BLACK);
+					node = new BSTNode(root, this, aKey, aValue, BLACK);
 				} else {
 					node->push_value(aKey, aValue);
 				}
 			}
 
-			_Value &find_on_node(const _Key &aKey, BSTNode *&node) {
+			_Value &find_on_node(BSTNode *&node, const _Key &aKey) {
 				if (!node) {
 					std::__throw_out_of_range("key node found");
 				}
 
-				return node->find_on_node(aKey);
+				return node->find_value(aKey);
+			}
+
+			const _Value &find_on_node(BSTNode *&node, const _Key &aKey) const {
+				if (!node) {
+					std::__throw_out_of_range("key node found");
+				}
+
+				return node->find_value(aKey);
 			}
 		};
-
 	} // namespace __clsaad_impl
 } // namespace ft

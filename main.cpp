@@ -11,6 +11,7 @@
 
 #include <ostream>
 #include <iostream>
+#include <iomanip>
 
 #ifndef DSP_CHECK_VAL
 # define DSP_CHECK_VAL true
@@ -363,6 +364,48 @@ void vectorTest() {
 	VECTOR_TEST(testRemainingCtor(validity));
 }
 
+void print_tree_branch(ft::__clsaad_impl::BSTNode<int, int> *node, int depth) {
+
+	for (int i = 0; i < depth; ++i) {
+		std::cout << "       ";
+	}
+
+	std::cout << std::setw(4);
+
+	if (!node) {
+		std::cout << "_" << std::endl;
+		return;
+	}
+
+	std::cout << node->value << " ---- +" << std::endl;
+
+	print_tree_branch(node->rightNode, depth + 1);
+	print_tree_branch(node->leftNode, depth + 1);
+
+}
+
+void test_node() {
+	ft::__clsaad_impl::BSTNode<int, int> *root;
+	ft::__clsaad_impl::BSTNode<int, int> node(&root, NULL, 5, 5);
+	root = &node;
+	int k = 7;
+
+	root->push_value(3, 3);
+	root->push_value(2, 2);
+	root->push_value(4, 4);
+	root->push_value(7, 7);
+
+	print_tree_branch(root, 0);
+
+	root->right_rotate();
+	print_tree_branch(root, 0);
+
+	root->left_rotate();
+	print_tree_branch(root, 0);
+
+	std::cout << "Value for 7: " << root->find_value(k) << std::endl;
+}
+
 int main(void) {
 	vectorTest();
 
@@ -371,6 +414,8 @@ int main(void) {
 	s.push(ValiditySanitizer(2));
 	s.pop();
 	s.pop();
+
+	test_node();
 
 	return 0;
 }
