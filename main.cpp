@@ -367,43 +367,101 @@ void vectorTest() {
 void print_tree_branch(ft::__clsaad_impl::BSTNode<int, int> *node, int depth) {
 
 	for (int i = 0; i < depth; ++i) {
-		std::cout << "       ";
+		std::cout << "          ";
 	}
 
 	std::cout << std::setw(4);
 
 	if (!node) {
-		std::cout << "_" << std::endl;
+		std::cout << "       _" << std::endl;
 		return;
 	}
 
-	std::cout << node->value << " ---- +" << std::endl;
+	std::cout << node->value << " (" << (node->nodeColor == ft::__clsaad_impl::RED ? "R" : "B") << ")" << " ------- +" << std::endl;
 
 	print_tree_branch(node->rightNode, depth + 1);
 	print_tree_branch(node->leftNode, depth + 1);
 
 }
 
+template<typename _Key, typename _Value>
+void sanitize_tree(ft::__clsaad_impl::BSTNode<_Key, _Value> *root) {
+	if (!root) {
+		return;
+	}
+
+	if (root->leftNode) {
+		if (root->leftNode->parent != root) {
+			std::cerr << "Error at node " << root->leftNode->value << std::endl;
+			std::__throw_runtime_error("TREE_SANITIZER: Wrong parent");
+		}
+
+		if (root->leftNode->nodeColor == ft::__clsaad_impl::RED && root->leftNode->nodeColor == root->nodeColor) {
+			std::cerr << "Error at node " << root->leftNode->value << std::endl;
+			std::__throw_runtime_error("TREE_SANITIZER: Wrong color");
+		}
+	}
+
+	if (root->rightNode) {
+		if (root->rightNode->parent != root) {
+			std::cerr << "Error at node " << root->rightNode->value << std::endl;
+			std::__throw_runtime_error("TREE_SANITIZER: Wrong parent");
+		}
+
+		if (root->rightNode->nodeColor == ft::__clsaad_impl::RED && root->rightNode->nodeColor == root->nodeColor) {
+			std::cerr << "Error at node " << root->rightNode->value << std::endl;
+			std::__throw_runtime_error("TREE_SANITIZER: Wrong color");
+		}
+	}
+
+	sanitize_tree(root->leftNode);
+	sanitize_tree(root->rightNode);
+}
+
+
+
 void test_node() {
 	ft::__clsaad_impl::BSTNode<int, int> *root;
-	ft::__clsaad_impl::BSTNode<int, int> node(&root, NULL, 5, 5);
+	ft::__clsaad_impl::BSTNode<int, int> node(&root, NULL, 50, 50);
 	root = &node;
-	int k = 7;
+	// int k = 7;
 
-	root->push_value(3, 3);
-	root->push_value(2, 2);
-	root->push_value(4, 4);
-	root->push_value(7, 7);
-
+	std::cout << "===== After inserting 30 =====" << std::endl;
+	root->push_value(30, 30);
 	print_tree_branch(root, 0);
+	sanitize_tree(root);
 
-	root->right_rotate();
+	std::cout << "===== After inserting 20 =====" << std::endl;
+	root->push_value(20, 20);
 	print_tree_branch(root, 0);
+	sanitize_tree(root);
 
-	root->left_rotate();
+	std::cout << "===== After inserting 40 =====" << std::endl;
+	root->push_value(40, 40);
 	print_tree_branch(root, 0);
+	sanitize_tree(root);
 
-	std::cout << "Value for 7: " << root->find_value(k) << std::endl;
+	std::cout << "===== After inserting 70 =====" << std::endl;
+	root->push_value(70, 70);
+	print_tree_branch(root, 0);
+	sanitize_tree(root);
+
+	// root->right_rotate();
+	// print_tree_branch(root, 0);
+
+	// root->left_rotate();
+	// print_tree_branch(root, 0);
+
+	// std::cout << "Value for 7: " << root->find_value(k) << std::endl;
+
+	for (int i = 0; i < 10; ++i) {
+		int v = i + ((i % 2) ? 50 : 0) + 1;
+		std::cout << "===== After inserting " << v << " =====" << std::endl;
+		root->push_value(v, v);
+		print_tree_branch(root, 0);
+		sanitize_tree(root);
+	}
+	print_tree_branch(root, 0);
 }
 
 int main(void) {
