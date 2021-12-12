@@ -38,17 +38,23 @@ namespace ft {
 					nodeColor = BLACK;
 				}
 			}
+
 		private:
 			BSTNode(const BSTNode &) {}
-		public:
 			~BSTNode() {}
 
+		private:
+			BSTNode &operator=(const BSTNode &) {
+				return (*this);
+			}
+
+		public:
 			void push_value(const _Key &aKey, const _Value &aValue) {
 				if (key == aKey) {
 					value = aValue;
 				}
 
-				if (aKey < key) {
+				if (_Less(aKey, key)) {
 					push_on_node(leftNode, aKey, aValue);
 				} else {
 					push_on_node(rightNode, aKey, aValue);
@@ -60,7 +66,85 @@ namespace ft {
 					return value;
 				}
 
-				return find_on_node((aKey < key) ? leftNode : rightNode, aKey);
+				return find_on_node((_Less(aKey, key)) ? leftNode : rightNode, aKey);
+			}
+
+			bool remove_value(const _Key &aKey) {
+				if (!(aKey == key)) {
+					return remove_on_node((_Less(aKey, key)) ? leftNode : rightNode, aKey);
+				}
+
+				std::size_t childCount = !!(leftNode) + !!(rightNode);
+				BSTNode *replacement;
+
+				BSTNodeColor originalColor = nodeColor;
+
+				if (leftNode == NULL) {
+					if (parent) {
+						parent = rightNode;
+					} else {
+						*root = rightNode;
+					}
+
+					if (rightNode) {
+						rightNode->parent = parent;
+					}
+				} else if (rightNode == NULL) {
+					if (parent) {
+						parent->node_storage(*this) = leftNode;
+					} else {
+						*root = leftNode;
+					}
+
+					if (leftNode) {
+						leftNode->parent = parent;
+					}
+				} else {
+					replacement = rightNode->min_node();
+					originalColor = replacement->nodeColor;
+
+					BSTNode *replacementChild = replacement->rightNode;
+
+					if (replacement == rightNode) {
+
+					} else {
+
+					}
+				}
+
+				// if (childCount == 0) {
+				// 	if (parent == NULL) {
+				// 		*root = NULL;
+				// 	} else {
+				// 		parent->node_storage(this) = NULL;
+				// 	}
+				// 	replacement = NULL;
+				// } else if (childCount == 1) {
+				// 	replacement = (leftNode != NULL) ? leftNode : rightNode;
+
+				// 	((parent != NULL) ? parent->node_storage(this) : *root) = replacement;
+				// 	replacement->parent = parent;
+				// } else {
+				// }
+
+				// if (nodeColor == RED || (replacement && replacement->nodeColor)) {
+				// 	replacement->nodeColor = BLACK;
+				// } else if (nodeColor == BLACK && (!replacement || replacement->nodeColor == BLACK)) {
+				// 	BSTNode *sibling = replacement->parent->sibling(replacement);
+
+				// 	if (!sibling || sibling->nodeColor == BLACK) {
+
+				// 		if (sibling) {
+				// 			if ((sibling->leftNode && sibling->leftNode->nodeColor == RED)
+				// 				|| (sibling->rightNode && sibling->rightNode->nodeColor == RED)) {
+
+				// 			}
+				// 		}
+				// 	}
+				// }
+
+				delete this;
+				return true;
 			}
 
 			const _Value &find_value(const _Key &aKey) const {
@@ -68,7 +152,7 @@ namespace ft {
 					return value;
 				}
 
-				return find_on_node((aKey < key) ? leftNode : rightNode, aKey);
+				return find_on_node((_Less(aKey, key)) ? leftNode : rightNode, aKey);
 			}
 
 			void right_rotate() {
@@ -123,6 +207,13 @@ namespace ft {
 				parent = pivot;
 			}
 
+			BSTNode *min_node() {
+				if (leftNode == NULL) {
+					retun this;
+				}
+				return leftNode->min_node();
+			}
+
 		private:
 			inline BSTNode *sibling(BSTNode *node) {
 				return (node == leftNode) ? rightNode : ((node == rightNode) ? leftNode : NULL);
@@ -150,7 +241,14 @@ namespace ft {
 				}
 			}
 
-			_Value &find_on_node(BSTNode *&node, const _Key &aKey) {
+			inline bool remove_on_node(BSTNode *node, const _Key &aKey) {
+				if (!node) {
+					return false;
+				}
+				return node->remove_value(aKey);
+			}
+
+			_Value &find_on_node(BSTNode *node, const _Key &aKey) {
 				if (!node) {
 					std::__throw_out_of_range("key node found");
 				}
@@ -158,7 +256,7 @@ namespace ft {
 				return node->find_value(aKey);
 			}
 
-			const _Value &find_on_node(BSTNode *&node, const _Key &aKey) const {
+			const _Value &find_on_node(BSTNode *node, const _Key &aKey) const {
 				if (!node) {
 					std::__throw_out_of_range("key node found");
 				}
