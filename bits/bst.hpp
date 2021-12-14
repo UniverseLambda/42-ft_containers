@@ -17,6 +17,7 @@ namespace ft {
 		struct BSTNode {
 			BSTNode **root;
 			BSTNode *parent;
+			_Less less;
 			static BSTNode *const nullValue;
 
 			_Key key;
@@ -26,9 +27,10 @@ namespace ft {
 			BSTNode *leftNode;
 			BSTNode *rightNode;
 
-			BSTNode(BSTNode **root, BSTNode *parent, _Key key, _Value value, BSTNodeColor color = RED):
+			BSTNode(BSTNode **root, BSTNode *parent, _Less less, _Key key, _Value value, BSTNodeColor color = RED):
 				root(root),
 				parent(parent),
+				less(less),
 				key(key),
 				value(value),
 				nodeColor(color),
@@ -41,6 +43,7 @@ namespace ft {
 
 		private:
 			BSTNode(const BSTNode &) {}
+		public:
 			~BSTNode() {}
 
 		private:
@@ -54,7 +57,7 @@ namespace ft {
 					value = aValue;
 				}
 
-				if (_Less(aKey, key)) {
+				if (less(aKey, key)) {
 					push_on_node(leftNode, aKey, aValue);
 				} else {
 					push_on_node(rightNode, aKey, aValue);
@@ -66,82 +69,21 @@ namespace ft {
 					return value;
 				}
 
-				return find_on_node((_Less(aKey, key)) ? leftNode : rightNode, aKey);
+				return find_on_node((less(aKey, key)) ? leftNode : rightNode, aKey);
 			}
 
 			bool remove_value(const _Key &aKey) {
 				if (!(aKey == key)) {
-					return remove_on_node((_Less(aKey, key)) ? leftNode : rightNode, aKey);
+					return remove_on_node((less(aKey, key)) ? leftNode : rightNode, aKey);
 				}
 
-				std::size_t childCount = !!(leftNode) + !!(rightNode);
 				BSTNode *replacement;
 
-				BSTNodeColor originalColor = nodeColor;
+				replacement = regular_bst_deletion();
 
-				if (leftNode == NULL) {
-					if (parent) {
-						parent = rightNode;
-					} else {
-						*root = rightNode;
-					}
-
-					if (rightNode) {
-						rightNode->parent = parent;
-					}
-				} else if (rightNode == NULL) {
-					if (parent) {
-						parent->node_storage(*this) = leftNode;
-					} else {
-						*root = leftNode;
-					}
-
-					if (leftNode) {
-						leftNode->parent = parent;
-					}
-				} else {
-					replacement = rightNode->min_node();
-					originalColor = replacement->nodeColor;
-
-					BSTNode *replacementChild = replacement->rightNode;
-
-					if (replacement == rightNode) {
-
-					} else {
-
-					}
+				if (nodeColor == BLACK) {
+					remove_tree_fix();
 				}
-
-				// if (childCount == 0) {
-				// 	if (parent == NULL) {
-				// 		*root = NULL;
-				// 	} else {
-				// 		parent->node_storage(this) = NULL;
-				// 	}
-				// 	replacement = NULL;
-				// } else if (childCount == 1) {
-				// 	replacement = (leftNode != NULL) ? leftNode : rightNode;
-
-				// 	((parent != NULL) ? parent->node_storage(this) : *root) = replacement;
-				// 	replacement->parent = parent;
-				// } else {
-				// }
-
-				// if (nodeColor == RED || (replacement && replacement->nodeColor)) {
-				// 	replacement->nodeColor = BLACK;
-				// } else if (nodeColor == BLACK && (!replacement || replacement->nodeColor == BLACK)) {
-				// 	BSTNode *sibling = replacement->parent->sibling(replacement);
-
-				// 	if (!sibling || sibling->nodeColor == BLACK) {
-
-				// 		if (sibling) {
-				// 			if ((sibling->leftNode && sibling->leftNode->nodeColor == RED)
-				// 				|| (sibling->rightNode && sibling->rightNode->nodeColor == RED)) {
-
-				// 			}
-				// 		}
-				// 	}
-				// }
 
 				delete this;
 				return true;
@@ -209,7 +151,7 @@ namespace ft {
 
 			BSTNode *min_node() {
 				if (leftNode == NULL) {
-					retun this;
+					return this;
 				}
 				return leftNode->min_node();
 			}
@@ -234,7 +176,7 @@ namespace ft {
 
 			inline void push_on_node(BSTNode *&node, const _Key &aKey, const _Value &aValue) {
 				if (!node) {
-					node = new BSTNode(root, this, aKey, aValue, RED);
+					node = new BSTNode(root, this, less, aKey, aValue, RED);
 					node->rebalance_tree();
 				} else {
 					node->push_value(aKey, aValue);
@@ -340,6 +282,81 @@ namespace ft {
 				tmp = nodeColor;
 				nodeColor = grandparent->nodeColor;
 				grandparent->nodeColor = tmp;
+			}
+
+			void swap_place(BSTNode *node) {
+				BSTNode *r, l, p;
+				BSTNodeColor c;
+
+				r = rightNode;
+				l = leftNode;
+				p = parent;
+				c = nodeColor;
+
+				if (parent) {
+					parent->node_storage(this) = node;
+				} else {
+					*root = node;
+				}
+
+				rightNode = node->rightNode;
+				leftNode = node->leftNode;
+				parent = node->parent;
+				nodeColor = node->nodeColor;
+
+				node->rightNode = r;
+				node->leftNode = l;
+				node->parent = p;
+				node->nodeColor = c;
+
+				if (rightNode) {
+					rightNode->parent = this;
+				}
+
+				if (leftNode) {
+					leftNode->parent = this;
+				}
+
+				if (node->rightNode) {
+					node->rightNode->parent = node;
+				}
+
+				if (node->leftNode) {
+					node->leftNode->parent = node;
+				}
+			}
+
+			BSTNode *regular_bst_deletion() {
+				std::size_t childCount = !!(leftNode) + !!(rightNode);
+
+				if (childCount == 2) {
+					swap_place(rightNode->min_node());
+				}
+
+				BSTNode *replacement = (leftNode) ? leftNode : rightNode;
+
+				if (parent != NULL) {
+					parent->node_storage(this) = replacement;
+				} else {
+					*root = replacement;
+				}
+
+				if (replacement != NULL) {
+					BSTNodeColor c;
+
+					c = nodeColor;
+					nodeColor = replacement->nodeColor;
+					replacement->nodeColor = c;
+					replacement->parent = parent;
+				} else {
+					nodeColor = BLACK;
+				}
+
+				return replacement;
+			}
+
+			void remove_tree_fix() {
+				if ()
 			}
 		};
 	} // namespace __clsaad_impl

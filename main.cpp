@@ -422,7 +422,7 @@ void sanitize_tree(ft::__clsaad_impl::BSTNode<_Key, _Value> *root) {
 
 void test_node() {
 	ft::__clsaad_impl::BSTNode<int, int> *root;
-	ft::__clsaad_impl::BSTNode<int, int> node(&root, NULL, 50, 50);
+	ft::__clsaad_impl::BSTNode<int, int> node(&root, NULL, std::less<int>(), 50, 50);
 	root = &node;
 	// int k = 7;
 
