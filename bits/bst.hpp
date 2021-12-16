@@ -342,21 +342,110 @@ namespace ft {
 				}
 
 				if (replacement != NULL) {
-					BSTNodeColor c;
-
-					c = nodeColor;
-					nodeColor = replacement->nodeColor;
-					replacement->nodeColor = c;
 					replacement->parent = parent;
-				} else {
-					nodeColor = BLACK;
 				}
 
 				return replacement;
 			}
 
-			void remove_tree_fix() {
-				if ()
+			// !! We starting to get into the shady stuff !!
+
+			void remove_tree_fix(BSTNode *parent) {
+				BSTNodeColor color = safe_get_color();
+
+				if (color == RED) {
+					nodeColor = BLACK;
+					return;
+				}
+
+				// TODO: Check behavior when replacement is now root
+				if (parent == NULL) {
+					return;
+				}
+
+				BSTNode *sibling = parent->sibling(this);
+
+				if (sibling->safe_get_color() == RED) {
+					if (sibling == parent->rightNode) {
+						// Right case
+						parent->left_rotate();
+
+					} else {
+						// Left case
+						parent->right_rotate();
+					}
+
+					sibling->nodeColor = BLACK;
+					parent->nodeColor = RED;
+
+					sibling = parent->sibling(this);
+				}
+
+				if (sibling->safe_get_left_node()->safe_get_color() == BLACK &&
+					sibling->safe_get_right_node()->safe_get_color() == BLACK) {
+					parent->propagate_double_black();
+				} else {
+					BSTNode *left = sibling->leftNode();
+					BSTNode *right = sibling->rightNode();
+
+					if (sibling == parent->rightNode) {
+						// Right Left case
+						if (right->safe_get_color() != RED) {
+							sibling->right_rotate();
+							std::swap(rightNode, sibling);
+						}
+
+						// Right Right case
+						parent->left_rotate();
+						rightNode->nodeColor = BLACK;
+					} else {
+						// Left Left case
+						if (right->safe_get_color() != RED) {
+							sibling->left_rotate();
+							std::swap(rightNode, sibling);
+						}
+
+						// Left Right case
+						parent->right_rotate();
+						rightNode->nodeColor = BLACK;
+					}
+				}
+			}
+
+			void propagate_double_black(BSTNode *parent) {
+				if (parent == NULL) {
+					// THIS IS THE ROOT, SO DON'T DO ANYTHING
+					return;
+				}
+
+				safe_set_color(RED);
+				parent->sibling(this)->safe_set_color(RED);
+
+				if (parent->nodeColor == BLACK) {
+					parent->propagate_double_black(parent->parent);
+				} else {
+					parent->nodeColor = RED;
+				}
+			}
+
+			// !!!!!! WARNING Black magic wizardry !!!!!!
+
+			BSTNodeColor safe_get_color() const {
+				return (this == NULL) ? BLACK : nodeColor;
+			}
+
+			void safe_set_color(BSTNodeColor color) {
+				if (this != NULL) {
+					nodeColor = color;
+				}
+			}
+
+			BSTNode *safe_get_left_node() const {
+				return (this == NULL) ? NULL : leftNode;
+			}
+
+			BSTNode *safe_get_right_node() const {
+				return (this == NULL) ? NULL : rightNode;
 			}
 		};
 	} // namespace __clsaad_impl
