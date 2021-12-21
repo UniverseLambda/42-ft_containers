@@ -365,7 +365,6 @@ void vectorTest() {
 }
 
 void print_tree_branch(ft::__clsaad_impl::BSTNode<int, int> *node, int depth) {
-
 	for (int i = 0; i < depth; ++i) {
 		std::cout << "          ";
 	}
@@ -377,7 +376,7 @@ void print_tree_branch(ft::__clsaad_impl::BSTNode<int, int> *node, int depth) {
 		return;
 	}
 
-	std::cout << node->value << " (" << (node->nodeColor == ft::__clsaad_impl::RED ? "R" : "B") << ")" << " ------- +" << std::endl;
+	std::cout << node->data->second << " (" << (node->nodeColor == ft::__clsaad_impl::RED ? "R" : "B") << ")" << " ------- +" << std::endl;
 
 	print_tree_branch(node->rightNode, depth + 1);
 	print_tree_branch(node->leftNode, depth + 1);
@@ -392,24 +391,24 @@ void sanitize_tree(ft::__clsaad_impl::BSTNode<_Key, _Value> *root) {
 
 	if (root->leftNode) {
 		if (root->leftNode->parent != root) {
-			std::cerr << "Error at node " << root->leftNode->value << std::endl;
+			std::cerr << "Error at node " << root->leftNode->data->second << std::endl;
 			std::__throw_runtime_error("TREE_SANITIZER: Wrong parent");
 		}
 
 		if (root->leftNode->nodeColor == ft::__clsaad_impl::RED && root->leftNode->nodeColor == root->nodeColor) {
-			std::cerr << "Error at node " << root->leftNode->value << std::endl;
+			std::cerr << "Error at node " << root->leftNode->data->second << std::endl;
 			std::__throw_runtime_error("TREE_SANITIZER: Wrong color");
 		}
 	}
 
 	if (root->rightNode) {
 		if (root->rightNode->parent != root) {
-			std::cerr << "Error at node " << root->rightNode->value << std::endl;
+			std::cerr << "Error at node " << root->rightNode->data->second << std::endl;
 			std::__throw_runtime_error("TREE_SANITIZER: Wrong parent");
 		}
 
 		if (root->rightNode->nodeColor == ft::__clsaad_impl::RED && root->rightNode->nodeColor == root->nodeColor) {
-			std::cerr << "Error at node " << root->rightNode->value << std::endl;
+			std::cerr << "Error at node " << root->rightNode->data->second << std::endl;
 			std::__throw_runtime_error("TREE_SANITIZER: Wrong color");
 		}
 	}
@@ -422,7 +421,7 @@ void sanitize_tree(ft::__clsaad_impl::BSTNode<_Key, _Value> *root) {
 
 void test_node() {
 	ft::__clsaad_impl::BSTNode<int, int> *root;
-	ft::__clsaad_impl::BSTNode<int, int> node(&root, NULL, std::less<int>(), 50, 50);
+	ft::__clsaad_impl::BSTNode<int, int> node(&root, NULL, std::less<int>(), 50, 50, std::allocator<ft::pair<const int, int> >());
 	root = &node;
 	int k = 50;
 

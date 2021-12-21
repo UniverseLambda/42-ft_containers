@@ -5,6 +5,8 @@
 #endif
 
 #include <functional>
+#include <memory>
+#include "../utility.hpp"
 
 namespace ft {
 	namespace __clsaad_impl {
@@ -18,38 +20,51 @@ namespace ft {
 			return self != NULL;
 		}
 
-		template<typename _Key, typename _Value, typename _Less = std::less<_Key> >
+		template<typename _Key, typename _Value, typename _Less = std::less<_Key>, typename _Allocator = std::allocator<pair<const _Key, _Value> > >
 		struct BSTNode {
 			BSTNode **root;
 			BSTNode *parent;
 			_Less less;
 			static BSTNode *const nullValue;
 
-			_Key key;
-			_Value value;
+			typedef pair<const _Key, _Value> pairType;
+
+			_Allocator alloc;
+			pairType *data;
 
 			BSTNodeColor nodeColor;
 			BSTNode *leftNode;
 			BSTNode *rightNode;
 
-			BSTNode(BSTNode **root, BSTNode *parent, _Less less, _Key key, _Value value, BSTNodeColor color = RED):
+			BSTNode(BSTNode **root, BSTNode *parent, _Less less, const _Key &key, const _Value &value, _Allocator alloc, BSTNodeColor color = RED):
 				root(root),
 				parent(parent),
 				less(less),
-				key(key),
-				value(value),
+				alloc(alloc),
+				data(alloc.allocate(1)),
 				nodeColor(color),
 				leftNode(NULL),
 				rightNode(NULL) {
 				if (!parent) {
 					nodeColor = BLACK;
 				}
+
+				alloc.construct(data, key, value);
 			}
 
 		private:
 			BSTNode(const BSTNode &) {}
 		public:
-			~BSTNode() {}
+			~BSTNode() {
+				if (rightNode)
+					delete rightNode;
+
+				if (leftNode)
+					delete leftNode;
+
+				alloc.destroy(data);
+				alloc.deallocate(data, 1);
+			}
 
 		private:
 			BSTNode &operator=(const BSTNode &) {
@@ -58,11 +73,11 @@ namespace ft {
 
 		public:
 			void push_value(const _Key &aKey, const _Value &aValue) {
-				if (key == aKey) {
-					value = aValue;
+				if (key_equivalent(aKey)) {
+					data->second = aValue;
 				}
 
-				if (less(aKey, key)) {
+				if (less(aKey, data->first)) {
 					push_on_node(leftNode, aKey, aValue);
 				} else {
 					push_on_node(rightNode, aKey, aValue);
@@ -70,16 +85,16 @@ namespace ft {
 			}
 
 			_Value &find_value(const _Key &aKey) {
-				if (aKey == key) {
-					return value;
+				if (key_equivalent(aKey)) {
+					return data->second;
 				}
 
-				return find_on_node((less(aKey, key)) ? leftNode : rightNode, aKey);
+				return find_on_node((less(aKey, data->first)) ? leftNode : rightNode, aKey);
 			}
 
 			bool remove_value(const _Key &aKey) {
-				if (!(aKey == key)) {
-					return remove_on_node((less(aKey, key)) ? leftNode : rightNode, aKey);
+				if (!key_equivalent(aKey)) {
+					return remove_on_node((less(aKey, data->first)) ? leftNode : rightNode, aKey);
 				}
 
 				bst_deletion();
@@ -87,11 +102,11 @@ namespace ft {
 			}
 
 			const _Value &find_value(const _Key &aKey) const {
-				if (aKey == key) {
-					return value;
+				if (key_equivalent(aKey)) {
+					return data->second;
 				}
 
-				return find_on_node((_Less(aKey, key)) ? leftNode : rightNode, aKey);
+				return find_on_node((_Less(aKey, data->first)) ? leftNode : rightNode, aKey);
 			}
 
 			void right_rotate() {
@@ -154,6 +169,10 @@ namespace ft {
 			}
 
 		private:
+			inline bool key_equivalent(const _Key &k) {
+				return !less(data->first, k) && !less(k, data->first);
+			}
+
 			inline BSTNode *sibling(BSTNode *node) {
 				return (node == leftNode) ? rightNode : ((node == rightNode) ? leftNode : NULL);
 			}
@@ -173,7 +192,7 @@ namespace ft {
 
 			inline void push_on_node(BSTNode *&node, const _Key &aKey, const _Value &aValue) {
 				if (!node) {
-					node = new BSTNode(root, this, less, aKey, aValue, RED);
+					node = new BSTNode(root, this, less, aKey, aValue, alloc, RED);
 					node->rebalance_tree();
 				} else {
 					node->push_value(aKey, aValue);
@@ -282,8 +301,7 @@ namespace ft {
 			}
 
 			void swap_place(BSTNode *node) {
-				std::swap(key, node->key);
-				std::swap(value, node->value);
+				std::swap(data, node->data);
 
 				// Mostly used with pointers. This whole shit is useless. FML
 
@@ -354,6 +372,8 @@ namespace ft {
 
 				replacement->remove_tree_fix(parent);
 
+				rightNode = NULL;
+				leftNode = NULL;
 				delete this;
 			}
 
