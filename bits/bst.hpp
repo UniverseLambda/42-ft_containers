@@ -27,10 +27,10 @@ namespace ft {
 			_Less less;
 			static BSTNode *const nullValue;
 
-			typedef pair<const _Key, _Value> pairType;
+			typedef pair<const _Key, _Value> PairType;
 
 			_Allocator alloc;
-			pairType *data;
+			PairType *data;
 
 			BSTNodeColor nodeColor;
 			BSTNode *leftNode;
@@ -52,8 +52,49 @@ namespace ft {
 				alloc.construct(data, key, value);
 			}
 
+			BSTNode(BSTNode **root, BSTNode *parent, _Less less, const PairType &pair, _Allocator alloc, BSTNodeColor color = RED):
+				root(root),
+				parent(parent),
+				less(less),
+				alloc(alloc),
+				data(alloc.allocate(1)),
+				nodeColor(color),
+				leftNode(NULL),
+				rightNode(NULL) {
+				if (!parent) {
+					nodeColor = BLACK;
+				}
+
+				alloc.construct(data, pair);
+			}
+
+			BSTNode(const BSTNode &other, BSTNode **aRoot) {
+				leftNode = NULL;
+				rightNode = NULL;
+				root = aRoot;
+				parent = NULL;
+				alloc = other.alloc;
+				less = other.less;
+
+				data = alloc.allocate(1);
+				alloc.construct(data, *(other.data));
+
+				if (other.leftNode != NULL) {
+					leftNode = new BSTNode(*(other.leftNode));
+					leftNode->parent = this;
+				}
+
+				if (other.rightNode != NULL) {
+					rightNode = new BSTNode(*(other.rightNode));
+					rightNode->parent = this;
+				}
+
+				nodeColor = other.nodeColor;
+			}
+
 		private:
 			BSTNode(const BSTNode &) {}
+
 		public:
 			~BSTNode() {
 				if (rightNode)
@@ -84,12 +125,42 @@ namespace ft {
 				}
 			}
 
+			_Value &find_or_create(const _Key &aKey) {
+				if (key_equivalent(aKey)) {
+					return data->second;
+				}
+
+				if (less(aKey, data->first)) {
+					if (leftNode == NULL) {
+						leftNode = new BSTNode(root, this, less, make_pair(aKey, _Value()), alloc, RED);
+						leftNode->rebalance_tree();
+						return leftNode->data->second;
+					}
+					return find_or_create(leftNode);
+				} else {
+					if (rightNode == NULL) {
+						rightNode = new BSTNode(root, this, less, make_pair(aKey, _Value()), alloc, RED);
+						rightNode->rebalance_tree();
+						return rightNode->data->second;
+					}
+					return find_or_create(rightNode);
+				}
+			}
+
 			_Value &find_value(const _Key &aKey) {
 				if (key_equivalent(aKey)) {
 					return data->second;
 				}
 
 				return find_on_node((less(aKey, data->first)) ? leftNode : rightNode, aKey);
+			}
+
+			const _Value &find_value(const _Key &aKey) const {
+				if (key_equivalent(aKey)) {
+					return data->second;
+				}
+
+				return find_on_node((_Less(aKey, data->first)) ? leftNode : rightNode, aKey);
 			}
 
 			bool remove_value(const _Key &aKey) {
@@ -99,14 +170,6 @@ namespace ft {
 
 				bst_deletion();
 				return true;
-			}
-
-			const _Value &find_value(const _Key &aKey) const {
-				if (key_equivalent(aKey)) {
-					return data->second;
-				}
-
-				return find_on_node((_Less(aKey, data->first)) ? leftNode : rightNode, aKey);
 			}
 
 			void right_rotate() {
@@ -208,7 +271,7 @@ namespace ft {
 
 			_Value &find_on_node(BSTNode *node, const _Key &aKey) {
 				if (!node) {
-					std::__throw_out_of_range("key node found");
+					std::__throw_out_of_range("key not found");
 				}
 
 				return node->find_value(aKey);
@@ -216,7 +279,7 @@ namespace ft {
 
 			const _Value &find_on_node(BSTNode *node, const _Key &aKey) const {
 				if (!node) {
-					std::__throw_out_of_range("key node found");
+					std::__throw_out_of_range("key not found");
 				}
 
 				return node->find_value(aKey);
