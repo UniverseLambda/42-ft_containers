@@ -13,6 +13,11 @@ namespace ft {
 			RED
 		};
 
+		template<typename _Tp>
+		inline bool safe_callable(_Tp *self) {
+			return self != NULL;
+		}
+
 		template<typename _Key, typename _Value, typename _Less = std::less<_Key> >
 		struct BSTNode {
 			BSTNode **root;
@@ -77,15 +82,7 @@ namespace ft {
 					return remove_on_node((less(aKey, key)) ? leftNode : rightNode, aKey);
 				}
 
-				BSTNode *replacement;
-
-				replacement = regular_bst_deletion();
-
-				if (nodeColor == BLACK) {
-					remove_tree_fix();
-				}
-
-				delete this;
+				bst_deletion();
 				return true;
 			}
 
@@ -285,52 +282,62 @@ namespace ft {
 			}
 
 			void swap_place(BSTNode *node) {
-				BSTNode *r, l, p;
-				BSTNodeColor c;
+				std::swap(key, node->key);
+				std::swap(value, node->value);
 
-				r = rightNode;
-				l = leftNode;
-				p = parent;
-				c = nodeColor;
+				// Mostly used with pointers. This whole shit is useless. FML
 
-				if (parent) {
-					parent->node_storage(this) = node;
-				} else {
-					*root = node;
-				}
+				// if (parent) {
+				// 	parent->node_storage(this) = node;
+				// } else {
+				// 	*root = node;
+				// }
 
-				rightNode = node->rightNode;
-				leftNode = node->leftNode;
-				parent = node->parent;
-				nodeColor = node->nodeColor;
+				// if (node->parent) {
+				// 	node->parent->node_storage(node) = this;
+				// } else {
+				// 	*root = this;
+				// }
 
-				node->rightNode = r;
-				node->leftNode = l;
-				node->parent = p;
-				node->nodeColor = c;
+				// std::swap(rightNode, node->rightNode);
+				// std::swap(leftNode, node->leftNode);
+				// std::swap(parent, node->parent);
+				// std::swap(nodeColor, node->nodeColor);
 
-				if (rightNode) {
-					rightNode->parent = this;
-				}
+				// if (parent == this) {
+				// 	parent = node;
+				// 	((node->rightNode == node) ? node->rightNode : node->leftNode) = this;
+				// } else if (node->parent == node) {
+				// 	node->parent = this;
+				// 	((rightNode == this) ? rightNode : leftNode) = node;
+				// }
 
-				if (leftNode) {
-					leftNode->parent = this;
-				}
+				// if (rightNode) {
+				// 	rightNode->parent = this;
+				// }
 
-				if (node->rightNode) {
-					node->rightNode->parent = node;
-				}
+				// if (leftNode) {
+				// 	leftNode->parent = this;
+				// }
 
-				if (node->leftNode) {
-					node->leftNode->parent = node;
-				}
+				// if (node->rightNode) {
+				// 	node->rightNode->parent = node;
+				// }
+
+				// if (node->leftNode) {
+				// 	node->leftNode->parent = node;
+				// }
 			}
 
-			BSTNode *regular_bst_deletion() {
+			void bst_deletion() {
 				std::size_t childCount = !!(leftNode) + !!(rightNode);
 
 				if (childCount == 2) {
-					swap_place(rightNode->min_node());
+					BSTNode *swapped = rightNode->min_node();
+
+					swap_place(swapped);
+					swapped->bst_deletion();
+					return;
 				}
 
 				BSTNode *replacement = (leftNode) ? leftNode : rightNode;
@@ -345,21 +352,23 @@ namespace ft {
 					replacement->parent = parent;
 				}
 
-				return replacement;
+				replacement->remove_tree_fix(parent);
+
+				delete this;
 			}
 
 			// !! We starting to get into the shady stuff !!
 
 			void remove_tree_fix(BSTNode *parent) {
-				BSTNodeColor color = safe_get_color();
-
-				if (color == RED) {
-					nodeColor = BLACK;
-					return;
-				}
 
 				// TODO: Check behavior when replacement is now root
 				if (parent == NULL) {
+					return;
+				}
+
+				BSTNodeColor color = safe_get_color();
+				if (color == RED || parent->nodeColor == RED) {
+					safe_set_color(BLACK);
 					return;
 				}
 
@@ -383,10 +392,10 @@ namespace ft {
 
 				if (sibling->safe_get_left_node()->safe_get_color() == BLACK &&
 					sibling->safe_get_right_node()->safe_get_color() == BLACK) {
-					parent->propagate_double_black();
+					parent->propagate_double_black(parent->parent);
 				} else {
-					BSTNode *left = sibling->leftNode();
-					BSTNode *right = sibling->rightNode();
+					// BSTNode *left = sibling->leftNode;
+					BSTNode *right = sibling->rightNode;
 
 					if (sibling == parent->rightNode) {
 						// Right Left case
@@ -418,7 +427,6 @@ namespace ft {
 					return;
 				}
 
-				safe_set_color(RED);
 				parent->sibling(this)->safe_set_color(RED);
 
 				if (parent->nodeColor == BLACK) {
@@ -431,21 +439,21 @@ namespace ft {
 			// !!!!!! WARNING Black magic wizardry !!!!!!
 
 			BSTNodeColor safe_get_color() const {
-				return (this == NULL) ? BLACK : nodeColor;
+				return (safe_callable(this)) ? nodeColor : BLACK;
 			}
 
 			void safe_set_color(BSTNodeColor color) {
-				if (this != NULL) {
+				if (safe_callable(this)) {
 					nodeColor = color;
 				}
 			}
 
 			BSTNode *safe_get_left_node() const {
-				return (this == NULL) ? NULL : leftNode;
+				return (safe_callable(this)) ? leftNode : NULL;
 			}
 
 			BSTNode *safe_get_right_node() const {
-				return (this == NULL) ? NULL : rightNode;
+				return (safe_callable(this)) ? rightNode : NULL;
 			}
 		};
 	} // namespace __clsaad_impl

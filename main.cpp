@@ -424,7 +424,7 @@ void test_node() {
 	ft::__clsaad_impl::BSTNode<int, int> *root;
 	ft::__clsaad_impl::BSTNode<int, int> node(&root, NULL, std::less<int>(), 50, 50);
 	root = &node;
-	// int k = 7;
+	int k = 50;
 
 	std::cout << "===== After inserting 30 =====" << std::endl;
 	root->push_value(30, 30);
@@ -446,13 +446,7 @@ void test_node() {
 	print_tree_branch(root, 0);
 	sanitize_tree(root);
 
-	// root->right_rotate();
-	// print_tree_branch(root, 0);
-
-	// root->left_rotate();
-	// print_tree_branch(root, 0);
-
-	// std::cout << "Value for 7: " << root->find_value(k) << std::endl;
+	std::cout << "Value for " << k << ": " << root->find_value(k) << std::endl;
 
 	for (int i = 0; i < 10; ++i) {
 		int v = i + ((i % 2) ? 50 : 0) + 1;
@@ -462,6 +456,24 @@ void test_node() {
 		sanitize_tree(root);
 	}
 	print_tree_branch(root, 0);
+
+	std::cout << "===== Removing 50 =====" << std::endl;
+	k = 50;
+	root->remove_value(k);
+	print_tree_branch(root, 0);
+	sanitize_tree(root);
+
+	std::cout << "===== Removing 70 =====" << std::endl;
+	k = 70;
+	root->remove_value(k);
+	print_tree_branch(root, 0);
+	sanitize_tree(root);
+
+	std::cout << "===== Removing root =====" << std::endl;
+	k = 30;
+	root->remove_value(k);
+	print_tree_branch(root, 0);
+	sanitize_tree(root);
 }
 
 int main(void) {
