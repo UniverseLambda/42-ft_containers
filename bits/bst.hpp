@@ -49,7 +49,12 @@ namespace ft {
 					nodeColor = BLACK;
 				}
 
+				// Workaround for glibc defect 402
+#ifdef __GLIBC__
+				alloc.construct(data, PairType(key, value));
+#else
 				alloc.construct(data, key, value);
+#endif
 			}
 
 			BSTNode(BSTNode **root, BSTNode *parent, _Less less, const PairType &pair, _Allocator alloc, BSTNodeColor color = RED):
