@@ -9,7 +9,22 @@
 #include "utility.hpp"
 
 namespace ft {
-	template<typename _Key, typename _Tp, typename _Compare = std::less<_Key>, typename _Allocator = std::allocator<ft::pair<const _Key, _Tp> > >
+	namespace __clsaad_impl {
+		template<typename _Key, typename _Value>
+		struct pair_key_extractor {
+			pair_key_extractor() {}
+			pair_key_extractor(const pair_key_extractor &) {}
+			~pair_key_extractor() {}
+			pair_key_extractor &operator=(const pair_key_extractor &) { return (*this); }
+
+			inline _Key &operator()(ft::pair<const _Key, _Value> &d) const {
+				return d.first;
+			}
+		};
+	} // namespace __clsaad_impl
+	
+
+	template<typename _Key, typename _Tp, typename _KeyLess = std::less<_Key>, typename _Allocator = std::allocator<ft::pair<const _Key, _Tp> > >
 	class map {
 	public:
 		typedef _Key key_type;
@@ -17,7 +32,7 @@ namespace ft {
 		typedef ft::pair<const _Key, _Tp> value_type;
 		typedef std::size_t size_type;
 		typedef std::ptrdiff_t difference_type;
-		typedef _Compare key_compare;
+		typedef _KeyLess key_compare;
 		typedef _Allocator allocator_type;
 		typedef value_type &reference;
 		typedef const value_type &const_reference;
@@ -28,84 +43,64 @@ namespace ft {
 		// typedef reverse_iterator;
 		// typedef const_reverse_iterator;
 
-	private:
-		typedef __clsaad_impl::BSTNode<_Key, _Tp, _Compare, _Allocator> node_type;
-
-		key_compare comp;
-		allocator_type alloc;
-		node_type *root;
-
-	public:
-		map(): root(NULL) {}
-
-		explicit map(const _Compare &comp, const _Allocator &alloc = _Allocator()):
-			root(NULL),
-			comp(comp),
-			alloc(alloc) {}
-
-		template<typename _InputIt>
-		map(_InputIt first, _InputIt last, const _Compare& comp = _Compare(), const _Allocator& alloc = _Allocator()):
-			root(NULL),
-			comp(comp),
-			alloc(alloc) {
-			insert(first, last);
-		}
-
-		map(const map &other):
-			comp(other.comp),
-			alloc(other.alloc) {
-			root = (other.root == NULL) ? NULL : new node_type(*other.root, &root);
-		}
-
-		~map() {
-			delete root;
-		}
-
-		map &operator=(const map &rhs) {
-			if (root != NULL)
-				delete root;
-
-			comp = rhs.comp;
-			alloc = rhs.alloc;
-			root = (rhs.root == NULL) ? NULL : new node_type(*rhs.root, &root);
-
-			return (*this);
-		}
-
-		allocator_type get_allocator() const {
-			return alloc;
-		}
-
-		_Tp &at(const _Key &key) {
-			if (root == NULL)
-				std::__throw_out_of_range("key not found");
-			return root->find_value(key);
-		}
-
-		const _Tp &at(const _Key &key) const {
-			if (root == NULL)
-				std::__throw_out_of_range("key not found");
-			return root->find_value(key);
-		}
-
-		_Tp &operator[](const _Key &key) {
-			if (root == NULL) {
-				return insert(ft::make_pair(key, _Tp())).first->second;
-			}
-			return root->find_or_create(key);
-		}
-
-
 		class value_compare: public std::binary_function<value_type, value_type, bool> {
 		protected:
-			_Compare comp;
+			_KeyLess comp;
 
-			value_compare(_Compare c): comp(c) {}
+			value_compare(_KeyLess c): comp(c) {}
 
 		public:
 			bool operator()(const value_type &lhs, const value_type &rhs) const {
 				return comp(lhs.first, rhs.first);
 			}
 		};
+
+	private:
+		typedef __clsaad_impl::pair_key_extractor<_Key, _Tp> key_extractor;
+		typedef __clsaad_impl::bst_wrapper<value_type, value_compare, allocator_type, key_type, key_extractor, key_compare> tree_type;
+
+		tree_type bst;
+
+	public:
+		map():
+			bst(value_compare(), _Allocator(), key_extractor(), _KeyLess()) {}
+
+		explicit map(const _KeyLess &key_less, const _Allocator &alloc = _Allocator()):
+			bst(value_compare(), alloc, key_extractor(), key_less) {}
+
+		template<typename _InputIt>
+		map(_InputIt first, _InputIt last, const _KeyLess &key_less = _KeyLess(), const _Allocator &alloc = _Allocator()):
+			bst(value_compare(), alloc, key_extractor(), key_less) {
+			insert(first, last);
+		}
+
+		map(const map &other):
+			bst(other.bst) {}
+
+		~map() {}
+
+		map &operator=(const map &rhs) {
+			bst = rhs.bst;
+
+			return (*this);
+		}
+
+		allocator_type get_allocator() const {
+			return bst.get_allocator();
+		}
+
+		_Tp &at(const _Key &key) {
+			return bst.find_node(key);
+		}
+
+		const _Tp &at(const _Key &key) const {
+			return bst.find_node(key);
+		}
+
+		_Tp &operator[](const _Key &key) {
+			ft::pair<typename tree_type::node_type *, bool> result = bst.insert(ft::make_pair(key, _Tp()));
+
+			return *(result.first->data->first);
+		}
 	};
 } // namespace ft

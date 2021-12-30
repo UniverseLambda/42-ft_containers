@@ -364,51 +364,52 @@ void vectorTest() {
 	VECTOR_TEST(testRemainingCtor(validity));
 }
 
-void print_tree_branch(ft::__clsaad_impl::BSTNode<int, int> *node, int depth) {
+template<typename _Node>
+void print_tree_branch(_Node *node, int depth) {
 	for (int i = 0; i < depth; ++i) {
 		std::cout << "          ";
 	}
 
 	std::cout << std::setw(4);
 
-	if (!node) {
+	if (!node || node->data == NULL) {
 		std::cout << "       _" << std::endl;
 		return;
 	}
 
-	std::cout << node->data->second << " (" << (node->nodeColor == ft::__clsaad_impl::RED ? "R" : "B") << ")" << " ------- +" << std::endl;
+	std::cout << *(node->data) << " (" << (node->nodeColor == ft::__clsaad_impl::RED ? "R" : "B") << ")" << " ------- +" << std::endl;
 
 	print_tree_branch(node->rightNode, depth + 1);
 	print_tree_branch(node->leftNode, depth + 1);
 
 }
 
-template<typename _Key, typename _Value>
-void sanitize_tree(ft::__clsaad_impl::BSTNode<_Key, _Value> *root) {
-	if (!root) {
+template<typename _Node>
+void sanitize_tree(_Node *root) {
+	if (!root || root->data == NULL) {
 		return;
 	}
 
-	if (root->leftNode) {
+	if (root->leftNode && root->leftNode->data != NULL) {
 		if (root->leftNode->parent != root) {
-			std::cerr << "Error at node " << root->leftNode->data->second << std::endl;
+			std::cerr << "Error at node " << *(root->leftNode->data) << std::endl;
 			std::__throw_runtime_error("TREE_SANITIZER: Wrong parent");
 		}
 
 		if (root->leftNode->nodeColor == ft::__clsaad_impl::RED && root->leftNode->nodeColor == root->nodeColor) {
-			std::cerr << "Error at node " << root->leftNode->data->second << std::endl;
+			std::cerr << "Error at node " << *(root->leftNode->data) << std::endl;
 			std::__throw_runtime_error("TREE_SANITIZER: Wrong color");
 		}
 	}
 
-	if (root->rightNode) {
+	if (root->rightNode && root->rightNode->data != NULL) {
 		if (root->rightNode->parent != root) {
-			std::cerr << "Error at node " << root->rightNode->data->second << std::endl;
+			std::cerr << "Error at node " << *(root->rightNode->data) << std::endl;
 			std::__throw_runtime_error("TREE_SANITIZER: Wrong parent");
 		}
 
 		if (root->rightNode->nodeColor == ft::__clsaad_impl::RED && root->rightNode->nodeColor == root->nodeColor) {
-			std::cerr << "Error at node " << root->rightNode->data->second << std::endl;
+			std::cerr << "Error at node " << *(root->rightNode->data) << std::endl;
 			std::__throw_runtime_error("TREE_SANITIZER: Wrong color");
 		}
 	}
@@ -419,60 +420,141 @@ void sanitize_tree(ft::__clsaad_impl::BSTNode<_Key, _Value> *root) {
 
 
 
-void test_node() {
-	ft::__clsaad_impl::BSTNode<int, int> *root;
-	ft::__clsaad_impl::BSTNode<int, int> node(&root, NULL, std::less<int>(), 50, 50, std::allocator<ft::pair<const int, int> >());
-	root = &node;
-	int k = 50;
+// void test_node() {
+// 	ft::__clsaad_impl::BSTNode<int, int> *root;
+// 	ft::__clsaad_impl::BSTNode<int, int> node(&root, NULL, std::less<int>(), 50, 50, std::allocator<ft::pair<const int, int> >());
+// 	root = &node;
+// 	int k = 50;
 
-	std::cout << "===== After inserting 30 =====" << std::endl;
-	root->push_value(30, 30);
-	print_tree_branch(root, 0);
-	sanitize_tree(root);
+// 	std::cout << "===== After inserting 30 =====" << std::endl;
+// 	root->push_value(30, 30, true);
+// 	print_tree_branch(root, 0);
+// 	sanitize_tree(root);
 
-	std::cout << "===== After inserting 20 =====" << std::endl;
-	root->push_value(20, 20);
-	print_tree_branch(root, 0);
-	sanitize_tree(root);
+// 	std::cout << "===== After inserting 20 =====" << std::endl;
+// 	root->push_value(20, 20, true);
+// 	print_tree_branch(root, 0);
+// 	sanitize_tree(root);
 
-	std::cout << "===== After inserting 40 =====" << std::endl;
-	root->push_value(40, 40);
-	print_tree_branch(root, 0);
-	sanitize_tree(root);
+// 	std::cout << "===== After inserting 40 =====" << std::endl;
+// 	root->push_value(40, 40, true);
+// 	print_tree_branch(root, 0);
+// 	sanitize_tree(root);
 
-	std::cout << "===== After inserting 70 =====" << std::endl;
-	root->push_value(70, 70);
-	print_tree_branch(root, 0);
-	sanitize_tree(root);
+// 	std::cout << "===== After inserting 70 =====" << std::endl;
+// 	root->push_value(70, 70, true);
+// 	print_tree_branch(root, 0);
+// 	sanitize_tree(root);
 
-	std::cout << "Value for " << k << ": " << root->find_value(k) << std::endl;
+// 	std::cout << "Value for " << k << ": " << root->find_value(k) << std::endl;
+
+// 	for (int i = 0; i < 10; ++i) {
+// 		int v = i + ((i % 2) ? 50 : 0) + 1;
+// 		std::cout << "===== After inserting " << v << " =====" << std::endl;
+// 		root->push_value(v, v, true);
+// 		print_tree_branch(root, 0);
+// 		sanitize_tree(root);
+// 	}
+// 	print_tree_branch(root, 0);
+
+// 	std::cout << "===== Removing 50 =====" << std::endl;
+// 	k = 50;
+// 	root->remove_value(k);
+// 	print_tree_branch(root, 0);
+// 	sanitize_tree(root);
+
+// 	std::cout << "===== Removing 70 =====" << std::endl;
+// 	k = 70;
+// 	root->remove_value(k);
+// 	print_tree_branch(root, 0);
+// 	sanitize_tree(root);
+
+// 	std::cout << "===== Removing root =====" << std::endl;
+// 	k = 30;
+// 	root->remove_value(k);
+// 	print_tree_branch(root, 0);
+// 	sanitize_tree(root);
+// }
+
+void test_tree() {
+	typedef ft::__clsaad_impl::bst_wrapper< int, std::less<int> > bst_wrapper;
+	int v;
+
+	std::cout << "Constructing bst_wrapper..." << std::endl;
+	bst_wrapper bst = bst_wrapper(std::less<int>(), std::allocator<int>());
+	sanitize_tree(*bst.get_root());
+
+
+	// int v = 50;
+	// std::cout << "===== After inserting " << v << "=====" << std::endl;
+	// bst.insert(v);
+	// print_tree_branch(*bst.get_root(), 0);
+	// sanitize_tree(*bst.get_root());
+
+	v = 5;
+	std::cout << "===== After inserting " << v << "=====" << std::endl;
+	bst.insert(v);
+	print_tree_branch(*bst.get_root(), 0);
+	sanitize_tree(*bst.get_root());
+
+	v = 30;
+	std::cout << "===== After inserting " << v << "=====" << std::endl;
+	bst.insert(v);
+	print_tree_branch(*bst.get_root(), 0);
+	sanitize_tree(*bst.get_root());
+
+	v = 20;
+	std::cout << "===== After inserting " << v << "=====" << std::endl;
+	bst.insert(v);
+	print_tree_branch(*bst.get_root(), 0);
+	sanitize_tree(*bst.get_root());
+
+	v = 40;
+	std::cout << "===== After inserting " << v << "=====" << std::endl;
+	bst.insert(v);
+	print_tree_branch(*bst.get_root(), 0);
+	sanitize_tree(*bst.get_root());
+
+	v = 70;
+	std::cout << "===== After inserting " << v << "=====" << std::endl;
+	bst.insert(v);
+	print_tree_branch(*bst.get_root(), 0);
+	sanitize_tree(*bst.get_root());
+
+	std::cout << "Value for " << v << ": " << *(bst.find_node(v).data) << std::endl;
 
 	for (int i = 0; i < 10; ++i) {
 		int v = i + ((i % 2) ? 50 : 0) + 1;
 		std::cout << "===== After inserting " << v << " =====" << std::endl;
-		root->push_value(v, v);
-		print_tree_branch(root, 0);
-		sanitize_tree(root);
+		bst.insert(v);
+		sanitize_tree(*bst.get_root());
+		print_tree_branch(*bst.get_root(), 0);
 	}
-	print_tree_branch(root, 0);
+	print_tree_branch(*bst.get_root(), 0);
 
-	std::cout << "===== Removing 50 =====" << std::endl;
-	k = 50;
-	root->remove_value(k);
-	print_tree_branch(root, 0);
-	sanitize_tree(root);
+	v = 40;
+	std::cout << "===== Removing " << v << "=====" << std::endl;
+	bst.erase(v);
+	print_tree_branch(*bst.get_root(), 0);
+	sanitize_tree(*bst.get_root());
 
-	std::cout << "===== Removing 70 =====" << std::endl;
-	k = 70;
-	root->remove_value(k);
-	print_tree_branch(root, 0);
-	sanitize_tree(root);
+	v = 70;
+	std::cout << "===== Removing " << v << "=====" << std::endl;
+	bst.erase(v);
+	print_tree_branch(*bst.get_root(), 0);
+	sanitize_tree(*bst.get_root());
 
-	std::cout << "===== Removing root =====" << std::endl;
-	k = 30;
-	root->remove_value(k);
-	print_tree_branch(root, 0);
-	sanitize_tree(root);
+	v = 30;
+	std::cout << "===== Removing " << v << " =====" << std::endl;
+	bst.erase(v);
+	print_tree_branch(*bst.get_root(), 0);
+	sanitize_tree(*bst.get_root());
+
+	v = 52;
+	std::cout << "===== Removing " << v << " =====" << std::endl;
+	bst.erase(v);
+	print_tree_branch(*bst.get_root(), 0);
+	sanitize_tree(*bst.get_root());
 }
 
 int main(void) {
@@ -484,7 +566,8 @@ int main(void) {
 	s.pop();
 	s.pop();
 
-	test_node();
+	// test_node();
+	test_tree();
 
 	return 0;
 }
