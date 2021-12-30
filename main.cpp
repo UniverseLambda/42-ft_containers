@@ -533,7 +533,7 @@ void test_tree() {
 	print_tree_branch(*bst.get_root(), 0);
 
 	v = 40;
-	std::cout << "===== Removing " << v << "=====" << std::endl;
+	std::cout << "===== Removing " << v << " =====" << std::endl;
 	bst.erase(v);
 	print_tree_branch(*bst.get_root(), 0);
 	sanitize_tree(*bst.get_root());
@@ -551,6 +551,18 @@ void test_tree() {
 	sanitize_tree(*bst.get_root());
 
 	v = 52;
+	std::cout << "===== Removing " << v << " =====" << std::endl;
+	bst.erase(v);
+	print_tree_branch(*bst.get_root(), 0);
+	sanitize_tree(*bst.get_root());
+	
+	v = 42;
+	std::cout << "===== Inserting " << v << " =====" << std::endl;
+	bst.insert(v);
+	print_tree_branch(*bst.get_root(), 0);
+	sanitize_tree(*bst.get_root());
+	
+	v = 42;
 	std::cout << "===== Removing " << v << " =====" << std::endl;
 	bst.erase(v);
 	print_tree_branch(*bst.get_root(), 0);

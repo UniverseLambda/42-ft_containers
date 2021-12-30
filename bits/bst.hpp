@@ -685,7 +685,7 @@ namespace ft {
 				int child_count = !!(node->leftNode) + !!(node->rightNode);
 
 				if (child_count == 2) {
-					swap_places(node, node->min_node());
+					swap_places(node, node->rightNode->min_node());
 					child_count = !!(node->leftNode) + !!(node->rightNode);
 				}
 
@@ -814,26 +814,26 @@ namespace ft {
 				std::swap(n0->parent, n1->parent);
 				std::swap(n0->nodeColor, n1->nodeColor);
 
-				if (n0->parent == n0) {
-					n0->parent = n1;
-					((n1->leftNode == n1) ? n1->leftNode : n1->rightNode) = n0;
-				}
-
-				if (n1->parent == n1) {
-					n1->parent = n0;
-					((n0->leftNode == n0) ? n0->leftNode : n0->rightNode) = n1;
-				}
-
 				if (n0->parent == NULL) {
 					root = n0;
 				} else {
-					n0->parent->node_storage(n1) = n0;
+					if (n0->parent == n0) {
+						n0->parent = n1;
+						((n1->leftNode == n1) ? n1->leftNode : n1->rightNode) = n0;
+					} else {
+						n0->parent->node_storage(n1) = n0;
+					}
 				}
-				
+
 				if (n1->parent == NULL) {
 					root = n1;
 				} else {
-					n1->parent->node_storage(n0) = n1;
+					if (n1->parent == n1) {
+						n1->parent = n0;
+						((n0->leftNode == n0) ? n0->leftNode : n0->rightNode) = n1;
+					} else {
+						n1->parent->node_storage(n0) = n1;
+					}
 				}
 
 				if (n0->leftNode != NULL) n0->leftNode->parent = n0;
