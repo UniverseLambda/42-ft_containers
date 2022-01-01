@@ -903,7 +903,6 @@ namespace ft {
 								sibling->nodeColor = BLACK;
 							}
 						}
-
 					} else {
 						node_type::set_color(sibling, RED);
 						
@@ -917,5 +916,92 @@ namespace ft {
 			}
 		};
 
+		template<typename _Tree, typename _Tp>
+		class bst_iterator: public ft::iterator<typename ft::bidirectional_iterator_tag, _Tp> {
+		private:
+			typedef BSTNode<_Tree, _Tp> node_type;
+			typedef ft::iterator_traits<bst_iterator> it_trait;
+
+			node_type *node;
+
+		public:
+			bst_iterator(): node(NULL) {}
+			bst_iterator(node_type *node): node(node) {}
+			bst_iterator(const bst_iterator &other): node(other.node) {}
+			~bst_iterator() {}
+
+			bst_iterator &operator=(const bst_iterator &rhs) {
+				node = rhs.node;
+				return (*this);
+			}
+
+			bool operator==(const bst_iterator &rhs) const {
+				return node == rhs.node;
+			}
+
+			bool operator!=(const bst_iterator &rhs) const {
+				return !(*this == rhs);
+			}
+
+			typename it_trait::reference operator*() const {
+				return *(node->data);
+			}
+
+			typename it_trait::pointer operator->() const {
+				return node->data;
+			}
+
+			bst_iterator &operator++() {
+				if (node->rightNode != NULL) {
+					node = node->rightNode->min_node();
+				} else if (node->leftNode != NULL) {
+					if (node == node->parent->rightNode) {
+						while (node == node->parent->rightNode) {
+							node = node->parent;
+						}
+					} else if (node == node->parent->leftNode) {
+						node = node->parent;
+					} else {
+						std::__throw_runtime_error("bst_iterator::operator++: could not determine current node side");
+					}
+				} else {
+					std::__throw_runtime_error("bst_iterator::operator++: no anchor node set (or properly set");
+				}
+
+				return (*this);
+			}
+
+			bst_iterator operator++(int) {
+				bst_iterator value = *this;
+				operator++();
+				return value;
+			}
+			
+			bst_iterator &operator--() {
+				if (node->leftNode != NULL) {
+					for (node = node->leftNode; node->rightNode != NULL; node = node->rightNode) {}
+				} else if (node->rightNode != NULL) {
+					if (node == node->parent->leftNode) {
+						while (node == node->parent->leftNode) {
+							node = node->parent;
+						}
+					} else if (node == node->parent->rightNode) {
+						node = node->parent;
+					} else {
+						std::__throw_runtime_error("bst_iterator::operator--: could not determine current node side");
+					}
+				} else {
+					std::__throw_runtime_error("bst_iterator::operator--: no anchor node set (or properly set");
+				}
+
+				return (*this);
+			}
+
+			bst_iterator operator--(int) {
+				bst_iterator value = *this;
+				operator--();
+				return value;
+			}
+		};
 	} // namespace __clsaad_impl
 } // namespace ft
