@@ -15,11 +15,6 @@ namespace ft {
 			RED
 		};
 
-		template<typename _Tp>
-		inline bool safe_callable(_Tp *self) {
-			return self != NULL;
-		}
-
 		template<typename _Data>
 		struct default_key_extractor {
 			default_key_extractor() {}
@@ -57,7 +52,7 @@ namespace ft {
 			if (data == NULL) {
 				return NULL;
 			}
-			
+
 			_Data *new_data = alloc.allocate(1);
 			alloc.construct(new_data, *data);
 			return new_data;
@@ -71,6 +66,25 @@ namespace ft {
 			alloc.deallocate(data, 1);
 		}
 
+		template<typename _Node>
+		inline _Node *move_to_dyn_storage(const _Node &node) {
+			std::allocator<_Node> alloc;
+			_Node *node_ptr;
+
+			node_ptr = alloc.allocate(1);
+			alloc.construct(node_ptr, node);
+
+			return node_ptr;
+		}
+
+		template<typename _Node>
+		inline void destroy_from_dyn_storage(_Node *node) {
+			std::allocator<_Node> alloc;
+
+			alloc.destroy(node);
+			alloc.deallocate(node, 1);
+		}
+
 		template<typename _Tree, typename _Data>
 		struct BSTNode {
 			static BSTNode *const nullValue;
@@ -79,13 +93,15 @@ namespace ft {
 
 			BSTNode **root;
 			BSTNode *parent;
-			
+
 			_Data *data;
 
 			BSTNodeColor nodeColor;
 
 			BSTNode *leftNode;
 			BSTNode *rightNode;
+
+			bool temporary;
 
 			BSTNode(_Tree &tree, BSTNode *parent, _Data *data, BSTNodeColor color):
 				tree(tree),
@@ -94,7 +110,8 @@ namespace ft {
 				data(data),
 				nodeColor(color),
 				leftNode(NULL),
-				rightNode(NULL) {
+				rightNode(NULL),
+				temporary(true) {
 				if (!parent) {
 					nodeColor = BLACK;
 				}
@@ -107,41 +124,59 @@ namespace ft {
 				data(bst_copy_data(tree.get_allocator(), other.data)),
 				nodeColor(other.nodeColor),
 				leftNode(NULL),
-				rightNode(NULL) {
-				
+				rightNode(NULL),
+				temporary(true) {
+
 				if (other.leftNode != NULL) {
-					leftNode = new BSTNode(tree, *(other.leftNode));
+					leftNode = move_to_dyn_storage(BSTNode(tree, *(other.leftNode)));
 					leftNode->parent = this;
 				}
 
 				if (other.rightNode != NULL) {
-					rightNode = new BSTNode(tree, *(other.rightNode));
+					rightNode = move_to_dyn_storage(BSTNode(tree, *(other.rightNode)));
 					rightNode->parent = this;
 				}
 
 			}
 
-		private:
-			// `= delete' only exists since C++11. So we force it to just... Not compile
-			BSTNode(const BSTNode &) {
-				this->you_should_definitely_not_use_this_constructor_you_bad_boy();
+			BSTNode(const BSTNode &cpy):
+				tree(cpy.tree),
+				root(cpy.root),
+				parent(cpy.parent),
+				data(cpy.data),
+				nodeColor(cpy.nodeColor),
+				leftNode(cpy.leftNode),
+				rightNode(cpy.rightNode),
+				temporary(false) {
+
+				if (leftNode != NULL) {
+					leftNode->parent = this;
+				}
+
+				if (rightNode != NULL) {
+					rightNode->parent = this;
+				}
 			}
 
-		public:
 			~BSTNode() {
-				if (rightNode && rightNode->data != NULL)
-					delete rightNode;
+				if (!temporary) {
+					if (rightNode && rightNode->data != NULL)
+						destroy_from_dyn_storage(rightNode);
 
-				if (leftNode && leftNode->data != NULL)
-					delete leftNode;
+					if (leftNode && leftNode->data != NULL)
+						destroy_from_dyn_storage(leftNode);
 
-				bst_delete_data(tree.get_allocator(), data);
+					bst_delete_data(tree.get_allocator(), data);
+				}
 			}
 
+		private:
 			BSTNode &operator=(const BSTNode &) {
+				this->you_should_definitely_not_use_this_you_filthy_bad_boy();
 				return (*this);
 			}
 
+		public:
 			void insertion_rebalance_tree() {
 				BSTNode *grandparent;
 				BSTNode *uncle;
@@ -177,37 +212,6 @@ namespace ft {
 					}
 				}
 			}
-
-			// TODO: check iterator invalidation compliance with standard
-			// void bst_deletion() {
-			// 	std::size_t childCount = !!(leftNode) + !!(rightNode);
-
-			// 	if (childCount == 2) {
-			// 		BSTNode *swapped = rightNode->min_node();
-
-			// 		swap_place(swapped);
-			// 		swapped->bst_deletion();
-			// 		return;
-			// 	}
-
-			// 	BSTNode *replacement = (leftNode) ? leftNode : rightNode;
-
-			// 	if (parent != NULL) {
-			// 		parent->node_storage(this) = replacement;
-			// 	} else {
-			// 		*root = replacement;
-			// 	}
-
-			// 	if (replacement != NULL) {
-			// 		replacement->parent = parent;
-			// 	}
-
-			// 	replacement->remove_tree_fix(parent);
-
-			// 	rightNode = NULL;
-			// 	leftNode = NULL;
-			// 	delete this;
-			// }
 
 			void right_rotate() {
 				BSTNode *pivot;
@@ -285,77 +289,6 @@ namespace ft {
 				std::__throw_runtime_error("internal error");
 			}
 
-			// void propagate_double_black() {
-			// 	if (parent == NULL) {
-			// 		// THIS IS THE ROOT, SO DON'T DO ANYTHING ASIDE OF RECOLORING IT
-			// 		nodeColor = BLACK;
-			// 		return;
-			// 	}
-
-			// 	BSTNode *sibling = parent->sibling(this);
-
-			// 	if (BSTNode::get_color(sibling) == RED) {
-			// 		if (sibling == parent->leftNode) {
-			// 			parent->left_rotate();
-			// 			std::swap(parent->nodeColor, sibling->nodeColor);
-						
-			// 		} else {
-			// 			parent->right_rotate();
-			// 			std::swap(parent->nodeColor, sibling->nodeColor);
-			// 		}
-
-			// 		sibling = parent->sibling(this);
-			// 	}
-
-			// 	BSTNode *sibling_left = BSTNode::get_left_node(sibling);
-			// 	BSTNode *sibling_right = BSTNode::get_right_node(sibling);
-
-			// 	if (BSTNode::get_color(sibling) == BLACK) {
-			// 		BSTNode *sibling_red = NULL;
-
-			// 		if (BSTNode::get_color(sibling_right) == RED) {
-			// 			sibling_red = sibling_right;
-			// 		} else if (BSTNode::get_color(sibling_left) == RED) {
-			// 			sibling_red = sibling_left;
-			// 		}
-
-			// 		if (sibling_red != NULL) {
-			// 			if (sibling == parent->rightNode) {
-			// 				if (sibling_red == sibling_right) {
-			// 					parent->right_rotate();
-			// 					sibling_right->nodeColor = BLACK;
-			// 				} else {
-			// 					sibling->left_rotate();
-			// 					std::swap(sibling->nodeColor, sibling_red->nodeColor);
-
-			// 					parent->right_rotate();
-			// 					sibling->nodeColor = BLACK;
-			// 				}
-			// 			} else {
-			// 				if (sibling_red == sibling_left) {
-			// 					parent->left_rotate();
-			// 					sibling_left->nodeColor = BLACK;
-			// 				} else {
-			// 					sibling->right_rotate();
-			// 					std::swap(sibling->nodeColor, sibling_red->nodeColor);
-
-			// 					parent->left_rotate();
-			// 					sibling->nodeColor = BLACK;
-			// 				}
-			// 			}
-
-			// 		} else {
-			// 			BSTNode::set_color(sibling, RED);
-						
-			// 			if (parent->nodeColor == BLACK) {
-			// 				parent->propagate_double_black();
-			// 			} else {
-			// 				parent->nodeColor = BLACK;
-			// 			}
-			// 		}
-			// 	}
-			// }
-
 		private:
 			void rebalance_ll(BSTNode *grandparent, BSTNode *parent) {
 				BSTNodeColor tmp;
@@ -399,93 +332,6 @@ namespace ft {
 				grandparent->nodeColor = tmp;
 			}
 
-			// void swap_place(BSTNode *node) {
-			// 	std::swap(data, node->data);
-
-			// 	// Mostly used with pointers. This whole shit is useless. FML
-
-			// 	// if (parent) {
-			// 	// 	parent->node_storage(this) = node;
-			// 	// } else {
-			// 	// 	*root = node;
-			// 	// }
-
-			// 	// if (node->parent) {
-			// 	// 	node->parent->node_storage(node) = this;
-			// 	// } else {
-			// 	// 	*root = this;
-			// 	// }
-
-			// 	// std::swap(rightNode, node->rightNode);
-			// 	// std::swap(leftNode, node->leftNode);
-			// 	// std::swap(parent, node->parent);
-			// 	// std::swap(nodeColor, node->nodeColor);
-
-			// 	// if (parent == this) {
-			// 	// 	parent = node;
-			// 	// 	((node->rightNode == node) ? node->rightNode : node->leftNode) = this;
-			// 	// } else if (node->parent == node) {
-			// 	// 	node->parent = this;
-			// 	// 	((rightNode == this) ? rightNode : leftNode) = node;
-			// 	// }
-
-			// 	// if (rightNode) {
-			// 	// 	rightNode->parent = this;
-			// 	// }
-
-			// 	// if (leftNode) {
-			// 	// 	leftNode->parent = this;
-			// 	// }
-
-			// 	// if (node->rightNode) {
-			// 	// 	node->rightNode->parent = node;
-			// 	// }
-
-			// 	// if (node->leftNode) {
-			// 	// 	node->leftNode->parent = node;
-			// 	// }
-			// }
-
-			// !! We starting to get into the shady stuff !!
-
-			// void remove_tree_fix(BSTNode *parent) {
-
-			// 	// TODO: Check behavior when replacement is now root
-			// 	if (parent == NULL) {
-			// 		return;
-			// 	}
-
-			// 	BSTNodeColor color = safe_get_color();
-			// 	if (color == RED || parent->nodeColor == RED) {
-			// 		safe_set_color(BLACK);
-			// 		return;
-			// 	}
-
-			// 	if (parent == NULL) {
-
-			// 	}
-			// }
-
-			// !!!!!! WARNING Black magic wizardry !!!!!!
-
-			// BSTNodeColor safe_get_color() const {
-			// 	return (safe_callable(this)) ? nodeColor : BLACK;
-			// }
-
-			// void safe_set_color(BSTNodeColor color) {
-			// 	if (safe_callable(this)) {
-			// 		nodeColor = color;
-			// 	}
-			// }
-
-			// BSTNode *safe_get_left_node() const {
-			// 	return (safe_callable(this)) ? leftNode : NULL;
-			// }
-
-			// BSTNode *safe_get_right_node() const {
-			// 	return (safe_callable(this)) ? rightNode : NULL;
-			// }
-
 		public:
 			static void set_color(BSTNode *node, BSTNodeColor color) {
 				if (node != NULL) {
@@ -526,7 +372,6 @@ namespace ft {
 
 		template<typename _Data, typename _Less, typename _Allocator = std::allocator<_Data>, typename _Key = _Data, typename _KeyExtractor = default_key_extractor<_Key>, typename _KeyLess = _Less>
 		class bst_wrapper {
-			friend bst_wrapper_anchor_guard<bst_wrapper>;
 		public:
 			typedef BSTNode<bst_wrapper, _Data> node_type;
 			typedef bst_wrapper_anchor_guard<bst_wrapper> anchor_guard_type;
@@ -540,6 +385,9 @@ namespace ft {
 			node_type *root;
 			node_type anchor;
 
+			std::size_t element_cout;
+			std::allocator<node_type> node_allocator;
+
 		public:
 			bst_wrapper(const _Less &less = _Less(), const _Allocator &alloc = _Allocator(), const _KeyExtractor &key_extractor = _KeyExtractor(), const _KeyLess &key_less = _KeyLess()):
 				less(less),
@@ -547,7 +395,8 @@ namespace ft {
 				key_extractor(key_extractor),
 				key_less(key_less),
 				root(NULL),
-				anchor((*this), NULL, NULL, BLACK)
+				anchor((*this), NULL, NULL, BLACK),
+				element_cout(0)
 				{}
 
 			bst_wrapper(const bst_wrapper &other):
@@ -556,37 +405,37 @@ namespace ft {
 				key_extractor(other.key_extractor),
 				key_less(other.key_less),
 				root(NULL),
-				anchor((*this), NULL, NULL, BLACK) {
+				anchor((*this), NULL, NULL, BLACK),
+				element_cout(other.element_cout) {
 
 				if (other.root != NULL) {
-					root = new node_type(*this, *other.root);
+					root = move_to_dyn_storage(node_type(*this, *other.root));
 				}
 
 				set_anchor();
 			}
-			
+
 			~bst_wrapper() {
 				anchor.rightNode = NULL;
 				anchor.leftNode = NULL;
 				if (root != NULL) {
-					delete root;
+					destroy_from_dyn_storage(root);
 				}
 			}
 
 			bst_wrapper &operator=(const bst_wrapper &rhs) {
 				if (root != NULL)
-					delete root;
+					destroy_from_dyn_storage(root);
 
 				if (rhs.root == NULL) {
 					root = NULL;
 				} else {
-					root = new node_type(*rhs.root, *this);
+					root = move_to_dyn_storage(node_type(*rhs.root, *this));
 				}
 
 				return (*this);
 			}
 
-		private:
 			void set_anchor() {
 				if (root == NULL) {
 					anchor.leftNode = NULL;
@@ -607,24 +456,25 @@ namespace ft {
 					}
 				}
 
-				anchor.leftNode = left_node;
-				anchor.rightNode = right_node;
+				// Yep. They are reversed. As decrementing bst_iterator(anchor) need to go back to max_node
+				anchor.rightNode = left_node;
+				anchor.leftNode = right_node;
 			}
 
 			void remove_anchor() {
 				if (anchor.leftNode)
-					anchor.leftNode->leftNode = NULL;
+					anchor.leftNode->rightNode = NULL;
 				if (anchor.rightNode)
-					anchor.rightNode->rightNode = NULL;
+					anchor.rightNode->leftNode = NULL;
 				anchor.leftNode = NULL;
 				anchor.rightNode = NULL;
 			}
 
-		public:
 			ft::pair<node_type *, bool> insert(const _Data &data) {
 				if (root == NULL) {
-					root = new node_type((*this), NULL, bst_allocate(alloc, data), BLACK);
+					root = move_to_dyn_storage(node_type((*this), NULL, bst_allocate(alloc, data), BLACK));
 					set_anchor();
+					++element_cout;
 					return ft::make_pair(root, true);
 				}
 
@@ -638,7 +488,7 @@ namespace ft {
 				}
 
 				anchor_guard_type guard(*this);
-				node = new node_type(*this, parent, bst_allocate(alloc, data), RED);
+				node = move_to_dyn_storage(node_type(*this, parent, bst_allocate(alloc, data), RED));
 
 				if (is_less) {
 					parent->leftNode = node;
@@ -647,6 +497,7 @@ namespace ft {
 				}
 
 				node->insertion_rebalance_tree();
+				++element_cout;
 				return ft::make_pair(node, true);
 			}
 
@@ -655,7 +506,7 @@ namespace ft {
 
 				if (result == NULL)
 					std::__throw_out_of_range("key not found");
-				
+
 				return *result;
 			}
 
@@ -664,7 +515,7 @@ namespace ft {
 
 				if (result != NULL)
 					std::__throw_out_of_range("key not found");
-				
+
 				return *result;
 			}
 
@@ -676,6 +527,7 @@ namespace ft {
 				}
 
 				erase(node);
+				--element_cout;
 				return true;
 			}
 
@@ -711,7 +563,7 @@ namespace ft {
 				// Setting them to NULL to prevent them from being deleted
 				node->leftNode = NULL;
 				node->rightNode = NULL;
-				delete node;
+				destroy_from_dyn_storage(node);
 			}
 
 			_Allocator &get_allocator() {
@@ -728,6 +580,13 @@ namespace ft {
 
 			const node_type **get_root() const {
 				return &root;
+			}
+
+			void clear() {
+				anchor_guard_type guard(*this);
+
+				destroy_from_dyn_storage(root);
+				root = NULL;
 			}
 
 			node_type *retrieve_node_key(const _Key &key, node_type **parent = NULL, bool *is_less = NULL) const {
@@ -764,11 +623,11 @@ namespace ft {
 
 				return NULL;
 			}
-			
+
 			inline node_type *retrieve_node_key(const _Key &key, node_type *&parent) const { return retrieve_node_key(key, &parent); }
 			inline node_type *retrieve_node_key(const _Key &key, bool &is_less) const { return retrieve_node_key(key, NULL, &is_less); }
 			inline node_type *retrieve_node_key(const _Key &key, node_type *&parent, bool &is_less) const { return retrieve_node_key(key, &parent, &is_less); }
-			
+
 			node_type *retrieve_node(const _Data &data, node_type **parent = NULL, bool *is_less = NULL) const {
 				node_type *current_node;
 				node_type *next_node = root;
@@ -803,7 +662,7 @@ namespace ft {
 
 				return NULL;
 			}
-			
+
 			inline node_type *retrieve_node(const _Data &data, node_type *&parent) const { return retrieve_node(data, &parent); }
 			inline node_type *retrieve_node(const _Data &data, bool &is_less) const { return retrieve_node(data, NULL, &is_less); }
 			inline node_type *retrieve_node(const _Data &data, node_type *&parent, bool &is_less) const { return retrieve_node(data, &parent, &is_less); }
@@ -842,6 +701,22 @@ namespace ft {
 				if (n1->rightNode != NULL) n1->rightNode->parent = n1;
 			}
 
+			node_type *min_node() const {
+				return (root == NULL) ? end_node() : anchor.rightNode;
+			}
+
+			node_type *max_node() const {
+				return (root == NULL) ? end_node() : anchor.leftNode;
+			}
+
+			node_type *end_node() const {
+				return &anchor;
+			}
+
+			std::size_t get_element_count() const {
+				return element_cout;
+			}
+
 		private:
 			void propagate_double_black(node_type *target, node_type *replaced = NULL) {
 				node_type *node_this = (target == NULL) ? replaced : target;
@@ -858,7 +733,7 @@ namespace ft {
 					if (sibling == node_this->parent->leftNode) {
 						node_this->parent->left_rotate();
 						std::swap(node_this->parent->nodeColor, sibling->nodeColor);
-						
+
 					} else {
 						node_this->parent->right_rotate();
 						std::swap(node_this->parent->nodeColor, sibling->nodeColor);
@@ -905,7 +780,7 @@ namespace ft {
 						}
 					} else {
 						node_type::set_color(sibling, RED);
-						
+
 						if (node_this->parent->nodeColor == BLACK) {
 							propagate_double_black(node_this->parent);
 						} else {
@@ -976,7 +851,7 @@ namespace ft {
 				operator++();
 				return value;
 			}
-			
+
 			bst_iterator &operator--() {
 				if (node->leftNode != NULL) {
 					for (node = node->leftNode; node->rightNode != NULL; node = node->rightNode) {}

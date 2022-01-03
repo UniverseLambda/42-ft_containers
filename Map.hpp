@@ -22,7 +22,6 @@ namespace ft {
 			}
 		};
 	} // namespace __clsaad_impl
-	
 
 	template<typename _Key, typename _Tp, typename _KeyLess = std::less<_Key>, typename _Allocator = std::allocator<ft::pair<const _Key, _Tp> > >
 	class map {
@@ -38,10 +37,6 @@ namespace ft {
 		typedef const value_type &const_reference;
 		typedef value_type *pointer;
 		typedef const value_type *const_pointer;
-		// typedef iterator;
-		// typedef const_iterator;
-		// typedef reverse_iterator;
-		// typedef const_reverse_iterator;
 
 		class value_compare: public std::binary_function<value_type, value_type, bool> {
 		protected:
@@ -59,6 +54,13 @@ namespace ft {
 		typedef __clsaad_impl::pair_key_extractor<_Key, _Tp> key_extractor;
 		typedef __clsaad_impl::bst_wrapper<value_type, value_compare, allocator_type, key_type, key_extractor, key_compare> tree_type;
 
+	public:
+		typedef __clsaad_impl::bst_iterator<tree_type, value_type> iterator;
+		typedef __clsaad_impl::bst_iterator<tree_type, const value_type> const_iterator;
+		typedef ft::reverse_iterator<iterator> reverse_iterator;
+		typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
+
+	private:
 		tree_type bst;
 
 	public:
@@ -101,6 +103,74 @@ namespace ft {
 			ft::pair<typename tree_type::node_type *, bool> result = bst.insert(ft::make_pair(key, _Tp()));
 
 			return *(result.first->data->first);
+		}
+
+		iterator begin() {
+			return iterator(bst.min_node());
+		}
+
+		const_iterator begin() const {
+			return const_iterator(bst.min_node());
+		}
+
+		iterator end() {
+			return iterator(bst.anchor());
+		}
+
+		const_iterator end() const {
+			return const_iterator(bst.anchor());
+		}
+
+		reverse_iterator rbegin() {
+			return reverse_iterator(end());
+		}
+
+		const_reverse_iterator rbegin() const {
+			return const_reverse_iterator(end());
+		}
+
+		reverse_iterator rend() {
+			return reverse_iterator(begin());
+		}
+
+		const_reverse_iterator rend() const {
+			return const_reverse_iterator(begin());
+		}
+
+		bool empty() const {
+			return size() == 0;
+		}
+
+		size_type size() const {
+			return bst.get_element_count();
+		}
+
+		size_type max_size() const {
+			return std::numeric_limits<difference_type>::max() / (sizeof(*this) + sizeof(typename tree_type::node_type) + sizeof(value_type));
+		}
+
+		void clear() {
+			bst.clear();
+		}
+
+		ft::pair<iterator, bool> insert(const value_type &value) {
+			ft::pair<typename tree_type::node_type *, bool> result = bst.insert(value);
+
+			return ft::pair<iterator, bool>(iterator(result.first), result.second);
+		}
+
+		// TODO: use hint...
+		iterator insert(iterator, const value_type &value) {
+			ft::pair<typename tree_type::node_type *, bool> result = bst.insert(value);
+
+			return iterator(result.first);
+		}
+
+		template<typename _InputIt>
+		void insert(_InputIt first, _InputIt last) {
+			for (; first != last; ++first) {
+				insert(*first);
+			}
 		}
 	};
 } // namespace ft

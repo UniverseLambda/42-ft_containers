@@ -418,64 +418,6 @@ void sanitize_tree(_Node *root) {
 	sanitize_tree(root->rightNode);
 }
 
-
-
-// void test_node() {
-// 	ft::__clsaad_impl::BSTNode<int, int> *root;
-// 	ft::__clsaad_impl::BSTNode<int, int> node(&root, NULL, std::less<int>(), 50, 50, std::allocator<ft::pair<const int, int> >());
-// 	root = &node;
-// 	int k = 50;
-
-// 	std::cout << "===== After inserting 30 =====" << std::endl;
-// 	root->push_value(30, 30, true);
-// 	print_tree_branch(root, 0);
-// 	sanitize_tree(root);
-
-// 	std::cout << "===== After inserting 20 =====" << std::endl;
-// 	root->push_value(20, 20, true);
-// 	print_tree_branch(root, 0);
-// 	sanitize_tree(root);
-
-// 	std::cout << "===== After inserting 40 =====" << std::endl;
-// 	root->push_value(40, 40, true);
-// 	print_tree_branch(root, 0);
-// 	sanitize_tree(root);
-
-// 	std::cout << "===== After inserting 70 =====" << std::endl;
-// 	root->push_value(70, 70, true);
-// 	print_tree_branch(root, 0);
-// 	sanitize_tree(root);
-
-// 	std::cout << "Value for " << k << ": " << root->find_value(k) << std::endl;
-
-// 	for (int i = 0; i < 10; ++i) {
-// 		int v = i + ((i % 2) ? 50 : 0) + 1;
-// 		std::cout << "===== After inserting " << v << " =====" << std::endl;
-// 		root->push_value(v, v, true);
-// 		print_tree_branch(root, 0);
-// 		sanitize_tree(root);
-// 	}
-// 	print_tree_branch(root, 0);
-
-// 	std::cout << "===== Removing 50 =====" << std::endl;
-// 	k = 50;
-// 	root->remove_value(k);
-// 	print_tree_branch(root, 0);
-// 	sanitize_tree(root);
-
-// 	std::cout << "===== Removing 70 =====" << std::endl;
-// 	k = 70;
-// 	root->remove_value(k);
-// 	print_tree_branch(root, 0);
-// 	sanitize_tree(root);
-
-// 	std::cout << "===== Removing root =====" << std::endl;
-// 	k = 30;
-// 	root->remove_value(k);
-// 	print_tree_branch(root, 0);
-// 	sanitize_tree(root);
-// }
-
 void test_tree() {
 	typedef ft::__clsaad_impl::bst_wrapper< int, std::less<int> > bst_wrapper;
 	int v;
@@ -555,13 +497,13 @@ void test_tree() {
 	bst.erase(v);
 	print_tree_branch(*bst.get_root(), 0);
 	sanitize_tree(*bst.get_root());
-	
+
 	v = 42;
 	std::cout << "===== Inserting " << v << " =====" << std::endl;
 	bst.insert(v);
 	print_tree_branch(*bst.get_root(), 0);
 	sanitize_tree(*bst.get_root());
-	
+
 	v = 42;
 	std::cout << "===== Removing " << v << " =====" << std::endl;
 	bst.erase(v);
