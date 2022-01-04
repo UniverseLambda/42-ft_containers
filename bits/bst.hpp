@@ -717,6 +717,45 @@ namespace ft {
 				return element_cout;
 			}
 
+			// Before C++11, whether the allocator is swapped or not is undefined... Even though stateful allocators may fail after this call,
+			// the Allocator requirement does not require Swappable... So we do not swap alloc so it will compile for every Allocators.
+			void swap(bst_wrapper &other) {
+				anchor_guard_type guard0(*this);
+				anchor_guard_type guard1(other);
+
+				std::swap(root, other.root);
+				std::swap(element_cout, other.element_cout);
+				std::swap(key_less, other.key_less);
+			}
+
+			node_type *lower_bound(const _Key &key) const {
+				node_type *node = root;
+
+				while (node != NULL) {
+					const _Key &curr = key_extractor(*node->data);
+
+					if (is_equivalent(key_less, key, curr)) {
+						break;
+					}
+
+					if (key_less(curr, key)) {
+						node = node->rightNode;
+					} else {
+						if (node->leftNode == NULL) {
+							break;
+						}
+						const _Key &left = key_extractor(*(node->leftNode->data));
+
+						if (key_less(left, key)) {
+							break;
+						}
+						node = node->leftNode;
+					}
+				}
+
+				return node;
+			}
+
 		private:
 			void propagate_double_black(node_type *target, node_type *replaced = NULL) {
 				node_type *node_this = (target == NULL) ? replaced : target;

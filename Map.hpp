@@ -172,5 +172,118 @@ namespace ft {
 				insert(*first);
 			}
 		}
+
+		void erase(iterator it) {
+			bst.erase(it.node);
+		}
+
+		void erase(iterator first, iterator last) {
+			for (; first != last; ++first) {
+				bst.erase(first.node);
+			}
+		}
+
+		size_type erase(const _Key &key) {
+			return !!(bst.erase(key));
+		}
+
+		void swap(map &other) {
+			bst.swap(other);
+		}
+
+		size_type count(const _Key &key) const {
+			try {
+				bst.find_node(key);
+
+				return 1;
+			} catch (std::out_of_range) {}
+			return 0;
+		}
+
+		iterator find(const _Key &key) {
+			try {
+				typename tree_type::node_type &node = bst.find_node(key);
+
+				return iterator(&node);
+			} catch (std::out_of_range) {}
+			return end();
+		}
+
+		const_iterator find(const _Key &key) const {
+			try {
+				typename tree_type::node_type &node = bst.find_node(key);
+
+				return const_iterator(&node);
+			} catch (std::out_of_range) {}
+			return end();
+		}
+
+		iterator lower_bound(const _Key &key) {
+			typename tree_type::node_type *node = bst.lower_bound(key);
+
+			if (node == NULL)
+				return end();
+			return iterator(node);
+		}
+
+		const_iterator lower_bound(const _Key &key) const {
+			typename tree_type::node_type *node = bst.lower_bound(key);
+
+			if (node == NULL)
+				return end();
+			return const_iterator(node);
+		}
+
+		iterator upper_bound(const _Key &key) {
+			typename tree_type::node_type *node = bst.lower_bound(key);
+
+			if (node == NULL)
+				return end();
+
+			if (__clsaad_impl::is_equivalent(bst.less, node->data->first, key)) {
+				return ++(iterator(node));
+			} else {
+				return iterator(node);
+			}
+		}
+
+		const_iterator upper_bound(const _Key &key) const {
+			typename tree_type::node_type *node = bst.lower_bound(key);
+
+			if (node == NULL)
+				return end();
+
+			if (__clsaad_impl::is_equivalent(bst.less, node->data->first, key)) {
+				return ++(const_iterator(node));
+			} else {
+				return const_iterator(node);
+			}
+		}
+
+		ft::pair<iterator, iterator> equal_range(const _Key &key) {
+			typename tree_type::node_type *node = bst.lower_bound(key);
+
+			if (node == NULL)
+				return make_pair(end(), end());
+
+			if (__clsaad_impl::is_equivalent(bst.less, node->data->first, key)) {
+				return make_pair(iterator(node), ++(iterator(node)));
+			} else {
+				return make_pair(iterator(node), iterator(node));
+			}
+		}
+
+		ft::pair<const_iterator, const_iterator> equal_range(const _Key &key) const {
+			typename tree_type::node_type *node = bst.lower_bound(key);
+
+			if (node == NULL)
+				return make_pair(end(), end());
+
+			if (__clsaad_impl::is_equivalent(bst.less, node->data->first, key)) {
+				return make_pair(const_iterator(node), ++(const_iterator(node)));
+			} else {
+				return make_pair(const_iterator(node), const_iterator(node));
+			}
+		}
 	};
 } // namespace ft
