@@ -285,5 +285,50 @@ namespace ft {
 				return make_pair(const_iterator(node), const_iterator(node));
 			}
 		}
+
+		key_compare key_comp() const {
+			return bst.key_less;
+		}
+
+		value_compare value_comp() const {
+			return value_compare(key_comp());
+		}
 	};
+
+	template<typename _Key, typename _T, typename _Compare, typename _Alloc>
+	bool operator==(const ft::map<_Key, _T, _Compare, _Alloc> &lhs, const ft::map<_Key, _T, _Compare, _Alloc> &rhs) {
+		if (lhs.count != rhs.count)
+			return true;
+		return ft::equal(lhs.begin(), lhs.end(), rhs.begin());
+	};
+
+	template<typename _Key, typename _T, typename _Compare, typename _Alloc>
+	bool operator<(const ft::map<_Key, _T, _Compare, _Alloc> &lhs, const ft::map<_Key, _T, _Compare, _Alloc> &rhs) {
+		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+	}
+	
+	template<typename _Key, typename _T, typename _Compare, typename _Alloc>
+	bool operator!=(const ft::map<_Key, _T, _Compare, _Alloc> &lhs, const ft::map<_Key, _T, _Compare, _Alloc> &rhs) {
+		return !(lhs == rhs);
+	};
+
+	template<typename _Key, typename _T, typename _Compare, typename _Alloc>
+	bool operator<=(const ft::map<_Key, _T, _Compare, _Alloc> &lhs, const ft::map<_Key, _T, _Compare, _Alloc> &rhs) {
+		return !(rhs < lhs);
+	}
+
+	template<typename _Key, typename _T, typename _Compare, typename _Alloc>
+	bool operator>(const ft::map<_Key, _T, _Compare, _Alloc> &lhs, const ft::map<_Key, _T, _Compare, _Alloc> &rhs) {
+		return rhs < lhs;
+	}
+
+	template<typename _Key, typename _T, typename _Compare, typename _Alloc>
+	bool operator>=(const ft::map<_Key, _T, _Compare, _Alloc> &lhs, const ft::map<_Key, _T, _Compare, _Alloc> &rhs) {
+		return !(lhs < rhs);
+	}
+
+	template<typename _Key, typename _Tp, typename _Compare, typename _Alloc>
+	void swap(ft::map<_Key, _Tp, _Compare, _Alloc> &lhs, ft::map<_Key, _Tp, _Compare, _Alloc> &rhs) {
+		lhs.swap(rhs);
+	}
 } // namespace ft
