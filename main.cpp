@@ -81,6 +81,10 @@ struct ValiditySanitizer {
 	}
 };
 
+std::ostream &operator<<(std::ostream &os, ValiditySanitizer &san) {
+	return (os << " {idx: " << san.idx << ", origin: " << san.origin << ", valid: " << san.valid << "}");
+}
+
 std::ostream &operator<<(std::ostream &os, ValiditySanitizer::Origin origin) {
 	return (os << ValiditySanitizer::originToString(origin));
 }
@@ -511,6 +515,38 @@ void test_tree() {
 	sanitize_tree(*bst.get_root());
 }
 
+void test_map() {
+	typedef ft::map<std::string, ValiditySanitizer> map_type;
+
+	map_type map;
+	std::size_t idx = 0;
+
+	map.insert(map_type::value_type("Bonchouuur0", ValiditySanitizer(idx++)));
+
+	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
+		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+	}
+
+	map.insert(map_type::value_type("Bonchouuur1", ValiditySanitizer(idx++)));
+
+	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
+		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+	}
+
+	map.insert(map_type::value_type("Bonchouuur3", ValiditySanitizer(idx++)));
+	map.insert(map_type::value_type("Bonchouuur2", ValiditySanitizer(idx++)));
+
+	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
+		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+	}
+
+	{
+		map_type::iterator it = map.end();
+		--it;
+		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+	}
+}
+
 int main(void) {
 	vectorTest();
 
@@ -520,8 +556,8 @@ int main(void) {
 	s.pop();
 	s.pop();
 
-	// test_node();
 	test_tree();
+	test_map();
 
 	return 0;
 }

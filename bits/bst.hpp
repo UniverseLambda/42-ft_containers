@@ -89,9 +89,8 @@ namespace ft {
 		struct BSTNode {
 			static BSTNode *const nullValue;
 
-			_Tree &tree;
+			_Tree *tree;
 
-			BSTNode **root;
 			BSTNode *parent;
 
 			_Data *data;
@@ -103,9 +102,8 @@ namespace ft {
 
 			bool temporary;
 
-			BSTNode(_Tree &tree, BSTNode *parent, _Data *data, BSTNodeColor color):
+			BSTNode(_Tree *tree, BSTNode *parent, _Data *data, BSTNodeColor color):
 				tree(tree),
-				root(tree.get_root()),
 				parent(parent),
 				data(data),
 				nodeColor(color),
@@ -117,11 +115,10 @@ namespace ft {
 				}
 			}
 
-			BSTNode(_Tree &tree, const BSTNode &other):
+			BSTNode(_Tree *tree, const BSTNode &other):
 				tree(tree),
-				root(tree.get_root()),
 				parent(NULL),
-				data(bst_copy_data(tree.get_allocator(), other.data)),
+				data(bst_copy_data(tree->get_allocator(), other.data)),
 				nodeColor(other.nodeColor),
 				leftNode(NULL),
 				rightNode(NULL),
@@ -141,7 +138,6 @@ namespace ft {
 
 			BSTNode(const BSTNode &cpy):
 				tree(cpy.tree),
-				root(cpy.root),
 				parent(cpy.parent),
 				data(cpy.data),
 				nodeColor(cpy.nodeColor),
@@ -166,7 +162,7 @@ namespace ft {
 					if (leftNode && leftNode->data != NULL)
 						destroy_from_dyn_storage(leftNode);
 
-					bst_delete_data(tree.get_allocator(), data);
+					bst_delete_data(tree->get_allocator(), data);
 				}
 			}
 
@@ -181,7 +177,7 @@ namespace ft {
 				BSTNode *grandparent;
 				BSTNode *uncle;
 
-				if (*root == this || parent == NULL) {
+				if (*(tree->get_root()) == this || parent == NULL) {
 					nodeColor = BLACK;
 					return;
 				}
@@ -233,8 +229,8 @@ namespace ft {
 
 				if (parent) {
 					parent->node_storage(this) = pivot;
-				} else if (root) {
-					*root = pivot;
+				} else {
+					*(tree->get_root()) = pivot;
 				}
 
 				parent = pivot;
@@ -258,19 +254,25 @@ namespace ft {
 
 				if (parent) {
 					parent->node_storage(this) = pivot;
-				} else if (root) {
-					*root = pivot;
+				} else {
+					*(tree->get_root()) = pivot;
 				}
 
 				parent = pivot;
 			}
 
-			// TODO: transform this to iterative to avoid stack-overflow
 			BSTNode *min_node() {
-				if (leftNode == NULL || leftNode->data == NULL) {
+				if (leftNode == NULL) {
 					return this;
 				}
-				return leftNode->min_node();
+
+				BSTNode *node = leftNode;
+
+				while (node->leftNode != NULL && node->leftNode->data != NULL) {
+					node = node->leftNode;
+				}
+
+				return node;
 			}
 
 			inline BSTNode *sibling(BSTNode *node) {
@@ -395,7 +397,7 @@ namespace ft {
 				key_extractor(key_extractor),
 				key_less(key_less),
 				root(NULL),
-				anchor((*this), NULL, NULL, BLACK),
+				anchor(this, NULL, NULL, BLACK),
 				element_cout(0)
 				{}
 
@@ -405,11 +407,11 @@ namespace ft {
 				key_extractor(other.key_extractor),
 				key_less(other.key_less),
 				root(NULL),
-				anchor((*this), NULL, NULL, BLACK),
+				anchor(this, NULL, NULL, BLACK),
 				element_cout(other.element_cout) {
 
 				if (other.root != NULL) {
-					root = move_to_dyn_storage(node_type(*this, *other.root));
+					root = move_to_dyn_storage(node_type(this, *other.root));
 				}
 
 				set_anchor();
@@ -459,6 +461,9 @@ namespace ft {
 				// Yep. They are reversed. As decrementing bst_iterator(anchor) need to go back to max_node
 				anchor.rightNode = left_node;
 				anchor.leftNode = right_node;
+
+				left_node->leftNode = &anchor;
+				right_node->rightNode = &anchor;
 			}
 
 			void remove_anchor() {
@@ -472,7 +477,7 @@ namespace ft {
 
 			ft::pair<node_type *, bool> insert(const _Data &data) {
 				if (root == NULL) {
-					root = move_to_dyn_storage(node_type((*this), NULL, bst_allocate(alloc, data), BLACK));
+					root = move_to_dyn_storage(node_type(this, NULL, bst_allocate(alloc, data), BLACK));
 					set_anchor();
 					++element_cout;
 					return ft::make_pair(root, true);
@@ -488,7 +493,7 @@ namespace ft {
 				}
 
 				anchor_guard_type guard(*this);
-				node = move_to_dyn_storage(node_type(*this, parent, bst_allocate(alloc, data), RED));
+				node = move_to_dyn_storage(node_type(this, parent, bst_allocate(alloc, data), RED));
 
 				if (is_less) {
 					parent->leftNode = node;
@@ -701,20 +706,40 @@ namespace ft {
 				if (n1->rightNode != NULL) n1->rightNode->parent = n1;
 			}
 
-			node_type *min_node() const {
+			const node_type *min_node() const {
 				return (root == NULL) ? end_node() : anchor.rightNode;
 			}
 
-			node_type *max_node() const {
+			node_type *min_node() {
+				return (root == NULL) ? end_node() : anchor.rightNode;
+			}
+
+			const node_type *max_node() const {
 				return (root == NULL) ? end_node() : anchor.leftNode;
 			}
 
-			node_type *end_node() const {
+			node_type *max_node() {
+				return (root == NULL) ? end_node() : anchor.leftNode;
+			}
+
+			node_type *end_node() {
+				return &anchor;
+			}
+
+			const node_type *end_node() const {
 				return &anchor;
 			}
 
 			std::size_t get_element_count() const {
 				return element_cout;
+			}
+
+			node_type &get_anchor() {
+				return anchor;
+			}
+
+			const node_type &get_anchor() const {
+				return anchor;
 			}
 
 			// Before C++11, whether the allocator is swapped or not is undefined... Even though stateful allocators may fail after this call,
@@ -723,9 +748,11 @@ namespace ft {
 				anchor_guard_type guard0(*this);
 				anchor_guard_type guard1(other);
 
-				std::swap(root, other.root);
-				std::swap(element_cout, other.element_cout);
 				std::swap(key_less, other.key_less);
+				std::swap(element_cout, other.element_cout);
+				
+				if (root != NULL) propagate_set_tree(root);
+				if (other.root != NULL) other.propagate_set_tree(other.root);
 			}
 
 			node_type *lower_bound(const _Key &key) const {
@@ -828,6 +855,13 @@ namespace ft {
 					}
 				}
 			}
+
+			void propagate_set_tree(node_type *node) {
+				node->tree = this;
+				
+				if (node->leftNode) propagate_set_tree(node->leftNode);
+				if (node->rightNode) propagate_set_tree(node->rightNode);
+			}
 		};
 
 		template<typename _Tree, typename _Tp>
@@ -867,19 +901,22 @@ namespace ft {
 
 			bst_iterator &operator++() {
 				if (node->rightNode != NULL) {
-					node = node->rightNode->min_node();
-				} else if (node->leftNode != NULL) {
-					if (node == node->parent->rightNode) {
-						while (node == node->parent->rightNode) {
-							node = node->parent;
-						}
-					} else if (node == node->parent->leftNode) {
-						node = node->parent;
-					} else {
-						std::__throw_runtime_error("bst_iterator::operator++: could not determine current node side");
-					}
+					for (node = node->rightNode; node->leftNode != NULL && node->data != NULL; node = node->leftNode) {}
 				} else {
-					std::__throw_runtime_error("bst_iterator::operator++: no anchor node set (or properly set");
+					while (true) {
+						if (node->parent == NULL) {
+							std::__throw_runtime_error("bst_iterator::operator++: no anchor node set (or properly set)");
+						}
+
+						if (node == node->parent->leftNode) {
+							node = node->parent;
+							break;
+						} else if (node == node->parent->rightNode) {
+							node = node->parent;
+						} else {
+							std::__throw_runtime_error("bst_iterator::operator++: could not determine current node side");
+						}
+					}
 				}
 
 				return (*this);
@@ -893,21 +930,26 @@ namespace ft {
 
 			bst_iterator &operator--() {
 				if (node->leftNode != NULL) {
-					for (node = node->leftNode; node->rightNode != NULL; node = node->rightNode) {}
-				} else if (node->rightNode != NULL) {
-					if (node == node->parent->leftNode) {
-						while (node == node->parent->leftNode) {
-							node = node->parent;
-						}
-					} else if (node == node->parent->rightNode) {
-						node = node->parent;
-					} else {
-						std::__throw_runtime_error("bst_iterator::operator--: could not determine current node side");
-					}
+					// Yeah... We need to be able to decrement from end(), but... Not incrementing from begin() - 1 because it is not decrementable by definition
+					// "The begin iterator is not decrementable and the behavior is undefined if --container.begin() is evaluated." -- from cppreference.com - LegacyBidirectionalIterator
+					for (node = node->leftNode; node->rightNode != NULL && node->rightNode->data != NULL; node = node->rightNode) {}
 				} else {
-					std::__throw_runtime_error("bst_iterator::operator--: no anchor node set (or properly set");
-				}
+					while (true) {
+						if (node->parent == NULL) {
+							std::__throw_runtime_error("bst_iterator::operator--: no anchor node set (or properly set)");
+						}
 
+						if (node == node->parent->rightNode) {
+							node = node->parent;
+							break;
+						} else if (node == node->parent->leftNode) {
+							node = node->parent;
+						} else {
+							std::__throw_runtime_error("bst_iterator::operator--: could not determine current node side");
+						}
+					}
+				}
+				
 				return (*this);
 			}
 
