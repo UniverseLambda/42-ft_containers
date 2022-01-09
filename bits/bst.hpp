@@ -124,12 +124,12 @@ namespace ft {
 				rightNode(NULL),
 				temporary(true) {
 
-				if (other.leftNode != NULL) {
+				if (other.leftNode != NULL && other.leftNode->data != NULL) {
 					leftNode = move_to_dyn_storage(BSTNode(tree, *(other.leftNode)));
 					leftNode->parent = this;
 				}
 
-				if (other.rightNode != NULL) {
+				if (other.rightNode != NULL && other.rightNode->data != NULL) {
 					rightNode = move_to_dyn_storage(BSTNode(tree, *(other.rightNode)));
 					rightNode->parent = this;
 				}

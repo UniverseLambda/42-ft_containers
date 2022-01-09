@@ -15,8 +15,8 @@ endif
 
 LD := $(CXX)
 
-CXX_FLAGS := -DDSP_CHECK_VAL=false -g3 -Wall -Wextra -Werror -std=c++98 # -fsanitize=address -fsanitize=undefined
-LD_FLAGS := $(LD_FLAGS) -g3 -Wall -Wextra -Werror -std=c++98 # -fsanitize=address -fsanitize=undefined
+CXX_FLAGS := -DDSP_CHECK_VAL=false -g3 -Wall -Wextra -Werror -std=c++98 -fsanitize=address -fsanitize=undefined
+LD_FLAGS := $(LD_FLAGS) -g3 -Wall -Wextra -Werror -std=c++98 -fsanitize=address -fsanitize=undefined
 
 OBJS :=	$(SRCS:.cpp=.o)
 

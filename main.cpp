@@ -545,6 +545,18 @@ void test_map() {
 		--it;
 		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
 	}
+
+	{
+		map_type copy(map);
+
+		for (map_type::iterator it = copy.begin(); it != copy.end(); ++it) {
+			std::cout << "copy[" << it->first << "] = " << it->second << std::endl;
+		}
+	}
+
+	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
+		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+	}
 }
 
 int main(void) {
