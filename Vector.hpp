@@ -413,7 +413,11 @@ namespace ft {
 				mData = newData;
 			} else {
 				for (size_type i = mSize; i > idx; --i) {
-					mAlloc.construct(&mData[(i - 1) + holeSize], mData[(i - 1)]);
+					if ((i + holeSize) <= mSize) {
+						mData[(i - 1) + holeSize] = mData[(i - 1)];
+					} else {
+						mAlloc.construct(&mData[(i - 1) + holeSize], mData[(i - 1)]);
+					}
 				}
 
 				for (size_type i = 0; i < holeSize; ++i) {

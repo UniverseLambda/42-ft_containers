@@ -13,12 +13,33 @@
 #include <iostream>
 #include <iomanip>
 
+#include <typeinfo>
+
+#ifdef ULDL_DBG
+#pragma message ("ULDL Enabled :)")
+
+#include <uldl/uldl.hpp>
+
+#define ULDL_INIT uldl::init();
+#define ULDL_TRACKER(T, X) uldl::tracker<T> X;
+#define ULDL_TRACKER_INIT(X) X(this),
+
+#else
+
+#define ULDL_INIT
+#define ULDL_TRACKER(T, X)
+#define ULDL_TRACKER_INIT(X)
+
+#endif
+
 #ifndef DSP_CHECK_VAL
 # define DSP_CHECK_VAL true
 #endif
 
 #define VECTOR_TEST(X) X; \
 						checkVector(validity, testIdx++)
+
+#define MAP_OP(X) X; check_map(map.begin(), map.end());
 
 struct CompareExpected {
 	enum _CompareExpectedV {
@@ -30,22 +51,29 @@ struct CompareExpected {
 
 struct ValiditySanitizer {
 	enum Origin {
+		DFL,
 		CTOR,
 		CPY_CTOR,
 		CPY_OP,
 		DTOR,
 	};
 
+	ULDL_TRACKER(ValiditySanitizer, tracker);
+	
 	bool valid;
 	Origin origin;
 	std::size_t idx;
 
-	ValiditySanitizer(size_t idx): valid(true), origin(CTOR), idx(idx) {}
-	ValiditySanitizer(const ValiditySanitizer &other): valid(other.valid), origin(CPY_CTOR), idx(other.idx) {}
+	char *mem_leak_check;
+
+	ValiditySanitizer(): ULDL_TRACKER_INIT(tracker) valid(true), origin(DFL), idx(-1), mem_leak_check(new char[1]) {}
+	ValiditySanitizer(size_t idx): ULDL_TRACKER_INIT(tracker) valid(true), origin(CTOR), idx(idx), mem_leak_check(new char[1]) {}
+	ValiditySanitizer(const ValiditySanitizer &other): ULDL_TRACKER_INIT(tracker) valid(other.valid), origin(CPY_CTOR), idx(other.idx), mem_leak_check(new char[1]) {}
 
 	~ValiditySanitizer() {
 		valid = false;
 		origin = DTOR;
+		delete[] mem_leak_check;
 	}
 
 	ValiditySanitizer &operator=(const ValiditySanitizer &lhs) {
@@ -58,7 +86,7 @@ struct ValiditySanitizer {
 
 	void check() const {
 		if (!valid) {
-			std::__throw_runtime_error((std::string("not valid object (") + originToString(origin) + ")").data());
+			throw std::runtime_error((std::string("not valid object (") + originToString(origin) + ")").data());
 		}
 	}
 
@@ -72,6 +100,7 @@ struct ValiditySanitizer {
 
 	static std::string originToString(Origin origin) {
 		switch (origin) {
+		case DFL:		return "DFL";
 		case CTOR:		return "CTOR";
 		case CPY_CTOR:	return "CPY_CTOR";
 		case CPY_OP:	return "CPY_OP";
@@ -81,12 +110,12 @@ struct ValiditySanitizer {
 	}
 };
 
-std::ostream &operator<<(std::ostream &os, ValiditySanitizer &san) {
-	return (os << " {idx: " << san.idx << ", origin: " << san.origin << ", valid: " << san.valid << "}");
+std::ostream &operator<<(std::ostream &os, const ValiditySanitizer::Origin origin) {
+	return (os << ValiditySanitizer::originToString(origin));
 }
 
-std::ostream &operator<<(std::ostream &os, ValiditySanitizer::Origin origin) {
-	return (os << ValiditySanitizer::originToString(origin));
+std::ostream &operator<<(std::ostream &os, const ValiditySanitizer &san) {
+	return (os << " {idx: " << san.idx << ", origin: " << san.origin << ", valid: " << san.valid << "}");
 }
 
 void checkVector(const ft::vector<ValiditySanitizer> &validity, std::size_t testIdx) {
@@ -397,24 +426,24 @@ void sanitize_tree(_Node *root) {
 	if (root->leftNode && root->leftNode->data != NULL) {
 		if (root->leftNode->parent != root) {
 			std::cerr << "Error at node " << *(root->leftNode->data) << std::endl;
-			std::__throw_runtime_error("TREE_SANITIZER: Wrong parent");
+			throw std::runtime_error("TREE_SANITIZER: Wrong parent");
 		}
 
 		if (root->leftNode->nodeColor == ft::__clsaad_impl::RED && root->leftNode->nodeColor == root->nodeColor) {
 			std::cerr << "Error at node " << *(root->leftNode->data) << std::endl;
-			std::__throw_runtime_error("TREE_SANITIZER: Wrong color");
+			throw std::runtime_error("TREE_SANITIZER: Wrong color");
 		}
 	}
 
 	if (root->rightNode && root->rightNode->data != NULL) {
 		if (root->rightNode->parent != root) {
 			std::cerr << "Error at node " << *(root->rightNode->data) << std::endl;
-			std::__throw_runtime_error("TREE_SANITIZER: Wrong parent");
+			throw std::runtime_error("TREE_SANITIZER: Wrong parent");
 		}
 
 		if (root->rightNode->nodeColor == ft::__clsaad_impl::RED && root->rightNode->nodeColor == root->nodeColor) {
 			std::cerr << "Error at node " << *(root->rightNode->data) << std::endl;
-			std::__throw_runtime_error("TREE_SANITIZER: Wrong color");
+			throw std::runtime_error("TREE_SANITIZER: Wrong color");
 		}
 	}
 
@@ -515,33 +544,36 @@ void test_tree() {
 	sanitize_tree(*bst.get_root());
 }
 
-void test_map() {
-	typedef ft::map<std::string, ValiditySanitizer> map_type;
 
-	map_type map;
-	std::size_t idx = 0;
 
-	map.insert(map_type::value_type("Bonchouuur0", ValiditySanitizer(idx++)));
+template<typename _It>
+void check_map(_It it, _It end) {
+	for (std::size_t idx = 0; it != end; ++idx, ++it) {
+		if (DSP_CHECK_VAL) {
+			if (idx < 31) {
+				std::cout << "Checking element " << idx << " = " << it->second.idx << std::endl;
+			} else if (idx == 31) {
+				std::cout << "(...)" << std::endl;
+			}
+		}
 
-	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
-		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+		try {
+			it->second.check();
+		} catch (std::exception &exc) {
+			std::cout << "Validity check failed on element number " << idx << " (key: " << it->first << ", mapped: " << it->second << ")" << std::endl;
+			throw exc;
+		}
 	}
+}
 
-	map.insert(map_type::value_type("Bonchouuur1", ValiditySanitizer(idx++)));
-
-	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
-		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
-	}
-
-	map.insert(map_type::value_type("Bonchouuur3", ValiditySanitizer(idx++)));
-	map.insert(map_type::value_type("Bonchouuur2", ValiditySanitizer(idx++)));
-
-	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
-		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
-	}
+template<typename _Iterator, typename _Map>
+void preserving_map_test(_Map &map) {
+	typedef _Map map_type;
+	typedef _Iterator iterator;
+	typedef typename map_type::allocator_type allocator_type;
 
 	{
-		map_type::iterator it = map.end();
+		iterator it = map.end();
 		--it;
 		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
 	}
@@ -549,17 +581,121 @@ void test_map() {
 	{
 		map_type copy(map);
 
-		for (map_type::iterator it = copy.begin(); it != copy.end(); ++it) {
+		for (iterator it = copy.begin(); it != copy.end(); ++it) {
 			std::cout << "copy[" << it->first << "] = " << it->second << std::endl;
 		}
 	}
 
-	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
+	for (iterator it = map.begin(); it != map.end(); ++it) {
 		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+	}
+	
+	{
+		map_type copy(++(map.begin()), map.end());
+
+		for (iterator it = copy.begin(); it != copy.end(); ++it) {
+			std::cout << "copy[" << it->first << "] = " << it->second << std::endl;
+		}
+	}
+
+	for (iterator it = map.begin(); it != map.end(); ++it) {
+		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+	}
+	
+	{
+		map_type copy(map.begin(), --(map.end()));
+
+		for (iterator it = copy.begin(); it != copy.end(); ++it) {
+			std::cout << "copy[" << it->first << "] = " << it->second << std::endl;
+		}
+	}
+
+	for (iterator it = map.begin(); it != map.end(); ++it) {
+		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+	}
+
+	{
+		allocator_type tmp = map.get_allocator();
+	}
+
+	for (iterator it = map.begin(); it != map.end(); ++it) {
+		std::cout << "map.at(\"" << it->first << "\") = " << map.at(it->first) << std::endl;
+	}
+
+	std::cout << "map.at with non-existing key... ";
+
+	// std::cout << "\x1B[92m" << "== test passed :)" << "\x1B[0m" << std::endl;
+	// std::cout << "\x1B[91m" << "== test not passed :(" << "\x1B[0m" << std::endl;
+
+	try {
+		map.at("MDR NICE TRY");
+
+		std::cout << "\x1B[91m" << "FAILED (nothing thrown)" << "\x1B[0m" << std::endl;
+	} catch (std::out_of_range &oor) {
+		std::cout << "\x1B[92m" << "SUCCESSFUL (std::out_of_range exception thrown. YAY)" << "\x1B[0m" << std::endl;
+	} catch (std::exception &exc) {
+		std::cout << "\x1B[91m" << "FAILED (wrong exception thrown, expected std::out_of_range, found " << typeid(exc).name() << ")" << "\x1B[0m" << std::endl;
+	} catch (...) {
+		std::cout << "\x1B[91m" << "FAILED (IT'S NOT EVEN AN EXCEPTION. WHAT THE HELL IS WRONG WITH YOU)" << "\x1B[0m" << std::endl;
 	}
 }
 
+void test_map() {
+	typedef ft::map<std::string, ValiditySanitizer> map_type;
+
+	map_type map;
+	std::size_t idx = 0;
+
+	std::cout << "======= MAP - ALTERING TESTS =======" << std::endl;
+	
+	std::cout << "** Basic insert on empty map **" << std::endl;
+	map.insert(map_type::value_type("Bonchouuur0", ValiditySanitizer(idx++)));
+
+	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
+		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+	}
+	check_map(map.begin(), map.end());
+
+
+	std::cout << "** Basic insert on map with size == 1 **" << std::endl;
+	map.insert(map_type::value_type("Bonchouuur1", ValiditySanitizer(idx++)));
+
+	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
+		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+	}
+
+	check_map(map.begin(), map.end());
+
+	std::cout << "** 2 consecutive basic inserts on map with size > 1 **" << std::endl;
+	map.insert(map_type::value_type("Bonchouuur3", ValiditySanitizer(idx++ + 1)));
+	map.insert(map_type::value_type("Bonchouuur2", ValiditySanitizer(idx++ - 1)));
+
+	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
+		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+	}
+
+	std::cout << "** operator[] test **" << std::endl;
+	std::cout << "operator[] with 1st element = " << map["Bonchouuur0"] << std::endl;
+	std::cout << "operator[] with 2nd element = " << map["Bonchouuur1"] << std::endl;
+	std::cout << "operator[] with 4th element = " << map["Bonchouuur3"] << std::endl;
+	std::cout << "operator[] with non-existent element (biggest before beginning of the map) = " << map["Bonchouuur/"] << std::endl;
+	std::cout << "operator[] with non-existent element (gap from beginning) = " << map["Bonchouuur "] << std::endl;
+	std::cout << "operator[] with non-existent element (lowest after end of the map) = " << map["Bonchouuur4"] << std::endl;
+	std::cout << "operator[] with non-existent element (gap from the end) = " << map["Bonchouuur6"] << std::endl;
+
+	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
+		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
+	}
+
+	std::cout << "======= MAP - PRESERVING TESTS (on non-const reference) =======" << std::endl;
+	preserving_map_test<map_type::iterator>(map);
+	std::cout << "======= MAP - PRESERVING TESTS (on const reference) =======" << std::endl;
+	preserving_map_test<map_type::const_iterator, const map_type>(map);
+}
+
 int main(void) {
+	ULDL_INIT
+
 	vectorTest();
 
 	ft::stack<ValiditySanitizer> s;

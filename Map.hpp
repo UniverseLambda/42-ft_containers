@@ -17,7 +17,7 @@ namespace ft {
 			~pair_key_extractor() {}
 			pair_key_extractor &operator=(const pair_key_extractor &) { return (*this); }
 
-			inline _Key &operator()(ft::pair<const _Key, _Value> &d) const {
+			inline const _Key &operator()(const ft::pair<const _Key, _Value> &d) const {
 				return d.first;
 			}
 		};
@@ -54,10 +54,11 @@ namespace ft {
 	private:
 		typedef __clsaad_impl::pair_key_extractor<_Key, _Tp> key_extractor;
 		typedef __clsaad_impl::bst_wrapper<value_type, value_compare, allocator_type, key_type, key_extractor, key_compare> tree_type;
+		typedef const __clsaad_impl::bst_wrapper<value_type, value_compare, allocator_type, key_type, key_extractor, key_compare> const_tree_type;
 
 	public:
-		typedef __clsaad_impl::bst_iterator<tree_type, value_type> iterator;
-		typedef __clsaad_impl::bst_iterator<tree_type, const value_type> const_iterator;
+		typedef __clsaad_impl::bst_iterator<typename tree_type::node_type, value_type> iterator;
+		typedef __clsaad_impl::bst_iterator<const typename const_tree_type::node_type, const value_type> const_iterator;
 		typedef ft::reverse_iterator<iterator> reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
@@ -93,17 +94,17 @@ namespace ft {
 		}
 
 		_Tp &at(const _Key &key) {
-			return bst.find_node(key);
+			return bst.find_node(key).data->second;
 		}
 
 		const _Tp &at(const _Key &key) const {
-			return bst.find_node(key);
+			return bst.find_node(key).data->second;
 		}
 
 		_Tp &operator[](const _Key &key) {
 			ft::pair<typename tree_type::node_type *, bool> result = bst.insert(ft::make_pair(key, _Tp()));
 
-			return *(result.first->data->first);
+			return result.first->data->second;
 		}
 
 		iterator begin() {

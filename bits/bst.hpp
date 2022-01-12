@@ -204,7 +204,7 @@ namespace ft {
 					} else if (grandparent->rightNode == parent && parent->leftNode == this) {
 						rebalance_rl(grandparent, parent);
 					} else {
-						std::__throw_runtime_error("WHAT????");
+						throw std::runtime_error("WHAT????");
 					}
 				}
 			}
@@ -288,7 +288,7 @@ namespace ft {
 					return rightNode;
 				}
 
-				std::__throw_runtime_error("internal error");
+				throw std::runtime_error("internal error");
 			}
 
 		private:
@@ -510,7 +510,7 @@ namespace ft {
 				node_type *result = retrieve_node_key(key);
 
 				if (result == NULL)
-					std::__throw_out_of_range("key not found");
+					throw std::out_of_range("key not found");
 
 				return *result;
 			}
@@ -518,8 +518,8 @@ namespace ft {
 			const node_type &find_node(const _Key &key) const {
 				node_type *result = retrieve_node_key(key);
 
-				if (result != NULL)
-					std::__throw_out_of_range("key not found");
+				if (result == NULL)
+					throw std::out_of_range("key not found");
 
 				return *result;
 			}
@@ -864,10 +864,10 @@ namespace ft {
 			}
 		};
 
-		template<typename _Tree, typename _Tp>
+		template<typename _Node, typename _Tp>
 		class bst_iterator: public ft::iterator<typename ft::bidirectional_iterator_tag, _Tp> {
 		private:
-			typedef BSTNode<_Tree, _Tp> node_type;
+			typedef _Node node_type;
 			typedef ft::iterator_traits<bst_iterator> it_trait;
 
 			node_type *node;
@@ -905,7 +905,7 @@ namespace ft {
 				} else {
 					while (true) {
 						if (node->parent == NULL) {
-							std::__throw_runtime_error("bst_iterator::operator++: no anchor node set (or properly set)");
+							throw std::runtime_error("bst_iterator::operator++: no anchor node set (or properly set)");
 						}
 
 						if (node == node->parent->leftNode) {
@@ -914,7 +914,7 @@ namespace ft {
 						} else if (node == node->parent->rightNode) {
 							node = node->parent;
 						} else {
-							std::__throw_runtime_error("bst_iterator::operator++: could not determine current node side");
+							throw std::runtime_error("bst_iterator::operator++: could not determine current node side");
 						}
 					}
 				}
@@ -936,7 +936,7 @@ namespace ft {
 				} else {
 					while (true) {
 						if (node->parent == NULL) {
-							std::__throw_runtime_error("bst_iterator::operator--: no anchor node set (or properly set)");
+							throw std::runtime_error("bst_iterator::operator--: no anchor node set (or properly set)");
 						}
 
 						if (node == node->parent->rightNode) {
@@ -945,7 +945,7 @@ namespace ft {
 						} else if (node == node->parent->leftNode) {
 							node = node->parent;
 						} else {
-							std::__throw_runtime_error("bst_iterator::operator--: could not determine current node side");
+							throw std::runtime_error("bst_iterator::operator--: could not determine current node side");
 						}
 					}
 				}
