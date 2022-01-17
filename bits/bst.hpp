@@ -590,8 +590,11 @@ namespace ft {
 			void clear() {
 				anchor_guard_type guard(*this);
 
-				destroy_from_dyn_storage(root);
+				if (root != NULL) {
+					destroy_from_dyn_storage(root);
+				}
 				root = NULL;
+				element_cout = 0;
 			}
 
 			node_type *retrieve_node_key(const _Key &key, node_type **parent = NULL, bool *is_less = NULL) const {

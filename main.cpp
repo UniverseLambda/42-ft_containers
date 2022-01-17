@@ -15,6 +15,12 @@
 
 #include <typeinfo>
 
+#include <vector>
+#include <stack>
+#include <map>
+
+#include <sstream>
+
 #ifdef ULDL_DBG
 #pragma message ("ULDL Enabled :)")
 
@@ -40,6 +46,23 @@
 						checkVector(validity, testIdx++)
 
 #define MAP_OP(X) X; check_map(map.begin(), map.end());
+
+#define CONSOLE_RED "\x1B[91m"
+#define CONSOLE_GREEN "\x1B[92m"
+#define CONSOLE_RESET "\x1B[0m"
+
+#ifndef TEST_NAMESPACE
+# define TEST_NAMESPACE ft
+#endif
+
+#define _SUB_MACRO_TO_STRING(X) #X
+#define MACRO_TO_STRING(X) _SUB_MACRO_TO_STRING(X)
+
+#ifdef SHOW_CAPACITY
+# define DSP_CAPACITY(X) X
+#else
+# define DSP_CAPACITY(X) "ign_for_diff"
+#endif
 
 struct CompareExpected {
 	enum _CompareExpectedV {
@@ -118,12 +141,12 @@ std::ostream &operator<<(std::ostream &os, const ValiditySanitizer &san) {
 	return (os << " {idx: " << san.idx << ", origin: " << san.origin << ", valid: " << san.valid << "}");
 }
 
-void checkVector(const ft::vector<ValiditySanitizer> &validity, std::size_t testIdx) {
-	typedef ft::vector<ValiditySanitizer>::const_iterator iter;
+void checkVector(const TEST_NAMESPACE::vector<ValiditySanitizer> &validity, std::size_t testIdx) {
+	typedef TEST_NAMESPACE::vector<ValiditySanitizer>::const_iterator iter;
 
 	std::size_t idx = 0;
 
-	std::cout << "== CHECK " << testIdx << " (current size: " << validity.size() << " out of " << validity.capacity() << ") ==" << std::endl;
+	std::cout << "== CHECK " << testIdx << " (current size: " << validity.size() << " out of " << DSP_CAPACITY(validity.capacity()) << ") ==" << std::endl;
 	for (iter it = validity.begin(); it != validity.end(); ++idx, ++it) {
 		if (DSP_CHECK_VAL) {
 			if (idx < 31) {
@@ -138,8 +161,8 @@ void checkVector(const ft::vector<ValiditySanitizer> &validity, std::size_t test
 	}
 }
 
-void insertFromOtherVector(ft::vector<ValiditySanitizer> &validity, std::size_t &testIdx) {
-	ft::vector<ValiditySanitizer> validity1;
+void insertFromOtherVector(TEST_NAMESPACE::vector<ValiditySanitizer> &validity, std::size_t &testIdx) {
+	TEST_NAMESPACE::vector<ValiditySanitizer> validity1;
 
 
 	for (std::size_t i = 0; i < 10; ++i) {
@@ -149,8 +172,8 @@ void insertFromOtherVector(ft::vector<ValiditySanitizer> &validity, std::size_t 
 	VECTOR_TEST(validity.insert(validity.begin() + 9, validity1.begin(), validity1.end()));
 }
 
-void assignFromOtherVector(ft::vector<ValiditySanitizer> &validity, std::size_t &testIdx) {
-	ft::vector<ValiditySanitizer> validity1;
+void assignFromOtherVector(TEST_NAMESPACE::vector<ValiditySanitizer> &validity, std::size_t &testIdx) {
+	TEST_NAMESPACE::vector<ValiditySanitizer> validity1;
 
 
 	for (std::size_t i = 0; i < 20; ++i) {
@@ -160,8 +183,8 @@ void assignFromOtherVector(ft::vector<ValiditySanitizer> &validity, std::size_t 
 	VECTOR_TEST(validity.assign(validity1.begin(), validity1.end()));
 }
 
-void swapFromOtherVector(ft::vector<ValiditySanitizer> &validity, std::size_t &testIdx) {
-	ft::vector<ValiditySanitizer> validity1;
+void swapFromOtherVector(TEST_NAMESPACE::vector<ValiditySanitizer> &validity, std::size_t &testIdx) {
+	TEST_NAMESPACE::vector<ValiditySanitizer> validity1;
 
 	for (std::size_t i = 0; i < 20; ++i) {
 		validity1.push_back(ValiditySanitizer(i + 10000));
@@ -173,51 +196,51 @@ void swapFromOtherVector(ft::vector<ValiditySanitizer> &validity, std::size_t &t
 		validity1.push_back(ValiditySanitizer(i + 10000 + 20));
 	}
 
-	VECTOR_TEST(ft::swap(validity, validity1));
-	VECTOR_TEST(ft::swap(validity, validity1));
+	VECTOR_TEST(TEST_NAMESPACE::swap(validity, validity1));
+	VECTOR_TEST(TEST_NAMESPACE::swap(validity, validity1));
 }
 
 template<typename _Tp>
-void execCompareVector(const ft::vector<_Tp> &v0, const ft::vector<_Tp> &v1, CompareExpected::_CompareExpectedV result) {
+void execCompareVector(const TEST_NAMESPACE::vector<_Tp> &v0, const TEST_NAMESPACE::vector<_Tp> &v1, CompareExpected::_CompareExpectedV result) {
 	if ((v0 == v1) == (result == CompareExpected::EQUALS)) {
-		std::cout << "\x1B[92m" << "== test passed :)" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_GREEN << "== test passed :)" << CONSOLE_RESET << std::endl;
 	} else {
-		std::cout << "\x1B[91m" << "== test not passed :(" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_RED << "== test not passed :(" << CONSOLE_RESET << std::endl;
 	}
 
 	if ((v0 != v1) == (result != CompareExpected::EQUALS)) {
-		std::cout << "\x1B[92m" << "!= test passed :)" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_GREEN << "!= test passed :)" << CONSOLE_RESET << std::endl;
 	} else {
-		std::cout << "\x1B[91m" << "!= test not passed :(" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_RED << "!= test not passed :(" << CONSOLE_RESET << std::endl;
 	}
 
 	if ((v0 <= v1) == (result != CompareExpected::GREATER)) {
-		std::cout << "\x1B[92m" << "<= test passed :)" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_GREEN << "<= test passed :)" << CONSOLE_RESET << std::endl;
 	} else {
-		std::cout << "\x1B[91m" << "<= test not passed :(" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_RED << "<= test not passed :(" << CONSOLE_RESET << std::endl;
 	}
 
 	if ((v0 < v1) == (result == CompareExpected::LOWER)) {
-		std::cout << "\x1B[92m" << "< test passed :)" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_GREEN << "< test passed :)" << CONSOLE_RESET << std::endl;
 	} else {
-		std::cout << "\x1B[91m" << "< test not passed :(" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_RED << "< test not passed :(" << CONSOLE_RESET << std::endl;
 	}
 
 	if ((v0 >= v1) == (result != CompareExpected::LOWER)) {
-		std::cout << "\x1B[92m" << ">= test passed :)" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_GREEN << ">= test passed :)" << CONSOLE_RESET << std::endl;
 	} else {
-		std::cout << "\x1B[91m" << ">= test not passed :(" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_RED << ">= test not passed :(" << CONSOLE_RESET << std::endl;
 	}
 
 	if ((v0 > v1) == (result == CompareExpected::GREATER)) {
-		std::cout << "\x1B[92m" << "> test passed :)" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_GREEN << "> test passed :)" << CONSOLE_RESET << std::endl;
 	} else {
-		std::cout << "\x1B[91m" << "> test not passed :(" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_RED << "> test not passed :(" << CONSOLE_RESET << std::endl;
 	}
 }
 
-void compareVector(ft::vector<ValiditySanitizer> &validity) {
-	ft::vector<ValiditySanitizer> cmp(validity);
+void compareVector(TEST_NAMESPACE::vector<ValiditySanitizer> &validity) {
+	TEST_NAMESPACE::vector<ValiditySanitizer> cmp(validity);
 
 	std::cout << "*** Compare (equals) ***" << std::endl;
 	execCompareVector(validity, cmp, CompareExpected::EQUALS);
@@ -246,8 +269,8 @@ void compareVector(ft::vector<ValiditySanitizer> &validity) {
 	execCompareVector(validity, cmp, CompareExpected::EQUALS);
 }
 
-void assignmentOperator(ft::vector<ValiditySanitizer> &validity, std::size_t &testIdx) {
-	ft::vector<ValiditySanitizer> v1;
+void assignmentOperator(TEST_NAMESPACE::vector<ValiditySanitizer> &validity, std::size_t &testIdx) {
+	TEST_NAMESPACE::vector<ValiditySanitizer> v1;
 
 	// Java-style
 	for (int i = 0; i < 16; ++i) {
@@ -257,9 +280,9 @@ void assignmentOperator(ft::vector<ValiditySanitizer> &validity, std::size_t &te
 	VECTOR_TEST(validity = v1);
 }
 
-void testRemainingCtor(ft::vector<ValiditySanitizer> &validity) {
-	ft::vector<ValiditySanitizer> v0(validity.begin(), validity.end());
-	ft::vector<ValiditySanitizer> v1(10, ValiditySanitizer(69420));
+void testRemainingCtor(TEST_NAMESPACE::vector<ValiditySanitizer> &validity) {
+	TEST_NAMESPACE::vector<ValiditySanitizer> v0(validity.begin(), validity.end());
+	TEST_NAMESPACE::vector<ValiditySanitizer> v1(10, ValiditySanitizer(69420));
 
 	std::cout << "**** iterator CTOR TEST **** (vvvvvv)" << std::endl;
 	checkVector(v0, 0);
@@ -269,8 +292,8 @@ void testRemainingCtor(ft::vector<ValiditySanitizer> &validity) {
 }
 
 void vectorTest() {
-	typedef ft::vector<ValiditySanitizer>::reverse_iterator riter;
-	ft::vector<ValiditySanitizer> validity;
+	typedef TEST_NAMESPACE::vector<ValiditySanitizer>::reverse_iterator riter;
+	TEST_NAMESPACE::vector<ValiditySanitizer> validity;
 	std::size_t testIdx = 0;
 
 	for (std::size_t i = 0; i < 5; ++i) {
@@ -366,9 +389,9 @@ void vectorTest() {
 	VECTOR_TEST(validity.reserve(129));
 	VECTOR_TEST(try {
 		validity.reserve(validity.max_size() + 1);
-		std::cout << "\x1B[91m" << "/!\\ No exception caught (shit)" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_RED << "/!\\ No exception caught (shit)" << CONSOLE_RESET << std::endl;
 	} catch (std::exception &e) {
-		std::cout << "\x1B[92m" << "/!\\ Caught an exception: " << e.what() << " (that's good)" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_GREEN << "/!\\ Caught an exception: " << e.what() << " (that's good)" << CONSOLE_RESET << std::endl;
 	});
 
 	VECTOR_TEST(std::cout << "Shitty vector test: " << (2 + validity.begin())->idx << std::endl);
@@ -544,7 +567,12 @@ void test_tree() {
 	sanitize_tree(*bst.get_root());
 }
 
-
+template<typename _Iterator>
+void display_map(_Iterator begin, _Iterator end, std::string name = "map") {
+	for (_Iterator it = begin; it != end; ++it) {
+		std::cout << name << "[" << it->first << "] = " << it->second << std::endl;
+	}
+}
 
 template<typename _It>
 void check_map(_It it, _It end) {
@@ -572,76 +600,140 @@ void preserving_map_test(_Map &map) {
 	typedef _Iterator iterator;
 	typedef typename map_type::allocator_type allocator_type;
 
-	{
+	std::cout << "** test end - 1 iterator ** " << std::endl;
+
+	// Otherwise, it's undefined behavior
+	if (map.begin() != map.end()) {
 		iterator it = map.end();
 		--it;
 		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
 	}
 
+	std::cout << "** copy of map ** " << std::endl;
 	{
 		map_type copy(map);
 
-		for (iterator it = copy.begin(); it != copy.end(); ++it) {
-			std::cout << "copy[" << it->first << "] = " << it->second << std::endl;
-		}
+		display_map(copy.begin(), copy.end(), "copy");
 	}
 
-	for (iterator it = map.begin(); it != map.end(); ++it) {
-		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
-	}
+	std::cout << "** test post copy destruction ** " << std::endl;
+	display_map(map.begin(), map.end());
 	
-	{
+	std::cout << "** test copy of [begin + 1, end] ** " << std::endl;
+	// Otherwise, it's undefined behavior
+	if (map.begin() != map.end()) {
 		map_type copy(++(map.begin()), map.end());
 
-		for (iterator it = copy.begin(); it != copy.end(); ++it) {
-			std::cout << "copy[" << it->first << "] = " << it->second << std::endl;
-		}
+		display_map(copy.begin(), copy.end(), "copy");
 	}
 
-	for (iterator it = map.begin(); it != map.end(); ++it) {
-		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
-	}
+	std::cout << "** test post copy destruction ** " << std::endl;
+	display_map(map.begin(), map.end());
 	
-	{
+	std::cout << "** test copy of [begin, end-1] ** " << std::endl;
+	// Otherwise, it's undefined behavior
+	if (map.begin() != map.end()) {
 		map_type copy(map.begin(), --(map.end()));
 
-		for (iterator it = copy.begin(); it != copy.end(); ++it) {
-			std::cout << "copy[" << it->first << "] = " << it->second << std::endl;
-		}
+		display_map(copy.begin(), copy.end(), "copy");
 	}
 
-	for (iterator it = map.begin(); it != map.end(); ++it) {
-		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
-	}
+	std::cout << "** test post copy destruction ** " << std::endl;
+	display_map(map.begin(), map.end());
 
+	std::cout << "** test for get_allocator ** " << std::endl;
 	{
 		allocator_type tmp = map.get_allocator();
 	}
 
+	std::cout << "** test for at ** " << std::endl;
 	for (iterator it = map.begin(); it != map.end(); ++it) {
 		std::cout << "map.at(\"" << it->first << "\") = " << map.at(it->first) << std::endl;
 	}
 
+	std::cout << "** named tests ** " << std::endl;
 	std::cout << "map.at with non-existing key... ";
-
-	// std::cout << "\x1B[92m" << "== test passed :)" << "\x1B[0m" << std::endl;
-	// std::cout << "\x1B[91m" << "== test not passed :(" << "\x1B[0m" << std::endl;
 
 	try {
 		map.at("MDR NICE TRY");
 
-		std::cout << "\x1B[91m" << "FAILED (nothing thrown)" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_RED << "FAILED (nothing thrown)" << CONSOLE_RESET << std::endl;
 	} catch (std::out_of_range &oor) {
-		std::cout << "\x1B[92m" << "SUCCESSFUL (std::out_of_range exception thrown. YAY)" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_GREEN << "SUCCESSFUL (std::out_of_range exception thrown. YAY)" << CONSOLE_RESET << std::endl;
 	} catch (std::exception &exc) {
-		std::cout << "\x1B[91m" << "FAILED (wrong exception thrown, expected std::out_of_range, found " << typeid(exc).name() << ")" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_RED << "FAILED (wrong exception thrown, expected std::out_of_range, found " << typeid(exc).name() << ")" << CONSOLE_RESET << std::endl;
 	} catch (...) {
-		std::cout << "\x1B[91m" << "FAILED (IT'S NOT EVEN AN EXCEPTION. WHAT THE HELL IS WRONG WITH YOU)" << "\x1B[0m" << std::endl;
+		std::cout << CONSOLE_RED << "FAILED (IT'S NOT EVEN AN EXCEPTION. WHAT THE HELL IS WRONG WITH YOU)" << CONSOLE_RESET << std::endl;
 	}
+
+	std::cout << "Reverse iterator test..." << std::endl;
+	display_map(map.rbegin(), map.rend());
+
+	std::cout << "is map empty: " << ((map.empty() == (map.size() == 0)) ? CONSOLE_GREEN : CONSOLE_RED) << (map.empty() ? "yes" : "no") << CONSOLE_RESET << std::endl;
+}
+
+void clear_map_test(TEST_NAMESPACE::map<std::string, ValiditySanitizer> &map) {
+	bool already_failed = false;
+	map.clear();
+	if (map.begin() != map.end()) {
+		std::cout << CONSOLE_RED << "Iterator failed *begin() != end()*";
+		already_failed = true;
+	}
+
+	if (!map.empty()) {
+		if (already_failed) {
+			std::cout << ", ";
+		}
+		std::cout << CONSOLE_RED << " empty fail *empty() != true*";
+		already_failed = true;
+	}
+
+	if (map.size() != 0) {
+		if (already_failed) {
+			std::cout << ", ";
+		}
+		std::cout << CONSOLE_RED << " empty fail *empty() != true*";
+		already_failed = true;
+	}
+	
+	if (!already_failed) {
+		std::cout << CONSOLE_GREEN << "OKAY :)";
+	}
+
+	std::cout << CONSOLE_RESET << std::endl;
+}
+
+template<typename _Map, typename _Key, typename _Value>
+void insert_test(_Map &map, const _Key &key, const _Value &value, bool should_succeed) {
+	typedef typename _Map::iterator it;
+
+	TEST_NAMESPACE::pair<it, bool> insert_res = map.insert(typename _Map::value_type(key, value));
+	std::cout << "return value: "
+		<< "iterator {key: " << insert_res.first->first << ", value: " << insert_res.first->second << "}, "
+		<< "successful: "
+			<< (insert_res.second == should_succeed ? CONSOLE_GREEN : CONSOLE_RED)
+			<< (insert_res.second ? "yes" : "no")
+	<< CONSOLE_RESET << std::endl;
+
+	std::cout << "map content: " << std::endl;
+	display_map(map.begin(), map.end());
+}
+
+template<typename _Map, typename _Key, typename _Value>
+void insert_test(_Map &map, const _Key &key, const _Value &value, typename _Map::iterator hint) {
+	typedef typename _Map::iterator it;
+
+	it insert_res = map.insert(hint, typename _Map::value_type(key, value));
+	std::cout << "return value: "
+		<< "iterator {key: " << insert_res->first << ", value: " << insert_res->second << "}"
+	<< std::endl;
+
+	std::cout << "map content: " << std::endl;
+	display_map(map.begin(), map.end());
 }
 
 void test_map() {
-	typedef ft::map<std::string, ValiditySanitizer> map_type;
+	typedef TEST_NAMESPACE::map<std::string, ValiditySanitizer> map_type;
 
 	map_type map;
 	std::size_t idx = 0;
@@ -686,19 +778,72 @@ void test_map() {
 	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
 		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
 	}
-
+	
 	std::cout << "======= MAP - PRESERVING TESTS (on non-const reference) =======" << std::endl;
 	preserving_map_test<map_type::iterator>(map);
-	std::cout << "======= MAP - PRESERVING TESTS (on const reference) =======" << std::endl;
+	std::cout << "========= MAP - PRESERVING TESTS (on const reference) =========" << std::endl;
 	preserving_map_test<map_type::const_iterator, const map_type>(map);
+	std::cout << "================ END OF MAP - PRESERVING TESTS ================" << std::endl;
+
+
+
+	std::cout << "** clear test **" << std::endl;
+	std::cout << "On non-empty map... " << std::flush;
+	clear_map_test(map);
+	std::cout << "On empty map... " << std::flush;
+	clear_map_test(map);
+
+	std::cout << "===== EMPTY MAP - PRESERVING TESTS (on non-const reference) ====" << std::endl;
+	preserving_map_test<map_type::iterator>(map);
+	std::cout << "======= EMPTY MAP - PRESERVING TESTS (on const reference) ======" << std::endl;
+	preserving_map_test<map_type::const_iterator, const map_type>(map);
+	std::cout << "============== END OF EMPTY MAP - PRESERVING TESTS =============" << std::endl;
+
+	std::cout << "** insert test post clear **" << std::endl;
+	
+	std::cout << "[+] insert on empty map..." << std::endl;
+	insert_test(map, "val_san0", ValiditySanitizer(idx++), true);
+	
+	std::cout << "[+] insert already existing key (size = 1)..." << std::endl;
+	insert_test(map, "val_san0", ValiditySanitizer(idx), false);
+
+	std::cout << "[+] insert on non-empty map (size = 1)..." << std::endl;
+	insert_test(map, "val_san1", ValiditySanitizer(idx++), true);
+
+	std::cout << "[+] insert already existing key (size = 2)..." << std::endl;
+	insert_test(map, "val_san1", ValiditySanitizer(idx), false);
+
+	{
+		std::cout << "[+] insert from iterators" << std::endl;
+		// Yep. Using the standard vector to fill it, just so we can confirm it works
+		std::vector< TEST_NAMESPACE::pair<std::string, ValiditySanitizer> > pairs;
+
+		for (int i = 0; i < 8; ++i) {
+			std::stringstream ss;
+
+			ss << "val_san" << (i + 4);
+			pairs.push_back(TEST_NAMESPACE::make_pair(ss.str(), ValiditySanitizer((idx++) + i)));
+		}
+
+		map.insert(pairs.begin(), pairs.end());
+		display_map(map.begin(), map.end());
+	}
+
+	std::cout << "[+] insert with hint next to expected place..." << std::endl;
+	insert_test(map, "val_san2", ValiditySanitizer(idx++), ++++(map.begin()));
+
+	std::cout << "[+] insert with hint away to expected place..." << std::endl;
+	insert_test(map, "val_san3", ValiditySanitizer(idx++), map.begin());
 }
 
 int main(void) {
 	ULDL_INIT
 
+	std::cout << "TEST_NAMESPACE=" << MACRO_TO_STRING(TEST_NAMESPACE) << std::endl;
+
 	vectorTest();
 
-	ft::stack<ValiditySanitizer> s;
+	TEST_NAMESPACE::stack<ValiditySanitizer> s;
 	s.push(ValiditySanitizer(1));
 	s.push(ValiditySanitizer(2));
 	s.pop();

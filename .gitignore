@@ -4,3 +4,4 @@
 !*.cpp
 !Makefile
 !.gitignore
+!autotest.sh

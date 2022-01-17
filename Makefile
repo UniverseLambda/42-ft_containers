@@ -1,7 +1,8 @@
-.PHONY:	all re clean fclean distclean leak_test uldl
+.PHONY:	all re clean fclean distclean leak_test uldl std
 .SUFFIX: .cpp .o
 
 NAME :=	container_test
+STD_NAME := std_test
 
 SRCS :=	main.cpp \
 
@@ -21,29 +22,37 @@ CXX_FLAGS := -DDSP_CHECK_VAL=false -g3 -Wall -Wextra -Werror -std=c++98 $(SAN_FL
 LD_FLAGS := $(LD_FLAGS) -g3 -Wall -Wextra -Werror -std=c++98 $(SAN_FLAGS)
 LD_LIBS :=
 
-OBJS :=	$(SRCS:.cpp=.o)
+OBJS :=			$(SRCS:.cpp=.o)
 
-all:		$(NAME)
+all:			$(NAME)
 
-$(NAME):	$(OBJS)
+$(NAME):		$(OBJS)
 	$(LD) $(LD_FLAGS) -o $@ $(OBJS) $(LD_LIBS)
 
-%.o: %.cpp	$(INCS)
+%.o: %.cpp		$(INCS)
 	$(CXX) $(CXX_FLAGS) -c -o $@ $<
 
 clean:
 	rm -f $(OBJS)
 
-fclean:		clean
+fclean:			clean
 	rm -f $(NAME)
+	rm -f $(STD_NAME)
+	rm -f leak_test
 
-distclean:	fclean
+distclean:		fclean
 
-re: distclean all
+re: 			distclean all
 
-uldl:	LD_LIBS += -luldl
-uldl:	CXX_FLAGS += -DULDL_DBG
-uldl:	$(NAME)
+uldl:			LD_LIBS += -luldl
+uldl:			CXX_FLAGS += -DULDL_DBG
+uldl:			$(NAME)
 
-leak_test: leak_test.cpp Vector.hpp
+std:			$(STD_NAME)
+
+$(STD_NAME):	CXX_FLAGS += -DTEST_NAMESPACE=std
+$(STD_NAME):	$(OBJS)
+	$(LD) $(LD_FLAGS) -o $@ $(OBJS) $(LD_LIBS)
+
+leak_test:		leak_test.cpp Vector.hpp
 	$(CXX) -g3 -Wall -Wextra -Werror -std=c++98 leak_test.cpp -o leak_test -luldl

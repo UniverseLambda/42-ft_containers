@@ -338,7 +338,7 @@ namespace ft {
 		void resize(size_type count, _Tp value = _Tp()) {
 			reserve(count);
 			if (count < mSize) {
-				for (size_type i = count; i < mSize; ++i) {
+				while (mSize > count) {
 					pop_back();
 				}
 			} else {
