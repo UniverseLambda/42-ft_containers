@@ -64,6 +64,12 @@
 # define DSP_CAPACITY(X) "ign_for_diff"
 #endif
 
+#ifdef SHOW_ORIGIN
+# define DSP_ORIGIN(X) X
+#else
+# define DSP_ORIGIN(X) "ign_for_diff"
+#endif
+
 struct CompareExpected {
 	enum _CompareExpectedV {
 		EQUALS,
@@ -82,7 +88,7 @@ struct ValiditySanitizer {
 	};
 
 	ULDL_TRACKER(ValiditySanitizer, tracker);
-	
+
 	bool valid;
 	Origin origin;
 	std::size_t idx;
@@ -109,7 +115,7 @@ struct ValiditySanitizer {
 
 	void check() const {
 		if (!valid) {
-			throw std::runtime_error((std::string("not valid object (") + originToString(origin) + ")").data());
+			throw std::runtime_error((std::string("not valid object (") + DSP_ORIGIN(originToString(origin)) + ")").data());
 		}
 	}
 
@@ -134,7 +140,8 @@ struct ValiditySanitizer {
 };
 
 std::ostream &operator<<(std::ostream &os, const ValiditySanitizer::Origin origin) {
-	return (os << ValiditySanitizer::originToString(origin));
+	(void)origin;
+	return (os << DSP_ORIGIN(ValiditySanitizer::originToString(origin)));
 }
 
 std::ostream &operator<<(std::ostream &os, const ValiditySanitizer &san) {
@@ -598,7 +605,7 @@ template<typename _Iterator, typename _Map>
 void preserving_map_test(_Map &map) {
 	typedef _Map map_type;
 	typedef _Iterator iterator;
-	typedef typename map_type::allocator_type allocator_type;
+	// typedef typename map_type::allocator_type allocator_type;
 
 	std::cout << "** test end - 1 iterator ** " << std::endl;
 
@@ -618,7 +625,7 @@ void preserving_map_test(_Map &map) {
 
 	std::cout << "** test post copy destruction ** " << std::endl;
 	display_map(map.begin(), map.end());
-	
+
 	std::cout << "** test copy of [begin + 1, end] ** " << std::endl;
 	// Otherwise, it's undefined behavior
 	if (map.begin() != map.end()) {
@@ -629,7 +636,7 @@ void preserving_map_test(_Map &map) {
 
 	std::cout << "** test post copy destruction ** " << std::endl;
 	display_map(map.begin(), map.end());
-	
+
 	std::cout << "** test copy of [begin, end-1] ** " << std::endl;
 	// Otherwise, it's undefined behavior
 	if (map.begin() != map.end()) {
@@ -643,7 +650,7 @@ void preserving_map_test(_Map &map) {
 
 	std::cout << "** test for get_allocator ** " << std::endl;
 	{
-		allocator_type tmp = map.get_allocator();
+		map.get_allocator();
 	}
 
 	std::cout << "** test for at ** " << std::endl;
@@ -666,10 +673,303 @@ void preserving_map_test(_Map &map) {
 		std::cout << CONSOLE_RED << "FAILED (IT'S NOT EVEN AN EXCEPTION. WHAT THE HELL IS WRONG WITH YOU)" << CONSOLE_RESET << std::endl;
 	}
 
-	std::cout << "Reverse iterator test..." << std::endl;
+
+	std::cout << "** test for count ** " << std::endl;
+	{
+		std::size_t count;
+
+		count = map.count("Bonchouuur0");
+		std::cout << "existing key: " << (count == 1 ? CONSOLE_GREEN : CONSOLE_RED) << count << CONSOLE_RESET << std::endl;
+		count = map.count("Bonchouuurfnjdk");
+		std::cout << "non-existing key: " << (count == 0 ? CONSOLE_GREEN : CONSOLE_RED) << count << CONSOLE_RESET << std::endl;
+
+	}
+
+	std::cout << "** test for find ** " << std::endl;
+	{
+		_Iterator find_res;
+
+		if (!map.empty()) {
+			std::cout << "existing key: ";
+			find_res = map.find("Bonchouuur0");
+			if (find_res == map.end()) {
+				std::cout << CONSOLE_RED << "not found!" << CONSOLE_RESET << std::endl;
+			} else {
+				std::cout << CONSOLE_GREEN << "found" << CONSOLE_RESET << ": " << "iterator {key: " << find_res->first << ", value: " << find_res->second << "}" << std::endl;
+			}
+		}
+
+		std::cout << "non-existing key: ";
+		find_res = map.find("fejdsfnel");
+
+		if (find_res == map.end()) {
+			std::cout << CONSOLE_GREEN << "not found!" << CONSOLE_RESET << std::endl;
+		} else {
+			std::cout << CONSOLE_RED << "found" << CONSOLE_RESET << ": " << "iterator {key: " << find_res->first << ", value: " << find_res->second << "}" << std::endl;
+		}
+	}
+
+	std::cout << "** test for equal_range **" << std::endl;
+	{
+		TEST_NAMESPACE::pair<iterator, iterator> equal_range_res;
+
+		if (!map.empty()) {
+			std::cout << "existing key: " << std::endl;
+			equal_range_res = map.equal_range("Bonchouuur1");
+			std::cout << "\tfirst: " << "iterator {key: " << equal_range_res.first->first << std::flush << ", value: " << equal_range_res.first->second << "}" << std::endl;
+			std::cout << "\tsecond: " << "iterator {key: " << equal_range_res.second->first << std::flush << ", value: " << equal_range_res.second->second << "}" << std::endl;
+		}
+
+		std::cout << "non-existing key: " << std::endl;
+		equal_range_res = map.equal_range("Bonchouuur5");
+		if (equal_range_res.first != map.end() && equal_range_res.second != map.end()) {
+			std::cout << "\tfirst: " << "iterator {key: " << equal_range_res.first->first << ", value: " << equal_range_res.first->second << "}" << std::endl;
+			std::cout << "\tsecond: " << "iterator {key: " << equal_range_res.second->first << ", value: " << equal_range_res.second->second << "}" << std::endl;
+		} else {
+			std::cout << "* returned [end(), end()] *" << std::endl;
+		}
+
+		std::cout << "non-existing past-the-end key: " << std::endl;
+		equal_range_res = map.equal_range("Bonchouuur7");
+		if (equal_range_res.first != map.end() && equal_range_res.second != map.end()) {
+			std::cout << "\tfirst: " << "iterator {key: " << equal_range_res.first->first << ", value: " << equal_range_res.first->second << "}" << std::endl;
+			std::cout << "\tsecond: " << "iterator {key: " << equal_range_res.second->first << ", value: " << equal_range_res.second->second << "}" << std::endl;
+		} else {
+			std::cout << "* returned [end(), end()] *" << std::endl;
+		}
+	}
+
+	std::cout << "** test for lower_bound **" << std::endl;
+	{
+		iterator lower_bound_res;
+
+		if (!map.empty()) {
+			std::cout << "existing key: ";
+			lower_bound_res = map.lower_bound("Bonchouuur1");
+			std::cout << "iterator {key: " << lower_bound_res->first << std::flush << ", value: " << lower_bound_res->second << "}" << std::endl;
+		}
+
+		std::cout << "non-existing key: ";
+		lower_bound_res = map.lower_bound("Bonchouuur5");
+		if (lower_bound_res != map.end() && lower_bound_res != map.end()) {
+			std::cout << "iterator {key: " << lower_bound_res->first << ", value: " << lower_bound_res->second << "}" << std::endl;
+		} else {
+			std::cout << "* returned [end(), end()] *" << std::endl;
+		}
+
+		std::cout << "non-existing past-the-end key: ";
+		lower_bound_res = map.lower_bound("Bonchouuur7");
+		if (lower_bound_res != map.end() && lower_bound_res != map.end()) {
+			std::cout << "iterator {key: " << lower_bound_res->first << ", value: " << lower_bound_res->second << "}" << std::endl;
+		} else {
+			std::cout << "* returned [end(), end()] *" << std::endl;
+		}
+	}
+
+	std::cout << "** test for upper_bound **" << std::endl;
+	{
+		iterator upper_bound_res;
+
+		if (!map.empty()) {
+			std::cout << "existing key: ";
+			upper_bound_res = map.upper_bound("Bonchouuur1");
+			std::cout << "iterator {key: " << upper_bound_res->first << std::flush << ", value: " << upper_bound_res->second << "}" << std::endl;
+		}
+
+		std::cout << "non-existing key: ";
+		upper_bound_res = map.upper_bound("Bonchouuur5");
+		if (upper_bound_res != map.end() && upper_bound_res != map.end()) {
+			std::cout << "iterator {key: " << upper_bound_res->first << ", value: " << upper_bound_res->second << "}" << std::endl;
+		} else {
+			std::cout << "* returned [end(), end()] *" << std::endl;
+		}
+
+		std::cout << "non-existing past-the-end key: ";
+		upper_bound_res = map.upper_bound("Bonchouuur7");
+		if (upper_bound_res != map.end() && upper_bound_res != map.end()) {
+			std::cout << "iterator {key: " << upper_bound_res->first << ", value: " << upper_bound_res->second << "}" << std::endl;
+		} else {
+			std::cout << "* returned [end(), end()] *" << std::endl;
+		}
+	}
+
+
+	std::cout << "** reverse iterator test **" << std::endl;
 	display_map(map.rbegin(), map.rend());
 
 	std::cout << "is map empty: " << ((map.empty() == (map.size() == 0)) ? CONSOLE_GREEN : CONSOLE_RED) << (map.empty() ? "yes" : "no") << CONSOLE_RESET << std::endl;
+
+	std::cout << "** key_comp test **" << std::endl;
+	typename map_type::key_compare key_comp = map.key_comp();
+	if (key_comp("0", "1"))
+		std::cout << "works? " << CONSOLE_GREEN << "yes" << CONSOLE_RESET << std::endl;
+	else
+		std::cout << "works? " << CONSOLE_RED << "no" << CONSOLE_RESET << std::endl;
+
+	std::cout << "** value_comp test **" << std::endl;
+	typename map_type::value_compare value_comp = map.value_comp();
+	if (value_comp(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("0", ValiditySanitizer(-1)), TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("1", ValiditySanitizer(-1))))
+		std::cout << "works? " << CONSOLE_GREEN << "yes" << CONSOLE_RESET << std::endl;
+	else
+		std::cout << "works? " << CONSOLE_RED << "no" << CONSOLE_RESET << std::endl;
+
+
+	std::cout << "** comparing operators test **" << std::endl;
+	{
+		ft::map<std::string, ValiditySanitizer> smaller;
+		ft::map<std::string, ValiditySanitizer> just_smaller;
+		ft::map<std::string, ValiditySanitizer> just_bigger;
+		ft::map<std::string, ValiditySanitizer> bigger;
+		ft::map<std::string, ValiditySanitizer> nearly_totally_different;
+		ft::map<std::string, ValiditySanitizer> totally_different;
+
+		smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
+		smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
+		smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
+		smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
+		smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
+
+		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
+		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
+		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
+		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
+		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
+		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur3", ValiditySanitizer(-1)));
+		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur4", ValiditySanitizer(-1)));
+
+		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
+		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
+		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
+		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
+		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
+		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur3", ValiditySanitizer(-1)));
+		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur4", ValiditySanitizer(-1)));
+		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur6", ValiditySanitizer(-1)));
+		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur7", ValiditySanitizer(-1)));
+
+		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
+		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
+		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
+		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
+		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
+		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur3", ValiditySanitizer(-1)));
+		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur4", ValiditySanitizer(-1)));
+		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur6", ValiditySanitizer(-1)));
+		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur7", ValiditySanitizer(-1)));
+		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur8", ValiditySanitizer(-1)));
+		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur9", ValiditySanitizer(-1)));
+		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur:", ValiditySanitizer(-1)));
+
+		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("frofbsjl", ValiditySanitizer(-1)));
+		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("52014520", ValiditySanitizer(-1)));
+		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
+		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("-09876545678_)(", ValiditySanitizer(-1)));
+		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("(*&^%^&*())", ValiditySanitizer(-1)));
+		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("JJHJBHJBN", ValiditySanitizer(-1)));
+		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("JJHJBHJBNfjrk", ValiditySanitizer(-1)));
+		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("ghirufghh", ValiditySanitizer(-1)));
+
+		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("frofbsjl", ValiditySanitizer(-1)));
+		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("52014520", ValiditySanitizer(-1)));
+		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("fjeiofhoehfoejfh", ValiditySanitizer(-1)));
+		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("-09876545678_)(", ValiditySanitizer(-1)));
+		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("(*&^%^&*())", ValiditySanitizer(-1)));
+		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("JJHJBHJBN", ValiditySanitizer(-1)));
+		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("JJHJBHJBNfjrk", ValiditySanitizer(-1)));
+		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("ghirufghh", ValiditySanitizer(-1)));
+
+
+		std::cout << "[+] opeartor==" << std::endl;
+
+		std::cout << "Same input: ";
+		if (map == map)
+			std::cout << CONSOLE_GREEN << "equals" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_RED << "different" << CONSOLE_RESET << std::endl;
+
+		std::cout << "Smaller input: ";
+		if (map == smaller)
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_RED << "equals" << CONSOLE_RESET << std::endl;
+
+		std::cout << "Just smaller input: ";
+		if (map == just_smaller)
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_RED << "equals" << CONSOLE_RESET << std::endl;
+
+		std::cout << "Just bigger input: ";
+		if (map == just_bigger)
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_RED << "equals" << CONSOLE_RESET << std::endl;
+
+		std::cout << "Bigger input: ";
+		if (ft::operator==(map, bigger))
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_RED << "equals" << CONSOLE_RESET << std::endl;
+
+		std::cout << "Nearly totally different input: ";
+		if (map == nearly_totally_different)
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_RED << "equals" << CONSOLE_RESET << std::endl;
+
+		std::cout << "Totally different input: ";
+		if (map == totally_different)
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_RED << "equals" << CONSOLE_RESET << std::endl;
+
+		std::cout << "[+] operator!=" << std::endl;
+		std::cout << "Same input: " (ft::operator!=(map, map) ? "not" : "") << "less" << std::endl;
+		std::cout << "Smaller input: " << (ft::operator!=(map, smaller) ? "not" : "") << "less" << std::endl;
+		std::cout << "Just smaller input: " << (map != just_smaller ? "not" : "") << "less" << std::endl;
+		std::cout << "Just bigger input: " << (map != just_bigger ? "not" : "") << "less" << std::endl;
+		std::cout << "Bigger input: " << (map != bigger ? "not" : "") << "less" << std::endl;
+		std::cout << "Nearly totally different input: " << (map != nearly_totally_different ? "not" : "") << "less" << std::endl;
+		std::cout << "Totally different input: " << (map != totally_different ? "not" : "") << "less" << std::endl;
+
+		std::cout << "[+] operator<" << std::endl;
+		std::cout << "Same input: " (map < map ? "not" : "") << "less" << std::endl;
+		std::cout << "Smaller input: " << (map < smaller ? "not" : "") << "less" << std::endl;
+		std::cout << "Just smaller input: " << (map < just_smaller ? "not" : "") << "less" << std::endl;
+		std::cout << "Just bigger input: " << (map < just_bigger ? "not" : "") << "less" << std::endl;
+		std::cout << "Bigger input: " << (map < bigger ? "not" : "") << "less" << std::endl;
+		std::cout << "Nearly totally different input: " << (map < nearly_totally_different ? "not" : "") << "less" << std::endl;
+		std::cout << "Totally different input: " << (map < totally_different ? "not" : "") << "less" << std::endl;
+
+		std::cout << "[+] operator<=" << std::endl;
+		std::cout << "Same input: " (map <= map ? "not" : "") << "less" << std::endl;
+		std::cout << "Smaller input: " << (map < smaller ? "not" : "") << "less" << std::endl;
+		std::cout << "Just smaller input: " << (map <= just_smaller ? "not" : "") << "less" << std::endl;
+		std::cout << "Just bigger input: " << (map <= just_bigger ? "not" : "") << "less" << std::endl;
+		std::cout << "Bigger input: " << (map <= bigger ? "not" : "") << "less" << std::endl;
+		std::cout << "Nearly totally different input: " << (map <= nearly_totally_different ? "not" : "") << "less" << std::endl;
+		std::cout << "Totally different input: " << (map <= totally_different ? "not" : "") << "less" << std::endl;
+
+		std::cout << "[+] operator>" << std::endl;
+		std::cout << "Same input: " (map > map ? "not" : "") << "less" << std::endl;
+		std::cout << "Smaller input: " << (map > smaller ? "not" : "") << "less" << std::endl;
+		std::cout << "Just smaller input: " << (map > just_smaller ? "not" : "") << "less" << std::endl;
+		std::cout << "Just bigger input: " << (map > just_bigger ? "not" : "") << "less" << std::endl;
+		std::cout << "Bigger input: " << (map > bigger ? "not" : "") << "less" << std::endl;
+		std::cout << "Nearly totally different input: " << (map > nearly_totally_different ? "not" : "") << "less" << std::endl;
+		std::cout << "Totally different input: " << (map > totally_different ? "not" : "") << "less" << std::endl;
+
+		std::cout << "[+] operator>=" << std::endl;
+		std::cout << "Same input: " (map >= map ? "not" : "") << "less" << std::endl;
+		std::cout << "Smaller input: " << (map >= smaller ? "not" : "") << "less" << std::endl;
+		std::cout << "Just smaller input: " << (map >= just_smaller ? "not" : "") << "less" << std::endl;
+		std::cout << "Just bigger input: " << (map >= just_bigger ? "not" : "") << "less" << std::endl;
+		std::cout << "Bigger input: " << (map >= bigger ? "not" : "") << "less" << std::endl;
+		std::cout << "Nearly totally different input: " << (map >= nearly_totally_different ? "not" : "") << "less" << std::endl;
+		std::cout << "Totally different input: " << (map >= totally_different ? "not" : "") << "less" << std::endl;
+
+	}
+
 }
 
 void clear_map_test(TEST_NAMESPACE::map<std::string, ValiditySanitizer> &map) {
@@ -695,7 +995,7 @@ void clear_map_test(TEST_NAMESPACE::map<std::string, ValiditySanitizer> &map) {
 		std::cout << CONSOLE_RED << " empty fail *empty() != true*";
 		already_failed = true;
 	}
-	
+
 	if (!already_failed) {
 		std::cout << CONSOLE_GREEN << "OKAY :)";
 	}
@@ -739,7 +1039,7 @@ void test_map() {
 	std::size_t idx = 0;
 
 	std::cout << "======= MAP - ALTERING TESTS =======" << std::endl;
-	
+
 	std::cout << "** Basic insert on empty map **" << std::endl;
 	map.insert(map_type::value_type("Bonchouuur0", ValiditySanitizer(idx++)));
 
@@ -778,7 +1078,7 @@ void test_map() {
 	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
 		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
 	}
-	
+
 	std::cout << "======= MAP - PRESERVING TESTS (on non-const reference) =======" << std::endl;
 	preserving_map_test<map_type::iterator>(map);
 	std::cout << "========= MAP - PRESERVING TESTS (on const reference) =========" << std::endl;
@@ -800,10 +1100,10 @@ void test_map() {
 	std::cout << "============== END OF EMPTY MAP - PRESERVING TESTS =============" << std::endl;
 
 	std::cout << "** insert test post clear **" << std::endl;
-	
+
 	std::cout << "[+] insert on empty map..." << std::endl;
 	insert_test(map, "val_san0", ValiditySanitizer(idx++), true);
-	
+
 	std::cout << "[+] insert already existing key (size = 1)..." << std::endl;
 	insert_test(map, "val_san0", ValiditySanitizer(idx), false);
 
@@ -834,6 +1134,85 @@ void test_map() {
 
 	std::cout << "[+] insert with hint away to expected place..." << std::endl;
 	insert_test(map, "val_san3", ValiditySanitizer(idx++), map.begin());
+
+	std::cout << "** erase test **" << std::endl;
+	std::cout << "[+] insert with hint away to expected place..." << std::endl;
+	insert_test(map, "val_san3", ValiditySanitizer(idx++), map.begin());
+
+	std::cout << "[+] erase iterator 0" << std::endl;
+	map.erase(map.begin());
+	display_map(map.begin(), map.end());
+	check_map(map.begin(), map.end());
+
+	std::cout << "[+] erase iterator 1" << std::endl;
+	map.erase(++map.begin());
+	display_map(map.begin(), map.end());
+	check_map(map.begin(), map.end());
+
+	std::cout << "[+] erase range" << std::endl;
+	map.erase(++map.begin(), ++++map.begin());
+	display_map(map.begin(), map.end());
+	check_map(map.begin(), map.end());
+
+	std::cout << "[+] erase range (end, end)" << std::endl;
+	map.erase(map.end(), map.end());
+	display_map(map.begin(), map.end());
+	check_map(map.begin(), map.end());
+
+	std::cout << "[+] erase key" << std::endl;
+	std::cout << "delete existing key: " << map.erase("val_san9") << std::endl;
+	std::cout << "delete previously-existing key: " << map.erase("val_san9") << std::endl;
+	std::cout << "delete non-existing key: " << map.erase("val_sanJfkdfklenfjkn") << std::endl;
+
+	std::cout << "** swap test **" << std::endl;
+	{
+		map_type::value_type pair[5] = {
+			map_type::value_type("swap_vsan0", ValiditySanitizer(0)),
+			map_type::value_type("swap_vsan1", ValiditySanitizer(1)),
+			map_type::value_type("swap_vsan2", ValiditySanitizer(2)),
+			map_type::value_type("swap_vsan3", ValiditySanitizer(3)),
+			map_type::value_type("swap_vsan4", ValiditySanitizer(4)),
+		};
+		map_type other(&pair[0], &pair[5]);
+
+		std::cout << "[+] member swap" << std::endl;
+		std::cout << "Main map (before swap)" << std::endl;
+		display_map(map.begin(), map.end());
+		check_map(map.begin(), map.end());
+
+		std::cout << "Other map (before swap)" << std::endl;
+		display_map(other.begin(), other.end());
+		check_map(other.begin(), other.end());
+
+		map.swap(other);
+
+		std::cout << "Main map (after swap)" << std::endl;
+		display_map(map.begin(), map.end());
+		check_map(map.begin(), map.end());
+
+		std::cout << "Other map (after swap)" << std::endl;
+		display_map(other.begin(), other.end());
+		check_map(other.begin(), other.end());
+
+		std::cout << "[+] non-member swap" << std::endl;
+		std::cout << "Main map (before swap)" << std::endl;
+		display_map(map.begin(), map.end());
+		check_map(map.begin(), map.end());
+
+		std::cout << "Other map (before swap)" << std::endl;
+		display_map(other.begin(), other.end());
+		check_map(other.begin(), other.end());
+
+		swap(other, map);
+
+		std::cout << "Main map (after swap)" << std::endl;
+		display_map(map.begin(), map.end());
+		check_map(map.begin(), map.end());
+
+		std::cout << "Other map (after swap)" << std::endl;
+		display_map(other.begin(), other.end());
+		check_map(other.begin(), other.end());
+	}
 }
 
 int main(void) {

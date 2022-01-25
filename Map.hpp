@@ -176,12 +176,14 @@ namespace ft {
 		}
 
 		void erase(iterator it) {
-			bst.erase(it.node);
+			bst.erase(it.__get_node());
 		}
 
 		void erase(iterator first, iterator last) {
-			for (; first != last; ++first) {
-				bst.erase(first.node);
+			while (first != last) {
+				iterator tmp = first++;
+
+				erase(tmp);
 			}
 		}
 
@@ -190,7 +192,7 @@ namespace ft {
 		}
 
 		void swap(map &other) {
-			bst.swap(other);
+			bst.swap(other.bst);
 		}
 
 		size_type count(const _Key &key) const {
@@ -213,7 +215,7 @@ namespace ft {
 
 		const_iterator find(const _Key &key) const {
 			try {
-				typename tree_type::node_type &node = bst.find_node(key);
+				const typename tree_type::node_type &node = bst.find_node(key);
 
 				return const_iterator(&node);
 			} catch (std::out_of_range) {}
@@ -242,7 +244,7 @@ namespace ft {
 			if (node == NULL)
 				return end();
 
-			if (__clsaad_impl::is_equivalent(bst.less, node->data->first, key)) {
+			if (__clsaad_impl::is_equivalent(bst.get_key_less(), node->data->first, key)) {
 				return ++(iterator(node));
 			} else {
 				return iterator(node);
@@ -255,7 +257,7 @@ namespace ft {
 			if (node == NULL)
 				return end();
 
-			if (__clsaad_impl::is_equivalent(bst.less, node->data->first, key)) {
+			if (__clsaad_impl::is_equivalent(bst.get_key_less(), node->data->first, key)) {
 				return ++(const_iterator(node));
 			} else {
 				return const_iterator(node);
@@ -266,12 +268,12 @@ namespace ft {
 			typename tree_type::node_type *node = bst.lower_bound(key);
 
 			if (node == NULL)
-				return make_pair(end(), end());
+				return ft::pair<iterator, iterator>(end(), end());
 
-			if (__clsaad_impl::is_equivalent(bst.less, node->data->first, key)) {
-				return make_pair(iterator(node), ++(iterator(node)));
+			if (__clsaad_impl::is_equivalent(bst.get_key_less(), node->data->first, key)) {
+				return ft::pair<iterator, iterator>(iterator(node), ++(iterator(node)));
 			} else {
-				return make_pair(iterator(node), iterator(node));
+				return ft::pair<iterator, iterator>(iterator(node), iterator(node));
 			}
 		}
 
@@ -279,17 +281,17 @@ namespace ft {
 			typename tree_type::node_type *node = bst.lower_bound(key);
 
 			if (node == NULL)
-				return make_pair(end(), end());
+				return ft::pair<const_iterator, const_iterator>(end(), end());
 
-			if (__clsaad_impl::is_equivalent(bst.less, node->data->first, key)) {
-				return make_pair(const_iterator(node), ++(const_iterator(node)));
+			if (__clsaad_impl::is_equivalent(bst.get_key_less(), node->data->first, key)) {
+				return ft::pair<const_iterator, const_iterator>(const_iterator(node), ++(const_iterator(node)));
 			} else {
-				return make_pair(const_iterator(node), const_iterator(node));
+				return ft::pair<const_iterator, const_iterator>(const_iterator(node), const_iterator(node));
 			}
 		}
 
 		key_compare key_comp() const {
-			return bst.key_less;
+			return bst.get_key_less();
 		}
 
 		value_compare value_comp() const {
@@ -308,7 +310,7 @@ namespace ft {
 	bool operator<(const ft::map<_Key, _T, _Compare, _Alloc> &lhs, const ft::map<_Key, _T, _Compare, _Alloc> &rhs) {
 		return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
-	
+
 	template<typename _Key, typename _T, typename _Compare, typename _Alloc>
 	bool operator!=(const ft::map<_Key, _T, _Compare, _Alloc> &lhs, const ft::map<_Key, _T, _Compare, _Alloc> &rhs) {
 		return !(lhs == rhs);

@@ -72,7 +72,7 @@ namespace ft {
 		template<typename _InputIt>
 		vector(_InputIt first, _InputIt last, const allocator_type &alloc = allocator_type()):
 			mAlloc(alloc),
-			mCapacity(8),
+			mCapacity(16),
 			mData(mAlloc.allocate(mCapacity)),
 			mSize(0) {
 			for (; first != last; ++first) {

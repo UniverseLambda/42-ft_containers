@@ -579,6 +579,22 @@ namespace ft {
 				return alloc;
 			}
 
+			_Less &get_less() {
+				return less;
+			}
+
+			const _Less &get_less() const {
+				return less;
+			}
+
+			_KeyLess &get_key_less() {
+				return key_less;
+			}
+
+			const _KeyLess &get_key_less() const {
+				return key_less;
+			}
+
 			node_type **get_root() {
 				return &root;
 			}
@@ -753,7 +769,8 @@ namespace ft {
 
 				std::swap(key_less, other.key_less);
 				std::swap(element_cout, other.element_cout);
-				
+				std::swap(root, other.root);
+
 				if (root != NULL) propagate_set_tree(root);
 				if (other.root != NULL) other.propagate_set_tree(other.root);
 			}
@@ -761,7 +778,7 @@ namespace ft {
 			node_type *lower_bound(const _Key &key) const {
 				node_type *node = root;
 
-				while (node != NULL) {
+				while (node != NULL && node->data != NULL) {
 					const _Key &curr = key_extractor(*node->data);
 
 					if (is_equivalent(key_less, key, curr)) {
@@ -783,6 +800,8 @@ namespace ft {
 					}
 				}
 
+				if (node != NULL && node->data == NULL)
+					return NULL;
 				return node;
 			}
 
@@ -861,7 +880,7 @@ namespace ft {
 
 			void propagate_set_tree(node_type *node) {
 				node->tree = this;
-				
+
 				if (node->leftNode) propagate_set_tree(node->leftNode);
 				if (node->rightNode) propagate_set_tree(node->rightNode);
 			}
@@ -952,7 +971,7 @@ namespace ft {
 						}
 					}
 				}
-				
+
 				return (*this);
 			}
 
@@ -960,6 +979,14 @@ namespace ft {
 				bst_iterator value = *this;
 				operator--();
 				return value;
+			}
+
+			_Node *__get_node() {
+				return node;
+			}
+
+			_Node *__get_node() const {
+				return node;
 			}
 		};
 	} // namespace __clsaad_impl

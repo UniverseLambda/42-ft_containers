@@ -18,7 +18,7 @@ LD := $(CXX)
 
 # SAN_FLAGS := -fsanitize=address -fsanitize=undefined
 
-CXX_FLAGS := -DDSP_CHECK_VAL=false -g3 -Wall -Wextra -Werror -std=c++98 $(SAN_FLAGS)
+CXX_FLAGS := -DDSP_CHECK_VAL=false -g3 -Wall -Wextra -Werror -std=c++98 -I. $(SAN_FLAGS)
 LD_FLAGS := $(LD_FLAGS) -g3 -Wall -Wextra -Werror -std=c++98 $(SAN_FLAGS)
 LD_LIBS :=
 
@@ -44,7 +44,7 @@ distclean:		fclean
 
 re: 			distclean all
 
-uldl:			LD_LIBS += -luldl
+uldl:			LD_LIBS += -L. -luldl
 uldl:			CXX_FLAGS += -DULDL_DBG
 uldl:			$(NAME)
 
