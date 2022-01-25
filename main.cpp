@@ -816,160 +816,203 @@ void preserving_map_test(_Map &map) {
 
 	std::cout << "** comparing operators test **" << std::endl;
 	{
-		ft::map<std::string, ValiditySanitizer> smaller;
-		ft::map<std::string, ValiditySanitizer> just_smaller;
-		ft::map<std::string, ValiditySanitizer> just_bigger;
-		ft::map<std::string, ValiditySanitizer> bigger;
-		ft::map<std::string, ValiditySanitizer> nearly_totally_different;
-		ft::map<std::string, ValiditySanitizer> totally_different;
+		TEST_NAMESPACE::map<std::string, ValiditySanitizer> _smaller;
+		TEST_NAMESPACE::map<std::string, ValiditySanitizer> _just_smaller;
+		TEST_NAMESPACE::map<std::string, ValiditySanitizer> _just_bigger;
+		TEST_NAMESPACE::map<std::string, ValiditySanitizer> _bigger;
+		TEST_NAMESPACE::map<std::string, ValiditySanitizer> _nearly_totally_different;
+		TEST_NAMESPACE::map<std::string, ValiditySanitizer> _totally_different;
 
-		smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
-		smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
-		smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
-		smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
-		smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
+		_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
+		_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
+		_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
+		_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
+		_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
 
-		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
-		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
-		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
-		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
-		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
-		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur3", ValiditySanitizer(-1)));
-		just_smaller.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur4", ValiditySanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur3", ValiditySanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur4", ValiditySanitizer(-1)));
 
-		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
-		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
-		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
-		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
-		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
-		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur3", ValiditySanitizer(-1)));
-		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur4", ValiditySanitizer(-1)));
-		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur6", ValiditySanitizer(-1)));
-		just_bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur7", ValiditySanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur3", ValiditySanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur4", ValiditySanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur6", ValiditySanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur7", ValiditySanitizer(-1)));
 
-		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
-		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
-		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
-		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
-		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
-		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur3", ValiditySanitizer(-1)));
-		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur4", ValiditySanitizer(-1)));
-		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur6", ValiditySanitizer(-1)));
-		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur7", ValiditySanitizer(-1)));
-		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur8", ValiditySanitizer(-1)));
-		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur9", ValiditySanitizer(-1)));
-		bigger.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur:", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur3", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur4", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur6", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur7", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur8", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur9", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur:", ValiditySanitizer(-1)));
 
-		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("frofbsjl", ValiditySanitizer(-1)));
-		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("52014520", ValiditySanitizer(-1)));
-		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
-		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("-09876545678_)(", ValiditySanitizer(-1)));
-		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("(*&^%^&*())", ValiditySanitizer(-1)));
-		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("JJHJBHJBN", ValiditySanitizer(-1)));
-		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("JJHJBHJBNfjrk", ValiditySanitizer(-1)));
-		nearly_totally_different.insert(ft::pair<std::string, ValiditySanitizer>("ghirufghh", ValiditySanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("frofbsjl", ValiditySanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("52014520", ValiditySanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("-09876545678_)(", ValiditySanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("(*&^%^&*())", ValiditySanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("JJHJBHJBN", ValiditySanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("JJHJBHJBNfjrk", ValiditySanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("ghirufghh", ValiditySanitizer(-1)));
 
-		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("frofbsjl", ValiditySanitizer(-1)));
-		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("52014520", ValiditySanitizer(-1)));
-		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("fjeiofhoehfoejfh", ValiditySanitizer(-1)));
-		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("-09876545678_)(", ValiditySanitizer(-1)));
-		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("(*&^%^&*())", ValiditySanitizer(-1)));
-		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("JJHJBHJBN", ValiditySanitizer(-1)));
-		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("JJHJBHJBNfjrk", ValiditySanitizer(-1)));
-		totally_different.insert(ft::pair<std::string, ValiditySanitizer>("ghirufghh", ValiditySanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("frofbsjl", ValiditySanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("52014520", ValiditySanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("fjeiofhoehfoejfh", ValiditySanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("-09876545678_)(", ValiditySanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("(*&^%^&*())", ValiditySanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("JJHJBHJBN", ValiditySanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("JJHJBHJBNfjrk", ValiditySanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("ghirufghh", ValiditySanitizer(-1)));
+
+		// Yeah, weird-ass compiler ain't capable to find the right if it's not const *smh*
+		const TEST_NAMESPACE::map<std::string, ValiditySanitizer> &smaller = _smaller;
+		const TEST_NAMESPACE::map<std::string, ValiditySanitizer> &just_smaller = _just_smaller;
+		const TEST_NAMESPACE::map<std::string, ValiditySanitizer> &just_bigger = _just_bigger;
+		const TEST_NAMESPACE::map<std::string, ValiditySanitizer> &bigger = _bigger;
+		const TEST_NAMESPACE::map<std::string, ValiditySanitizer> &nearly_totally_different = _nearly_totally_different;
+		const TEST_NAMESPACE::map<std::string, ValiditySanitizer> &totally_different = _totally_different;
 
 
-		std::cout << "[+] opeartor==" << std::endl;
+		std::cout << "[+] operator==" << std::endl;
 
 		std::cout << "Same input: ";
 		if (map == map)
-			std::cout << CONSOLE_GREEN << "equals" << CONSOLE_RESET << std::endl;
+			std::cout << CONSOLE_GREEN << "equal" << CONSOLE_RESET << std::endl;
 		else
 			std::cout << CONSOLE_RED << "different" << CONSOLE_RESET << std::endl;
 
 		std::cout << "Smaller input: ";
 		if (map == smaller)
-			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
 		else
-			std::cout << CONSOLE_RED << "equals" << CONSOLE_RESET << std::endl;
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
 
 		std::cout << "Just smaller input: ";
 		if (map == just_smaller)
-			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
 		else
-			std::cout << CONSOLE_RED << "equals" << CONSOLE_RESET << std::endl;
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
 
 		std::cout << "Just bigger input: ";
 		if (map == just_bigger)
-			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
 		else
-			std::cout << CONSOLE_RED << "equals" << CONSOLE_RESET << std::endl;
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
 
 		std::cout << "Bigger input: ";
-		if (ft::operator==(map, bigger))
-			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		if (map == bigger)
+			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
 		else
-			std::cout << CONSOLE_RED << "equals" << CONSOLE_RESET << std::endl;
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
 
 		std::cout << "Nearly totally different input: ";
 		if (map == nearly_totally_different)
-			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
 		else
-			std::cout << CONSOLE_RED << "equals" << CONSOLE_RESET << std::endl;
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
 
 		std::cout << "Totally different input: ";
 		if (map == totally_different)
+			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		
+	
+		std::cout << "[+] operator!=" << std::endl;
+
+		std::cout << "Same input: ";
+		if (map != map)
+			std::cout << CONSOLE_RED << "different" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_GREEN << "equal" << CONSOLE_RESET << std::endl;
+
+		std::cout << "Smaller input: ";
+		if (map != smaller)
 			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
 		else
-			std::cout << CONSOLE_RED << "equals" << CONSOLE_RESET << std::endl;
+			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
 
-		std::cout << "[+] operator!=" << std::endl;
-		std::cout << "Same input: " (ft::operator!=(map, map) ? "not" : "") << "less" << std::endl;
-		std::cout << "Smaller input: " << (ft::operator!=(map, smaller) ? "not" : "") << "less" << std::endl;
-		std::cout << "Just smaller input: " << (map != just_smaller ? "not" : "") << "less" << std::endl;
-		std::cout << "Just bigger input: " << (map != just_bigger ? "not" : "") << "less" << std::endl;
-		std::cout << "Bigger input: " << (map != bigger ? "not" : "") << "less" << std::endl;
-		std::cout << "Nearly totally different input: " << (map != nearly_totally_different ? "not" : "") << "less" << std::endl;
-		std::cout << "Totally different input: " << (map != totally_different ? "not" : "") << "less" << std::endl;
+		std::cout << "Just smaller input: ";
+		if (map != just_smaller)
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
+
+		std::cout << "Just bigger input: ";
+		if (map != just_bigger)
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
+
+		std::cout << "Bigger input: ";
+		if (map != bigger)
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
+
+		std::cout << "Nearly totally different input: ";
+		if (map != nearly_totally_different)
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
+
+		std::cout << "Totally different input: ";
+		if (map != totally_different)
+			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
+		else
+			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
 
 		std::cout << "[+] operator<" << std::endl;
-		std::cout << "Same input: " (map < map ? "not" : "") << "less" << std::endl;
-		std::cout << "Smaller input: " << (map < smaller ? "not" : "") << "less" << std::endl;
-		std::cout << "Just smaller input: " << (map < just_smaller ? "not" : "") << "less" << std::endl;
-		std::cout << "Just bigger input: " << (map < just_bigger ? "not" : "") << "less" << std::endl;
-		std::cout << "Bigger input: " << (map < bigger ? "not" : "") << "less" << std::endl;
-		std::cout << "Nearly totally different input: " << (map < nearly_totally_different ? "not" : "") << "less" << std::endl;
-		std::cout << "Totally different input: " << (map < totally_different ? "not" : "") << "less" << std::endl;
+		std::cout << "Same input: " << (map < map ? "not " : "") << "less" << std::endl;
+		std::cout << "Smaller input: " << (map < smaller ? "not " : "") << "less" << std::endl;
+		std::cout << "Just smaller input: " << (map < just_smaller ? "not " : "") << "less" << std::endl;
+		std::cout << "Just bigger input: " << (map < just_bigger ? "not " : "") << "less" << std::endl;
+		std::cout << "Bigger input: " << (map < bigger ? "not " : "") << "less" << std::endl;
+		std::cout << "Nearly totally different input: " << (map < nearly_totally_different ? "not " : "") << "less" << std::endl;
+		std::cout << "Totally different input: " << (map < totally_different ? "not " : "") << "less" << std::endl;
 
 		std::cout << "[+] operator<=" << std::endl;
-		std::cout << "Same input: " (map <= map ? "not" : "") << "less" << std::endl;
-		std::cout << "Smaller input: " << (map < smaller ? "not" : "") << "less" << std::endl;
-		std::cout << "Just smaller input: " << (map <= just_smaller ? "not" : "") << "less" << std::endl;
-		std::cout << "Just bigger input: " << (map <= just_bigger ? "not" : "") << "less" << std::endl;
-		std::cout << "Bigger input: " << (map <= bigger ? "not" : "") << "less" << std::endl;
-		std::cout << "Nearly totally different input: " << (map <= nearly_totally_different ? "not" : "") << "less" << std::endl;
-		std::cout << "Totally different input: " << (map <= totally_different ? "not" : "") << "less" << std::endl;
+		std::cout << "Same input: " << (map <= map ? "not " : "") << "less" << std::endl;
+		std::cout << "Smaller input: " << (map <= smaller ? "not " : "") << "less" << std::endl;
+		std::cout << "Just smaller input: " << (map <= just_smaller ? "not " : "") << "less" << std::endl;
+		std::cout << "Just bigger input: " << (map <= just_bigger ? "not " : "") << "less" << std::endl;
+		std::cout << "Bigger input: " << (map <= bigger ? "not " : "") << "less" << std::endl;
+		std::cout << "Nearly totally different input: " << (map <= nearly_totally_different ? "not " : "") << "less" << std::endl;
+		std::cout << "Totally different input: " << (map <= totally_different ? "not " : "") << "less" << std::endl;
 
 		std::cout << "[+] operator>" << std::endl;
-		std::cout << "Same input: " (map > map ? "not" : "") << "less" << std::endl;
-		std::cout << "Smaller input: " << (map > smaller ? "not" : "") << "less" << std::endl;
-		std::cout << "Just smaller input: " << (map > just_smaller ? "not" : "") << "less" << std::endl;
-		std::cout << "Just bigger input: " << (map > just_bigger ? "not" : "") << "less" << std::endl;
-		std::cout << "Bigger input: " << (map > bigger ? "not" : "") << "less" << std::endl;
-		std::cout << "Nearly totally different input: " << (map > nearly_totally_different ? "not" : "") << "less" << std::endl;
-		std::cout << "Totally different input: " << (map > totally_different ? "not" : "") << "less" << std::endl;
+		std::cout << "Same input: " << (map > map ? "not " : "") << "less" << std::endl;
+		std::cout << "Smaller input: " << (map > smaller ? "not " : "") << "less" << std::endl;
+		std::cout << "Just smaller input: " << (map > just_smaller ? "not " : "") << "less" << std::endl;
+		std::cout << "Just bigger input: " << (map > just_bigger ? "not " : "") << "less" << std::endl;
+		std::cout << "Bigger input: " << (map > bigger ? "not " : "") << "less" << std::endl;
+		std::cout << "Nearly totally different input: " << (map > nearly_totally_different ? "not " : "") << "less" << std::endl;
+		std::cout << "Totally different input: " << (map > totally_different ? "not " : "") << "less" << std::endl;
 
 		std::cout << "[+] operator>=" << std::endl;
-		std::cout << "Same input: " (map >= map ? "not" : "") << "less" << std::endl;
-		std::cout << "Smaller input: " << (map >= smaller ? "not" : "") << "less" << std::endl;
-		std::cout << "Just smaller input: " << (map >= just_smaller ? "not" : "") << "less" << std::endl;
-		std::cout << "Just bigger input: " << (map >= just_bigger ? "not" : "") << "less" << std::endl;
-		std::cout << "Bigger input: " << (map >= bigger ? "not" : "") << "less" << std::endl;
-		std::cout << "Nearly totally different input: " << (map >= nearly_totally_different ? "not" : "") << "less" << std::endl;
-		std::cout << "Totally different input: " << (map >= totally_different ? "not" : "") << "less" << std::endl;
+		std::cout << "Same input: " << (map >= map ? "not " : "") << "less" << std::endl;
+		std::cout << "Smaller input: " << (map >= smaller ? "not " : "") << "less" << std::endl;
+		std::cout << "Just smaller input: " << (map >= just_smaller ? "not " : "") << "less" << std::endl;
+		std::cout << "Just bigger input: " << (map >= just_bigger ? "not " : "") << "less" << std::endl;
+		std::cout << "Bigger input: " << (map >= bigger ? "not " : "") << "less" << std::endl;
+		std::cout << "Nearly totally different input: " << (map >= nearly_totally_different ? "not " : "") << "less" << std::endl;
+		std::cout << "Totally different input: " << (map >= totally_different ? "not " : "") << "less" << std::endl;
 
 	}
-
 }
 
 void clear_map_test(TEST_NAMESPACE::map<std::string, ValiditySanitizer> &map) {

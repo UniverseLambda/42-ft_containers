@@ -200,7 +200,9 @@ namespace ft {
 				bst.find_node(key);
 
 				return 1;
-			} catch (std::out_of_range) {}
+			} catch (std::out_of_range &ofr) {
+				(void)ofr;
+			}
 			return 0;
 		}
 
@@ -209,7 +211,9 @@ namespace ft {
 				typename tree_type::node_type &node = bst.find_node(key);
 
 				return iterator(&node);
-			} catch (std::out_of_range) {}
+			} catch (std::out_of_range &ofr) {
+				(void)ofr;
+			}
 			return end();
 		}
 
@@ -218,7 +222,9 @@ namespace ft {
 				const typename tree_type::node_type &node = bst.find_node(key);
 
 				return const_iterator(&node);
-			} catch (std::out_of_range) {}
+			} catch (std::out_of_range &ofr) {
+				(void)ofr;
+			}
 			return end();
 		}
 
@@ -301,8 +307,8 @@ namespace ft {
 
 	template<typename _Key, typename _T, typename _Compare, typename _Alloc>
 	bool operator==(const ft::map<_Key, _T, _Compare, _Alloc> &lhs, const ft::map<_Key, _T, _Compare, _Alloc> &rhs) {
-		if (lhs.count != rhs.count)
-			return true;
+		if (lhs.size() != rhs.size())
+			return false;
 		return ft::equal(lhs.begin(), lhs.end(), rhs.begin());
 	};
 
