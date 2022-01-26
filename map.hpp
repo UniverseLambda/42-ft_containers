@@ -70,7 +70,7 @@ namespace ft {
 			bst(value_compare(_KeyLess()), _Allocator(), key_extractor(), _KeyLess()) {}
 
 		explicit map(const _KeyLess &key_less, const _Allocator &alloc = _Allocator()):
-			bst(value_compare(), alloc, key_extractor(), key_less) {}
+			bst(value_compare(_KeyLess()), alloc, key_extractor(), key_less) {}
 
 		template<typename _InputIt>
 		map(_InputIt first, _InputIt last, const _KeyLess &key_less = _KeyLess(), const _Allocator &alloc = _Allocator()):

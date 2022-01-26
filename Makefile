@@ -23,14 +23,13 @@ LD_LIBS :=
 
 all:			$(NAME) $(STD_NAME)
 
-$(NAME):
+$(NAME):		$(SRCS)
 	$(CXX) $(CXX_FLAGS) -o $@ $(SRCS) $(LD_LIBS)
 
-$(STD_NAME):
+$(STD_NAME):	$(SRCS)
 	$(CXX) $(CXX_FLAGS) -DTEST_NAMESPACE=std -o $@ $(SRCS) $(LD_LIBS)
 
 clean:
-	rm -f $(OBJS)
 
 fclean:			clean
 	rm -f $(NAME)

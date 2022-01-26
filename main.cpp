@@ -1256,6 +1256,41 @@ void test_map() {
 		display_map(other.begin(), other.end());
 		check_map(other.begin(), other.end());
 	}
+
+	std::cout << "** Constructors tests **" << std::endl;
+	std::cout << "[+] copy constructor" << std::endl;
+	{
+		std::cout << "Original" << std::endl;
+		display_map(map.begin(), map.end());
+
+		std::cout << "Copy" << std::endl;
+		map_type copy(map);
+		display_map(copy.begin(), copy.end());
+		check_map(copy.begin(), copy.end());
+	}
+	
+	std::cout << "[+] default with Compare and Allocator" << std::endl;
+	{
+		std::cout << "Original" << std::endl;
+		display_map(map.begin(), map.end());
+
+		std::cout << "Cmp and Alloc" << std::endl;
+		map_type dfl_cmp_alloc = map_type(std::less<std::string>(), std::allocator<map_type::value_type>());
+		dfl_cmp_alloc.insert(dfl_cmp_alloc.begin(), dfl_cmp_alloc.end());
+		display_map(dfl_cmp_alloc.begin(), dfl_cmp_alloc.end());
+		check_map(dfl_cmp_alloc.begin(), dfl_cmp_alloc.end());
+	}
+	
+	std::cout << "[+] iterator constructor" << std::endl;
+	{
+		std::cout << "Original" << std::endl;
+		display_map(map.begin(), map.end());
+
+		std::cout << "Iterator" << std::endl;
+		map_type copy(map.begin(), --(map.end()));
+		display_map(copy.begin(), copy.end());
+		check_map(copy.begin(), copy.end());
+	}
 }
 
 int main(void) {
