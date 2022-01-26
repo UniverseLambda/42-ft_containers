@@ -1293,6 +1293,236 @@ void test_map() {
 	}
 }
 
+template<typename _Iterator>
+void test_one_iterator_trait() {
+	std::cout << "sizeof iterator_traits::difference_type: "	<< sizeof(typename TEST_NAMESPACE::iterator_traits<_Iterator>::difference_type) << std::endl;
+	std::cout << "sizeof iterator_traits::value_type: "			<< sizeof(typename TEST_NAMESPACE::iterator_traits<_Iterator>::value_type) << std::endl;
+	std::cout << "sizeof iterator_traits::pointer: "			<< sizeof(typename TEST_NAMESPACE::iterator_traits<_Iterator>::pointer) << std::endl;
+	std::cout << "sizeof iterator_traits::reference: "			<< sizeof(typename TEST_NAMESPACE::iterator_traits<_Iterator>::reference) << std::endl;
+	std::cout << "sizeof iterator_traits::iterator_category: "	<< sizeof(typename TEST_NAMESPACE::iterator_traits<_Iterator>::difference_type) << std::endl;
+}
+
+void test_iterator_traits() {
+	std::cout << "======= iterator_traits TESTS =======" << std::endl;
+
+	std::cout << "** ft::vector<int>::iterator **" << std::endl;
+	test_one_iterator_trait< ft::vector<int>::iterator >();
+
+	std::cout << "** ft::vector<int>::const_iterator **" << std::endl;
+	test_one_iterator_trait< ft::vector<int>::const_iterator >();
+
+	std::cout << "** ft::vector<int>::reverse_iterator **" << std::endl;
+	test_one_iterator_trait< ft::vector<int>::reverse_iterator >();
+
+	std::cout << "** ft::vector<int>::const_reverse_iterator **" << std::endl;
+	test_one_iterator_trait< ft::vector<int>::const_reverse_iterator >();
+
+	std::cout << "** ft::vector<std::string>::iterator **" << std::endl;
+	test_one_iterator_trait< ft::vector<std::string>::iterator >();
+
+	std::cout << "** ft::vector<std::string>::const_iterator **" << std::endl;
+	test_one_iterator_trait< ft::vector<std::string>::const_iterator >();
+
+	std::cout << "** ft::vector<std::string>::reverse_iterator **" << std::endl;
+	test_one_iterator_trait< ft::vector<std::string>::reverse_iterator >();
+
+	std::cout << "** ft::vector<std::string>::const_reverse_iterator **" << std::endl;
+	test_one_iterator_trait< ft::vector<std::string>::const_reverse_iterator >();
+
+	std::cout << "** ft::map<int, int>::iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<int, int>::iterator >();
+
+	std::cout << "** ft::map<int, int>::const_iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<int, int>::const_iterator >();
+
+	std::cout << "** ft::map<int, int>::reverse_iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<int, int>::reverse_iterator >();
+
+	std::cout << "** ft::map<int, int>::const_reverse_iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<int, int>::const_reverse_iterator >();
+
+	std::cout << "** ft::map<int, int>::iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<int, int>::iterator >();
+
+	std::cout << "** ft::map<int, int>::const_iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<int, int>::const_iterator >();
+
+	std::cout << "** ft::map<int, int>::reverse_iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<int, int>::reverse_iterator >();
+
+	std::cout << "** ft::map<int, int>::const_reverse_iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<int, int>::const_reverse_iterator >();
+
+	std::cout << "** ft::map<std::string, std::string>::iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<std::string, std::string>::iterator >();
+
+	std::cout << "** ft::map<std::string, std::string>::const_iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<std::string, std::string>::const_iterator >();
+
+	std::cout << "** ft::map<std::string, std::string>::reverse_iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<std::string, std::string>::reverse_iterator >();
+
+	std::cout << "** ft::map<std::string, std::string>::const_reverse_iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<std::string, std::string>::const_reverse_iterator >();
+
+	std::cout << "** ft::map<std::string, std::string>::iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<std::string, std::string>::iterator >();
+
+	std::cout << "** ft::map<std::string, std::string>::const_iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<std::string, std::string>::const_iterator >();
+
+	std::cout << "** ft::map<std::string, std::string>::reverse_iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<std::string, std::string>::reverse_iterator >();
+
+	std::cout << "** ft::map<std::string, std::string>::const_reverse_iterator **" << std::endl;
+	test_one_iterator_trait< ft::map<std::string, std::string>::const_reverse_iterator >();
+
+
+	std::cout << "** std::vector<int>::iterator **" << std::endl;
+	test_one_iterator_trait< std::vector<int>::iterator >();
+
+	std::cout << "** std::vector<int>::const_iterator **" << std::endl;
+	test_one_iterator_trait< std::vector<int>::const_iterator >();
+
+	std::cout << "** std::vector<int>::reverse_iterator **" << std::endl;
+	test_one_iterator_trait< std::vector<int>::reverse_iterator >();
+
+	std::cout << "** std::vector<int>::const_reverse_iterator **" << std::endl;
+	test_one_iterator_trait< std::vector<int>::const_reverse_iterator >();
+
+	std::cout << "** std::vector<std::string>::iterator **" << std::endl;
+	test_one_iterator_trait< std::vector<std::string>::iterator >();
+
+	std::cout << "** std::vector<std::string>::const_iterator **" << std::endl;
+	test_one_iterator_trait< std::vector<std::string>::const_iterator >();
+
+	std::cout << "** std::vector<std::string>::reverse_iterator **" << std::endl;
+	test_one_iterator_trait< std::vector<std::string>::reverse_iterator >();
+
+	std::cout << "** std::vector<std::string>::const_reverse_iterator **" << std::endl;
+	test_one_iterator_trait< std::vector<std::string>::const_reverse_iterator >();
+
+	std::cout << "** std::map<int, int>::iterator **" << std::endl;
+	test_one_iterator_trait< std::map<int, int>::iterator >();
+
+	std::cout << "** std::map<int, int>::const_iterator **" << std::endl;
+	test_one_iterator_trait< std::map<int, int>::const_iterator >();
+
+	std::cout << "** std::map<int, int>::reverse_iterator **" << std::endl;
+	test_one_iterator_trait< std::map<int, int>::reverse_iterator >();
+
+	std::cout << "** std::map<int, int>::const_reverse_iterator **" << std::endl;
+	test_one_iterator_trait< std::map<int, int>::const_reverse_iterator >();
+
+	std::cout << "** std::map<int, int>::iterator **" << std::endl;
+	test_one_iterator_trait< std::map<int, int>::iterator >();
+
+	std::cout << "** std::map<int, int>::const_iterator **" << std::endl;
+	test_one_iterator_trait< std::map<int, int>::const_iterator >();
+
+	std::cout << "** std::map<int, int>::reverse_iterator **" << std::endl;
+	test_one_iterator_trait< std::map<int, int>::reverse_iterator >();
+
+	std::cout << "** std::map<int, int>::const_reverse_iterator **" << std::endl;
+	test_one_iterator_trait< std::map<int, int>::const_reverse_iterator >();
+
+	std::cout << "** std::map<std::string, std::string>::iterator **" << std::endl;
+	test_one_iterator_trait< std::map<std::string, std::string>::iterator >();
+
+	std::cout << "** std::map<std::string, std::string>::const_iterator **" << std::endl;
+	test_one_iterator_trait< std::map<std::string, std::string>::const_iterator >();
+
+	std::cout << "** std::map<std::string, std::string>::reverse_iterator **" << std::endl;
+	test_one_iterator_trait< std::map<std::string, std::string>::reverse_iterator >();
+
+	std::cout << "** std::map<std::string, std::string>::const_reverse_iterator **" << std::endl;
+	test_one_iterator_trait< std::map<std::string, std::string>::const_reverse_iterator >();
+
+	std::cout << "** std::map<std::string, std::string>::iterator **" << std::endl;
+	test_one_iterator_trait< std::map<std::string, std::string>::iterator >();
+
+	std::cout << "** std::map<std::string, std::string>::const_iterator **" << std::endl;
+	test_one_iterator_trait< std::map<std::string, std::string>::const_iterator >();
+
+	std::cout << "** std::map<std::string, std::string>::reverse_iterator **" << std::endl;
+	test_one_iterator_trait< std::map<std::string, std::string>::reverse_iterator >();
+
+	std::cout << "** std::map<std::string, std::string>::const_reverse_iterator **" << std::endl;
+	test_one_iterator_trait< std::map<std::string, std::string>::const_reverse_iterator >();
+
+	std::cout << "** int * **" << std::endl;
+	test_one_iterator_trait<int *>();
+
+	std::cout << "** const int * **" << std::endl;
+	test_one_iterator_trait<const int *>();
+
+	std::cout << "** std::string * **" << std::endl;
+	test_one_iterator_trait<std::string *>();
+
+	std::cout << "** const std::string * **" << std::endl;
+	test_one_iterator_trait<const std::string *>();
+}
+
+template<typename _Iterator>
+void test_iterator_if_rai(_Iterator it, TEST_NAMESPACE::random_access_iterator_tag) {
+	std::cout << "[+] *(iterator += 2): " << *(it += 2) << std::endl;
+	std::cout << "[+] *(iterator -= 2): " << *(it -= 2) << std::endl;
+	std::cout << "[+] *(iterator + 2): " << *(it + 2) << std::endl;
+	std::cout << "[+] *iterator: " << *it << std::endl;
+	std::cout << "[+] *(2 + iterator): " << *(2 + it) << std::endl;
+	std::cout << "[+] *iterator: " << *it << std::endl;
+	std::cout << "[+] *(iterator - 2): " << *(it - 2) << std::endl;
+	std::cout << "[+] (iterator - (iterator + 2)): " << (it - (it + 2)) << std::endl;
+	std::cout << "[+] iterator[2]: " << it[2] << std::endl;
+	std::cout << "[+] iterator[-2]: " << it[-2] << std::endl;
+	std::cout << "[+] iterator < (iterator - 2): " << (it < (it - 2)) << std::endl;
+	std::cout << "[+] iterator > (iterator - 2): " << (it > (it - 2)) << std::endl;
+	std::cout << "[+] iterator <= (iterator - 2): " << (it <= (it - 2)) << std::endl;
+	std::cout << "[+] iterator >= (iterator - 2): " << (it >= (it - 2)) << std::endl;
+	std::cout << "[+] iterator < (iterator + 2): " << (it < (it + 2)) << std::endl;
+	std::cout << "[+] iterator > (iterator + 2): " << (it > (it + 2)) << std::endl;
+	std::cout << "[+] iterator <= (iterator + 2): " << (it <= (it + 2)) << std::endl;
+	std::cout << "[+] iterator >= (iterator + 2): " << (it >= (it + 2)) << std::endl;
+	std::cout << "[+] iterator < iterator: " << (it < it) << std::endl;
+	std::cout << "[+] iterator > iteraor: " << (it > it) << std::endl;
+	std::cout << "[+] iterator <= iteraor: " << (it <= it) << std::endl;
+	std::cout << "[+] iterator >= iteraor: " << (it >= it) << std::endl;
+}
+
+template<typename _Iterator>
+void test_iterator_if_rai(_Iterator, TEST_NAMESPACE::input_iterator_tag) {}
+
+template<typename _Iterator>
+void test_iterator(_Iterator it) {
+	const _Iterator &const_it = it;
+	_Iterator copy = it;
+	_Iterator default_constructible;
+
+	std::cout << "[+] *iterator" << *it << std::endl;
+	std::cout << "[+] *const_it" << *const_it << std::endl;
+	std::cout << "[+] *(++iterator)" << *(++it) << std::endl;
+	std::cout << "[+] iterator == iterator: " << (it == it) << std::endl;
+	std::cout << "[+] iterator == copy: " << (it == copy) << std::endl;
+	std::cout << "[+] iterator == const_it: " << (it == const_it) << std::endl;
+	std::cout << "[+] iterator == default_constructible: " << (it == default_constructible) << std::endl;
+	std::cout << "[+] const_it == const_it: " << (const_it == const_it) << std::endl;
+	std::cout << "[+] const_it == copy: " << (const_it == copy) << std::endl;
+	std::cout << "[+] const_it == default_constructible: " << (const_it == default_constructible) << std::endl;
+	std::cout << "[+] default_constructible == default_constructible: " << (default_constructible == default_constructible) << std::endl;
+	std::cout << "[+] *(iterator++)" << *(it++) << std::endl;
+	std::cout << "[+] *(copy++)" << *(copy++) << std::endl;
+	std::cout << "[+] *iterator" << *(it) << std::endl;
+	std::cout << "[+] *copy" << *(copy) << std::endl;
+	copy = it++;
+	std::cout << "[+] *iterator" << *(it) << std::endl;
+	std::cout << "[+] *assigned copy" << *(copy) << std::endl;
+	std::cout << "[+] *(--iterator)" << *(--it) << std::endl;
+	std::cout << "[+] *(iterator--)" << *(it--) << std::endl;
+	std::cout << "[+] *(copy--)" << *(copy--) << std::endl;
+
+	test_iterator_if_rai(it, typename _Iterator::iterator_category());
+}
+
 int main(void) {
 	ULDL_INIT
 
@@ -1308,6 +1538,8 @@ int main(void) {
 
 	test_tree();
 	test_map();
+
+	test_iterator_traits();
 
 	return 0;
 }

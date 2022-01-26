@@ -47,6 +47,4 @@ namespace ft {
 	};
 } // namespace ft
 
-#define __FT_BITS_INC
 #include "bits/reverse_iterator.hpp"
-#undef __FT_BITS_INC

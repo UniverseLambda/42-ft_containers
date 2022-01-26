@@ -1,8 +1,6 @@
 #pragma once
 
-#define __FT_BITS_INC
 #include "bits/bst.hpp"
-#undef __FT_BITS_INC
 
 #include <functional>
 #include <memory>

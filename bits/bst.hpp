@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "../utility.hpp"
+#include "../iterator.hpp"
 
 namespace ft {
 	namespace __clsaad_impl {
@@ -889,7 +890,7 @@ namespace ft {
 		class bst_iterator: public ft::iterator<typename ft::bidirectional_iterator_tag, _Tp> {
 		private:
 			typedef _Node node_type;
-			typedef ft::iterator_traits<bst_iterator> it_trait;
+			typedef ft::iterator_traits< ft::iterator<typename ft::bidirectional_iterator_tag, _Tp> > it_trait;
 
 			node_type *node;
 

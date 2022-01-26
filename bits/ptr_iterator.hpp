@@ -11,7 +11,7 @@ namespace ft {
 		template<typename _Tp, typename _Container>
 		class ptr_iterator: public ft::iterator<typename ft::random_access_iterator_tag, _Tp> {
 		private:
-			typedef ft::iterator_traits<ptr_iterator> it_traits;
+			typedef ft::iterator_traits< ft::iterator<typename ft::random_access_iterator_tag, _Tp> > it_traits;
 
 			typename it_traits::pointer ptr;
 
