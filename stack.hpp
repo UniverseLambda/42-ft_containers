@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Vector.hpp"
+#include "vector.hpp"
 
 namespace ft {
-	template<typename _Tp, typename _Container = ft::vector<_Tp> >
+	template< typename _Tp, typename _Container = ft::vector<_Tp> >
 	class stack {
 	public:
 		typedef _Container container_type;

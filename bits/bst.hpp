@@ -1,16 +1,17 @@
 #pragma once
 
-#ifndef __FT_BITS_INC
-# error "You included a bits header"
-#endif
+// #ifndef __FT_BITS_INC
+// # error "You included a bits header"
+// #endif
 
 #include <functional>
 #include <memory>
+
 #include "../utility.hpp"
 
 namespace ft {
 	namespace __clsaad_impl {
-		enum BSTNodeColor {
+		enum bst_node_color {
 			BLACK,
 			RED
 		};
@@ -86,122 +87,120 @@ namespace ft {
 		}
 
 		template<typename _Tree, typename _Data>
-		struct BSTNode {
-			static BSTNode *const nullValue;
-
+		struct bst_node {
 			_Tree *tree;
 
-			BSTNode *parent;
+			bst_node *parent;
 
 			_Data *data;
 
-			BSTNodeColor nodeColor;
+			bst_node_color node_color;
 
-			BSTNode *leftNode;
-			BSTNode *rightNode;
+			bst_node *left_node;
+			bst_node *right_node;
 
 			bool temporary;
 
-			BSTNode(_Tree *tree, BSTNode *parent, _Data *data, BSTNodeColor color):
+			bst_node(_Tree *tree, bst_node *parent, _Data *data, bst_node_color color):
 				tree(tree),
 				parent(parent),
 				data(data),
-				nodeColor(color),
-				leftNode(NULL),
-				rightNode(NULL),
+				node_color(color),
+				left_node(NULL),
+				right_node(NULL),
 				temporary(true) {
 				if (!parent) {
-					nodeColor = BLACK;
+					node_color = BLACK;
 				}
 			}
 
-			BSTNode(_Tree *tree, const BSTNode &other):
+			bst_node(_Tree *tree, const bst_node &other):
 				tree(tree),
 				parent(NULL),
 				data(bst_copy_data(tree->get_allocator(), other.data)),
-				nodeColor(other.nodeColor),
-				leftNode(NULL),
-				rightNode(NULL),
+				node_color(other.node_color),
+				left_node(NULL),
+				right_node(NULL),
 				temporary(true) {
 
-				if (other.leftNode != NULL && other.leftNode->data != NULL) {
-					leftNode = move_to_dyn_storage(BSTNode(tree, *(other.leftNode)));
-					leftNode->parent = this;
+				if (other.left_node != NULL && other.left_node->data != NULL) {
+					left_node = move_to_dyn_storage(bst_node(tree, *(other.left_node)));
+					left_node->parent = this;
 				}
 
-				if (other.rightNode != NULL && other.rightNode->data != NULL) {
-					rightNode = move_to_dyn_storage(BSTNode(tree, *(other.rightNode)));
-					rightNode->parent = this;
+				if (other.right_node != NULL && other.right_node->data != NULL) {
+					right_node = move_to_dyn_storage(bst_node(tree, *(other.right_node)));
+					right_node->parent = this;
 				}
 
 			}
 
-			BSTNode(const BSTNode &cpy):
+			bst_node(const bst_node &cpy):
 				tree(cpy.tree),
 				parent(cpy.parent),
 				data(cpy.data),
-				nodeColor(cpy.nodeColor),
-				leftNode(cpy.leftNode),
-				rightNode(cpy.rightNode),
+				node_color(cpy.node_color),
+				left_node(cpy.left_node),
+				right_node(cpy.right_node),
 				temporary(false) {
 
-				if (leftNode != NULL) {
-					leftNode->parent = this;
+				if (left_node != NULL) {
+					left_node->parent = this;
 				}
 
-				if (rightNode != NULL) {
-					rightNode->parent = this;
+				if (right_node != NULL) {
+					right_node->parent = this;
 				}
 			}
 
-			~BSTNode() {
+			~bst_node() {
 				if (!temporary) {
-					if (rightNode && rightNode->data != NULL)
-						destroy_from_dyn_storage(rightNode);
+					if (right_node && right_node->data != NULL)
+						destroy_from_dyn_storage(right_node);
 
-					if (leftNode && leftNode->data != NULL)
-						destroy_from_dyn_storage(leftNode);
+					if (left_node && left_node->data != NULL)
+						destroy_from_dyn_storage(left_node);
 
 					bst_delete_data(tree->get_allocator(), data);
 				}
 			}
 
 		private:
-			BSTNode &operator=(const BSTNode &) {
+			bst_node &operator=(const bst_node &) {
 				this->you_should_definitely_not_use_this_you_filthy_bad_boy();
 				return (*this);
 			}
 
 		public:
 			void insertion_rebalance_tree() {
-				BSTNode *grandparent;
-				BSTNode *uncle;
+				bst_node *grandparent;
+				bst_node *uncle;
 
 				if (*(tree->get_root()) == this || parent == NULL) {
-					nodeColor = BLACK;
+					node_color = BLACK;
 					return;
 				}
 
-				if (parent->nodeColor == BLACK) {
+				if (parent->node_color == BLACK) {
 					return;
 				}
 
 				grandparent = parent->parent;
 				uncle = grandparent->sibling(parent);
 
-				if (uncle != NULL && uncle->nodeColor == RED) {
-					parent->nodeColor = BLACK;
-					uncle->nodeColor = BLACK;
-					grandparent->nodeColor = RED;
+				if (uncle != NULL && uncle->node_color == RED) {
+					parent->node_color = BLACK;
+					uncle->node_color = BLACK;
+					grandparent->node_color = RED;
 					grandparent->insertion_rebalance_tree();
 				} else {
-					if (grandparent->leftNode == parent && parent->leftNode == this) {
+					if (grandparent->left_node == parent && parent->left_node == this) {
 						rebalance_ll(grandparent, parent);
-					} else if (grandparent->leftNode == parent && parent->rightNode == this) {
+					} else if (grandparent->left_node == parent && parent->right_node == this) {
 						rebalance_lr(grandparent, parent);
-					} else if (grandparent->rightNode == parent && parent->rightNode == this) {
+					} else if (grandparent->right_node == parent && parent->right_node == this) {
 						rebalance_rr(grandparent, parent);
-					} else if (grandparent->rightNode == parent && parent->leftNode == this) {
+					} else if (grandparent->right_node == parent && parent->left_node == this) {
 						rebalance_rl(grandparent, parent);
 					} else {
 						throw std::runtime_error("WHAT????");
@@ -210,20 +209,20 @@ namespace ft {
 			}
 
 			void right_rotate() {
-				BSTNode *pivot;
+				bst_node *pivot;
 
-				if (!leftNode) {
+				if (!left_node) {
 					return;
 				}
 
-				pivot = leftNode;
+				pivot = left_node;
 
-				leftNode = pivot->rightNode;
+				left_node = pivot->right_node;
 
-				if (leftNode)
-					leftNode->parent = this;
+				if (left_node)
+					left_node->parent = this;
 
-				pivot->rightNode = this;
+				pivot->right_node = this;
 
 				pivot->parent = parent;
 
@@ -237,19 +236,19 @@ namespace ft {
 			}
 
 			void left_rotate() {
-				BSTNode *pivot;
+				bst_node *pivot;
 
-				if (!rightNode) {
+				if (!right_node) {
 					return;
 				}
 
-				pivot = rightNode;
+				pivot = right_node;
 
-				rightNode = pivot->leftNode;
-				if (rightNode)
-					rightNode->parent = this;
+				right_node = pivot->left_node;
+				if (right_node)
+					right_node->parent = this;
 
-				pivot->leftNode = this;
+				pivot->left_node = this;
 				pivot->parent = parent;
 
 				if (parent) {
@@ -261,96 +260,96 @@ namespace ft {
 				parent = pivot;
 			}
 
-			BSTNode *min_node() {
-				if (leftNode == NULL) {
+			bst_node *min_node() {
+				if (left_node == NULL) {
 					return this;
 				}
 
-				BSTNode *node = leftNode;
+				bst_node *node = left_node;
 
-				while (node->leftNode != NULL && node->leftNode->data != NULL) {
-					node = node->leftNode;
+				while (node->left_node != NULL && node->left_node->data != NULL) {
+					node = node->left_node;
 				}
 
 				return node;
 			}
 
-			inline BSTNode *sibling(BSTNode *node) {
-				return (node == leftNode) ? rightNode : ((node == rightNode) ? leftNode : NULL);
+			inline bst_node *sibling(bst_node *node) {
+				return (node == left_node) ? right_node : ((node == right_node) ? left_node : NULL);
 			}
 
-			inline BSTNode *&node_storage(BSTNode *node) {
-				if (node == leftNode) {
-					return leftNode;
+			inline bst_node *&node_storage(bst_node *node) {
+				if (node == left_node) {
+					return left_node;
 				}
 
-				if (node == rightNode) {
-					return rightNode;
+				if (node == right_node) {
+					return right_node;
 				}
 
 				throw std::runtime_error("internal error");
 			}
 
 		private:
-			void rebalance_ll(BSTNode *grandparent, BSTNode *parent) {
-				BSTNodeColor tmp;
+			void rebalance_ll(bst_node *grandparent, bst_node *parent) {
+				bst_node_color tmp;
 
 				grandparent->right_rotate();
 
-				tmp = parent->nodeColor;
-				parent->nodeColor = grandparent->nodeColor;
-				grandparent->nodeColor = tmp;
+				tmp = parent->node_color;
+				parent->node_color = grandparent->node_color;
+				grandparent->node_color = tmp;
 			}
 
-			void rebalance_lr(BSTNode *grandparent, BSTNode *parent) {
-				BSTNodeColor tmp;
+			void rebalance_lr(bst_node *grandparent, bst_node *parent) {
+				bst_node_color tmp;
 
 				parent->left_rotate();
 				grandparent->right_rotate();
 
-				tmp = nodeColor;
-				nodeColor = grandparent->nodeColor;
-				grandparent->nodeColor = tmp;
+				tmp = node_color;
+				node_color = grandparent->node_color;
+				grandparent->node_color = tmp;
 			}
 
-			void rebalance_rr(BSTNode *grandparent, BSTNode *parent) {
-				BSTNodeColor tmp;
+			void rebalance_rr(bst_node *grandparent, bst_node *parent) {
+				bst_node_color tmp;
 
 				grandparent->left_rotate();
 
-				tmp = parent->nodeColor;
-				parent->nodeColor = grandparent->nodeColor;
-				grandparent->nodeColor = tmp;
+				tmp = parent->node_color;
+				parent->node_color = grandparent->node_color;
+				grandparent->node_color = tmp;
 			}
 
-			void rebalance_rl(BSTNode *grandparent, BSTNode *parent) {
-				BSTNodeColor tmp;
+			void rebalance_rl(bst_node *grandparent, bst_node *parent) {
+				bst_node_color tmp;
 
 				parent->right_rotate();
 				grandparent->left_rotate();
 
-				tmp = nodeColor;
-				nodeColor = grandparent->nodeColor;
-				grandparent->nodeColor = tmp;
+				tmp = node_color;
+				node_color = grandparent->node_color;
+				grandparent->node_color = tmp;
 			}
 
 		public:
-			static void set_color(BSTNode *node, BSTNodeColor color) {
+			static void set_color(bst_node *node, bst_node_color color) {
 				if (node != NULL) {
-					node->nodeColor = color;
+					node->node_color = color;
 				}
 			}
 
-			static BSTNodeColor get_color(BSTNode *node) {
-				return (node != NULL) ? node->nodeColor : BLACK;
+			static bst_node_color get_color(bst_node *node) {
+				return (node != NULL) ? node->node_color : BLACK;
 			}
 
-			static BSTNode *get_left_node(BSTNode *node) {
-				return (node != NULL) ? node->leftNode : NULL;
+			static bst_node *get_left_node(bst_node *node) {
+				return (node != NULL) ? node->left_node : NULL;
 			}
 
-			static BSTNode *get_right_node(BSTNode *node) {
-				return (node != NULL) ? node->rightNode : NULL;
+			static bst_node *get_right_node(bst_node *node) {
+				return (node != NULL) ? node->right_node : NULL;
 			}
 		};
 
@@ -375,7 +374,7 @@ namespace ft {
 		template<typename _Data, typename _Less, typename _Allocator = std::allocator<_Data>, typename _Key = _Data, typename _KeyExtractor = default_key_extractor<_Key>, typename _KeyLess = _Less>
 		class bst_wrapper {
 		public:
-			typedef BSTNode<bst_wrapper, _Data> node_type;
+			typedef bst_node<bst_wrapper, _Data> node_type;
 			typedef bst_wrapper_anchor_guard<bst_wrapper> anchor_guard_type;
 
 		private:
@@ -418,8 +417,8 @@ namespace ft {
 			}
 
 			~bst_wrapper() {
-				anchor.rightNode = NULL;
-				anchor.leftNode = NULL;
+				anchor.right_node = NULL;
+				anchor.left_node = NULL;
 				if (root != NULL) {
 					destroy_from_dyn_storage(root);
 				}
@@ -440,39 +439,39 @@ namespace ft {
 
 			void set_anchor() {
 				if (root == NULL) {
-					anchor.leftNode = NULL;
-					anchor.rightNode = NULL;
+					anchor.left_node = NULL;
+					anchor.right_node = NULL;
 					return;
 				}
 
 				node_type *left_node = root;
 				node_type *right_node = root;
 
-				while (left_node->leftNode != NULL || right_node->rightNode != NULL) {
-					if (left_node->leftNode != NULL) {
-						left_node = left_node->leftNode;
+				while (left_node->left_node != NULL || right_node->right_node != NULL) {
+					if (left_node->left_node != NULL) {
+						left_node = left_node->left_node;
 					}
 
-					if (right_node->rightNode != NULL) {
-						right_node = right_node->rightNode;
+					if (right_node->right_node != NULL) {
+						right_node = right_node->right_node;
 					}
 				}
 
 				// Yep. They are reversed. As decrementing bst_iterator(anchor) need to go back to max_node
-				anchor.rightNode = left_node;
-				anchor.leftNode = right_node;
+				anchor.right_node = left_node;
+				anchor.left_node = right_node;
 
-				left_node->leftNode = &anchor;
-				right_node->rightNode = &anchor;
+				left_node->left_node = &anchor;
+				right_node->right_node = &anchor;
 			}
 
 			void remove_anchor() {
-				if (anchor.leftNode)
-					anchor.leftNode->rightNode = NULL;
-				if (anchor.rightNode)
-					anchor.rightNode->leftNode = NULL;
-				anchor.leftNode = NULL;
-				anchor.rightNode = NULL;
+				if (anchor.left_node)
+					anchor.left_node->right_node = NULL;
+				if (anchor.right_node)
+					anchor.right_node->left_node = NULL;
+				anchor.left_node = NULL;
+				anchor.right_node = NULL;
 			}
 
 			ft::pair<node_type *, bool> insert(const _Data &data) {
@@ -496,9 +495,9 @@ namespace ft {
 				node = move_to_dyn_storage(node_type(this, parent, bst_allocate(alloc, data), RED));
 
 				if (is_less) {
-					parent->leftNode = node;
+					parent->left_node = node;
 				} else {
-					parent->rightNode = node;
+					parent->right_node = node;
 				}
 
 				node->insertion_rebalance_tree();
@@ -539,14 +538,14 @@ namespace ft {
 			void erase(node_type *node) {
 				anchor_guard_type guard(*this);
 
-				int child_count = !!(node->leftNode) + !!(node->rightNode);
+				int child_count = !!(node->left_node) + !!(node->right_node);
 
 				if (child_count == 2) {
-					swap_places(node, node->rightNode->min_node());
-					child_count = !!(node->leftNode) + !!(node->rightNode);
+					swap_places(node, node->right_node->min_node());
+					child_count = !!(node->left_node) + !!(node->right_node);
 				}
 
-				node_type *replacement = (node->leftNode != NULL) ? node->leftNode : node->rightNode;
+				node_type *replacement = (node->left_node != NULL) ? node->left_node : node->right_node;
 
 				if (replacement != NULL) {
 					replacement->parent = node->parent;
@@ -558,7 +557,7 @@ namespace ft {
 				} else {
 					node->parent->node_storage(node) = replacement;
 
-					if (node->nodeColor == RED || node_type::get_color(replacement) == RED) {
+					if (node->node_color == RED || node_type::get_color(replacement) == RED) {
 						node_type::set_color(replacement, BLACK);
 					} else {
 						propagate_double_black(replacement, node);
@@ -566,8 +565,8 @@ namespace ft {
 				}
 
 				// Setting them to NULL to prevent them from being deleted
-				node->leftNode = NULL;
-				node->rightNode = NULL;
+				node->left_node = NULL;
+				node->right_node = NULL;
 				destroy_from_dyn_storage(node);
 			}
 
@@ -634,10 +633,10 @@ namespace ft {
 					}
 
 					if (key_less(key, key_extractor(*(current_node->data)))) {
-						next_node = current_node->leftNode;
+						next_node = current_node->left_node;
 						current_is_less = true;
 					} else {
-						next_node = current_node->rightNode;
+						next_node = current_node->right_node;
 						current_is_less = false;
 					}
 				}
@@ -673,10 +672,10 @@ namespace ft {
 					}
 
 					if (less(data, *(current_node->data))) {
-						next_node = current_node->leftNode;
+						next_node = current_node->left_node;
 						current_is_less = true;
 					} else {
-						next_node = current_node->rightNode;
+						next_node = current_node->right_node;
 						current_is_less = false;
 					}
 				}
@@ -692,17 +691,17 @@ namespace ft {
 			inline node_type *retrieve_node(const _Data &data, node_type *&parent, bool &is_less) const { return retrieve_node(data, &parent, &is_less); }
 
 			void swap_places(node_type *n0, node_type *n1) {
-				std::swap(n0->leftNode, n1->leftNode);
-				std::swap(n0->rightNode, n1->rightNode);
+				std::swap(n0->left_node, n1->left_node);
+				std::swap(n0->right_node, n1->right_node);
 				std::swap(n0->parent, n1->parent);
-				std::swap(n0->nodeColor, n1->nodeColor);
+				std::swap(n0->node_color, n1->node_color);
 
 				if (n0->parent == NULL) {
 					root = n0;
 				} else {
 					if (n0->parent == n0) {
 						n0->parent = n1;
-						((n1->leftNode == n1) ? n1->leftNode : n1->rightNode) = n0;
+						((n1->left_node == n1) ? n1->left_node : n1->right_node) = n0;
 					} else {
 						n0->parent->node_storage(n1) = n0;
 					}
@@ -713,32 +712,32 @@ namespace ft {
 				} else {
 					if (n1->parent == n1) {
 						n1->parent = n0;
-						((n0->leftNode == n0) ? n0->leftNode : n0->rightNode) = n1;
+						((n0->left_node == n0) ? n0->left_node : n0->right_node) = n1;
 					} else {
 						n1->parent->node_storage(n0) = n1;
 					}
 				}
 
-				if (n0->leftNode != NULL) n0->leftNode->parent = n0;
-				if (n0->rightNode != NULL) n0->rightNode->parent = n0;
-				if (n1->leftNode != NULL) n1->leftNode->parent = n1;
-				if (n1->rightNode != NULL) n1->rightNode->parent = n1;
+				if (n0->left_node != NULL) n0->left_node->parent = n0;
+				if (n0->right_node != NULL) n0->right_node->parent = n0;
+				if (n1->left_node != NULL) n1->left_node->parent = n1;
+				if (n1->right_node != NULL) n1->right_node->parent = n1;
 			}
 
 			const node_type *min_node() const {
-				return (root == NULL) ? end_node() : anchor.rightNode;
+				return (root == NULL) ? end_node() : anchor.right_node;
 			}
 
 			node_type *min_node() {
-				return (root == NULL) ? end_node() : anchor.rightNode;
+				return (root == NULL) ? end_node() : anchor.right_node;
 			}
 
 			const node_type *max_node() const {
-				return (root == NULL) ? end_node() : anchor.leftNode;
+				return (root == NULL) ? end_node() : anchor.left_node;
 			}
 
 			node_type *max_node() {
-				return (root == NULL) ? end_node() : anchor.leftNode;
+				return (root == NULL) ? end_node() : anchor.left_node;
 			}
 
 			node_type *end_node() {
@@ -786,17 +785,17 @@ namespace ft {
 					}
 
 					if (key_less(curr, key)) {
-						node = node->rightNode;
+						node = node->right_node;
 					} else {
-						if (node->leftNode == NULL) {
+						if (node->left_node == NULL) {
 							break;
 						}
-						const _Key &left = key_extractor(*(node->leftNode->data));
+						const _Key &left = key_extractor(*(node->left_node->data));
 
 						if (key_less(left, key)) {
 							break;
 						}
-						node = node->leftNode;
+						node = node->left_node;
 					}
 				}
 
@@ -818,13 +817,13 @@ namespace ft {
 				node_type *sibling = node_this->parent->sibling(target);
 
 				if (node_type::get_color(sibling) == RED) {
-					if (sibling == node_this->parent->leftNode) {
+					if (sibling == node_this->parent->left_node) {
 						node_this->parent->left_rotate();
-						std::swap(node_this->parent->nodeColor, sibling->nodeColor);
+						std::swap(node_this->parent->node_color, sibling->node_color);
 
 					} else {
 						node_this->parent->right_rotate();
-						std::swap(node_this->parent->nodeColor, sibling->nodeColor);
+						std::swap(node_this->parent->node_color, sibling->node_color);
 					}
 
 					sibling = node_this->parent->sibling(node_this);
@@ -843,36 +842,36 @@ namespace ft {
 					}
 
 					if (sibling_red != NULL) {
-						if (sibling == node_this->parent->rightNode) {
+						if (sibling == node_this->parent->right_node) {
 							if (sibling_red == sibling_right) {
 								node_this->parent->right_rotate();
-								sibling_right->nodeColor = BLACK;
+								sibling_right->node_color = BLACK;
 							} else {
 								sibling->left_rotate();
-								std::swap(sibling->nodeColor, sibling_red->nodeColor);
+								std::swap(sibling->node_color, sibling_red->node_color);
 
 								node_this->parent->right_rotate();
-								sibling->nodeColor = BLACK;
+								sibling->node_color = BLACK;
 							}
 						} else {
 							if (sibling_red == sibling_left) {
 								node_this->parent->left_rotate();
-								sibling_left->nodeColor = BLACK;
+								sibling_left->node_color = BLACK;
 							} else {
 								sibling->right_rotate();
-								std::swap(sibling->nodeColor, sibling_red->nodeColor);
+								std::swap(sibling->node_color, sibling_red->node_color);
 
 								node_this->parent->left_rotate();
-								sibling->nodeColor = BLACK;
+								sibling->node_color = BLACK;
 							}
 						}
 					} else {
 						node_type::set_color(sibling, RED);
 
-						if (node_this->parent->nodeColor == BLACK) {
+						if (node_this->parent->node_color == BLACK) {
 							propagate_double_black(node_this->parent);
 						} else {
-							node_this->parent->nodeColor = BLACK;
+							node_this->parent->node_color = BLACK;
 						}
 					}
 				}
@@ -881,8 +880,8 @@ namespace ft {
 			void propagate_set_tree(node_type *node) {
 				node->tree = this;
 
-				if (node->leftNode) propagate_set_tree(node->leftNode);
-				if (node->rightNode) propagate_set_tree(node->rightNode);
+				if (node->left_node) propagate_set_tree(node->left_node);
+				if (node->right_node) propagate_set_tree(node->right_node);
 			}
 		};
 
@@ -922,18 +921,18 @@ namespace ft {
 			}
 
 			bst_iterator &operator++() {
-				if (node->rightNode != NULL) {
-					for (node = node->rightNode; node->leftNode != NULL && node->data != NULL; node = node->leftNode) {}
+				if (node->right_node != NULL) {
+					for (node = node->right_node; node->left_node != NULL && node->data != NULL; node = node->left_node) {}
 				} else {
 					while (true) {
 						if (node->parent == NULL) {
 							throw std::runtime_error("bst_iterator::operator++: no anchor node set (or properly set)");
 						}
 
-						if (node == node->parent->leftNode) {
+						if (node == node->parent->left_node) {
 							node = node->parent;
 							break;
-						} else if (node == node->parent->rightNode) {
+						} else if (node == node->parent->right_node) {
 							node = node->parent;
 						} else {
 							throw std::runtime_error("bst_iterator::operator++: could not determine current node side");
@@ -951,20 +950,20 @@ namespace ft {
 			}
 
 			bst_iterator &operator--() {
-				if (node->leftNode != NULL) {
+				if (node->left_node != NULL) {
 					// Yeah... We need to be able to decrement from end(), but... Not incrementing from begin() - 1 because it is not decrementable by definition
 					// "The begin iterator is not decrementable and the behavior is undefined if --container.begin() is evaluated." -- from cppreference.com - LegacyBidirectionalIterator
-					for (node = node->leftNode; node->rightNode != NULL && node->rightNode->data != NULL; node = node->rightNode) {}
+					for (node = node->left_node; node->right_node != NULL && node->right_node->data != NULL; node = node->right_node) {}
 				} else {
 					while (true) {
 						if (node->parent == NULL) {
 							throw std::runtime_error("bst_iterator::operator--: no anchor node set (or properly set)");
 						}
 
-						if (node == node->parent->rightNode) {
+						if (node == node->parent->right_node) {
 							node = node->parent;
 							break;
-						} else if (node == node->parent->leftNode) {
+						} else if (node == node->parent->left_node) {
 							node = node->parent;
 						} else {
 							throw std::runtime_error("bst_iterator::operator--: could not determine current node side");

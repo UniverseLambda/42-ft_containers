@@ -3,11 +3,11 @@
 #include "algorithm.hpp"
 #include "utility.hpp"
 
-#include "Vector.hpp"
+#include "vector.hpp"
 
-#include "Stack.hpp"
+#include "stack.hpp"
 
-#include "Map.hpp"
+#include "map.hpp"
 
 #include <ostream>
 #include <iostream>
@@ -43,7 +43,7 @@
 #endif
 
 #define VECTOR_TEST(X) X; \
-						checkVector(validity, testIdx++)
+						check_vector(validity, testIdx++)
 
 #define MAP_OP(X) X; check_map(map.begin(), map.end());
 
@@ -70,16 +70,16 @@
 # define DSP_ORIGIN(X) "ign_for_diff"
 #endif
 
-struct CompareExpected {
-	enum _CompareExpectedV {
+struct compare_expected {
+	enum _compare_expected_v {
 		EQUALS,
 		GREATER,
 		LOWER
 	};
 };
 
-struct ValiditySanitizer {
-	enum Origin {
+struct validity_sanitizer {
+	enum origin_v {
 		DFL,
 		CTOR,
 		CPY_CTOR,
@@ -87,25 +87,25 @@ struct ValiditySanitizer {
 		DTOR,
 	};
 
-	ULDL_TRACKER(ValiditySanitizer, tracker);
+	ULDL_TRACKER(validity_sanitizer, tracker);
 
 	bool valid;
-	Origin origin;
+	origin_v origin;
 	std::size_t idx;
 
 	char *mem_leak_check;
 
-	ValiditySanitizer(): ULDL_TRACKER_INIT(tracker) valid(true), origin(DFL), idx(-1), mem_leak_check(new char[1]) {}
-	ValiditySanitizer(size_t idx): ULDL_TRACKER_INIT(tracker) valid(true), origin(CTOR), idx(idx), mem_leak_check(new char[1]) {}
-	ValiditySanitizer(const ValiditySanitizer &other): ULDL_TRACKER_INIT(tracker) valid(other.valid), origin(CPY_CTOR), idx(other.idx), mem_leak_check(new char[1]) {}
+	validity_sanitizer(): ULDL_TRACKER_INIT(tracker) valid(true), origin(DFL), idx(-1), mem_leak_check(new char[1]) {}
+	validity_sanitizer(size_t idx): ULDL_TRACKER_INIT(tracker) valid(true), origin(CTOR), idx(idx), mem_leak_check(new char[1]) {}
+	validity_sanitizer(const validity_sanitizer &other): ULDL_TRACKER_INIT(tracker) valid(other.valid), origin(CPY_CTOR), idx(other.idx), mem_leak_check(new char[1]) {}
 
-	~ValiditySanitizer() {
+	~validity_sanitizer() {
 		valid = false;
 		origin = DTOR;
 		delete[] mem_leak_check;
 	}
 
-	ValiditySanitizer &operator=(const ValiditySanitizer &lhs) {
+	validity_sanitizer &operator=(const validity_sanitizer &lhs) {
 		valid = lhs.valid;
 		origin = CPY_OP;
 		idx = lhs.idx;
@@ -119,15 +119,15 @@ struct ValiditySanitizer {
 		}
 	}
 
-	bool operator==(const ValiditySanitizer &rhs) const {
+	bool operator==(const validity_sanitizer &rhs) const {
 		return (idx == rhs.idx);
 	}
 
-	bool operator<(const ValiditySanitizer &rhs) const {
+	bool operator<(const validity_sanitizer &rhs) const {
 		return (idx < rhs.idx);
 	}
 
-	static std::string originToString(Origin origin) {
+	static std::string originToString(validity_sanitizer::origin_v origin) {
 		switch (origin) {
 		case DFL:		return "DFL";
 		case CTOR:		return "CTOR";
@@ -139,17 +139,17 @@ struct ValiditySanitizer {
 	}
 };
 
-std::ostream &operator<<(std::ostream &os, const ValiditySanitizer::Origin origin) {
+std::ostream &operator<<(std::ostream &os, const validity_sanitizer::origin_v origin) {
 	(void)origin;
-	return (os << DSP_ORIGIN(ValiditySanitizer::originToString(origin)));
+	return (os << DSP_ORIGIN(validity_sanitizer::originToString(origin)));
 }
 
-std::ostream &operator<<(std::ostream &os, const ValiditySanitizer &san) {
+std::ostream &operator<<(std::ostream &os, const validity_sanitizer &san) {
 	return (os << " {idx: " << san.idx << ", origin: " << san.origin << ", valid: " << san.valid << "}");
 }
 
-void checkVector(const TEST_NAMESPACE::vector<ValiditySanitizer> &validity, std::size_t testIdx) {
-	typedef TEST_NAMESPACE::vector<ValiditySanitizer>::const_iterator iter;
+void check_vector(const TEST_NAMESPACE::vector<validity_sanitizer> &validity, std::size_t testIdx) {
+	typedef TEST_NAMESPACE::vector<validity_sanitizer>::const_iterator iter;
 
 	std::size_t idx = 0;
 
@@ -168,39 +168,39 @@ void checkVector(const TEST_NAMESPACE::vector<ValiditySanitizer> &validity, std:
 	}
 }
 
-void insertFromOtherVector(TEST_NAMESPACE::vector<ValiditySanitizer> &validity, std::size_t &testIdx) {
-	TEST_NAMESPACE::vector<ValiditySanitizer> validity1;
+void insert_from_other_vector(TEST_NAMESPACE::vector<validity_sanitizer> &validity, std::size_t &testIdx) {
+	TEST_NAMESPACE::vector<validity_sanitizer> validity1;
 
 
 	for (std::size_t i = 0; i < 10; ++i) {
-		validity1.push_back(ValiditySanitizer(i + 1000));
+		validity1.push_back(validity_sanitizer(i + 1000));
 	}
 
 	VECTOR_TEST(validity.insert(validity.begin() + 9, validity1.begin(), validity1.end()));
 }
 
-void assignFromOtherVector(TEST_NAMESPACE::vector<ValiditySanitizer> &validity, std::size_t &testIdx) {
-	TEST_NAMESPACE::vector<ValiditySanitizer> validity1;
+void assign_from_other_vector(TEST_NAMESPACE::vector<validity_sanitizer> &validity, std::size_t &testIdx) {
+	TEST_NAMESPACE::vector<validity_sanitizer> validity1;
 
 
 	for (std::size_t i = 0; i < 20; ++i) {
-		validity1.push_back(ValiditySanitizer(i + 6000));
+		validity1.push_back(validity_sanitizer(i + 6000));
 	}
 
 	VECTOR_TEST(validity.assign(validity1.begin(), validity1.end()));
 }
 
-void swapFromOtherVector(TEST_NAMESPACE::vector<ValiditySanitizer> &validity, std::size_t &testIdx) {
-	TEST_NAMESPACE::vector<ValiditySanitizer> validity1;
+void swap_from_other_vector(TEST_NAMESPACE::vector<validity_sanitizer> &validity, std::size_t &testIdx) {
+	TEST_NAMESPACE::vector<validity_sanitizer> validity1;
 
 	for (std::size_t i = 0; i < 20; ++i) {
-		validity1.push_back(ValiditySanitizer(i + 10000));
+		validity1.push_back(validity_sanitizer(i + 10000));
 	}
 
 	VECTOR_TEST(validity.swap(validity1));
 
 	for (std::size_t i = 0; i < 20; ++i) {
-		validity1.push_back(ValiditySanitizer(i + 10000 + 20));
+		validity1.push_back(validity_sanitizer(i + 10000 + 20));
 	}
 
 	VECTOR_TEST(TEST_NAMESPACE::swap(validity, validity1));
@@ -208,116 +208,116 @@ void swapFromOtherVector(TEST_NAMESPACE::vector<ValiditySanitizer> &validity, st
 }
 
 template<typename _Tp>
-void execCompareVector(const TEST_NAMESPACE::vector<_Tp> &v0, const TEST_NAMESPACE::vector<_Tp> &v1, CompareExpected::_CompareExpectedV result) {
-	if ((v0 == v1) == (result == CompareExpected::EQUALS)) {
+void exec_compare_vector(const TEST_NAMESPACE::vector<_Tp> &v0, const TEST_NAMESPACE::vector<_Tp> &v1, compare_expected::_compare_expected_v result) {
+	if ((v0 == v1) == (result == compare_expected::EQUALS)) {
 		std::cout << CONSOLE_GREEN << "== test passed :)" << CONSOLE_RESET << std::endl;
 	} else {
 		std::cout << CONSOLE_RED << "== test not passed :(" << CONSOLE_RESET << std::endl;
 	}
 
-	if ((v0 != v1) == (result != CompareExpected::EQUALS)) {
+	if ((v0 != v1) == (result != compare_expected::EQUALS)) {
 		std::cout << CONSOLE_GREEN << "!= test passed :)" << CONSOLE_RESET << std::endl;
 	} else {
 		std::cout << CONSOLE_RED << "!= test not passed :(" << CONSOLE_RESET << std::endl;
 	}
 
-	if ((v0 <= v1) == (result != CompareExpected::GREATER)) {
+	if ((v0 <= v1) == (result != compare_expected::GREATER)) {
 		std::cout << CONSOLE_GREEN << "<= test passed :)" << CONSOLE_RESET << std::endl;
 	} else {
 		std::cout << CONSOLE_RED << "<= test not passed :(" << CONSOLE_RESET << std::endl;
 	}
 
-	if ((v0 < v1) == (result == CompareExpected::LOWER)) {
+	if ((v0 < v1) == (result == compare_expected::LOWER)) {
 		std::cout << CONSOLE_GREEN << "< test passed :)" << CONSOLE_RESET << std::endl;
 	} else {
 		std::cout << CONSOLE_RED << "< test not passed :(" << CONSOLE_RESET << std::endl;
 	}
 
-	if ((v0 >= v1) == (result != CompareExpected::LOWER)) {
+	if ((v0 >= v1) == (result != compare_expected::LOWER)) {
 		std::cout << CONSOLE_GREEN << ">= test passed :)" << CONSOLE_RESET << std::endl;
 	} else {
 		std::cout << CONSOLE_RED << ">= test not passed :(" << CONSOLE_RESET << std::endl;
 	}
 
-	if ((v0 > v1) == (result == CompareExpected::GREATER)) {
+	if ((v0 > v1) == (result == compare_expected::GREATER)) {
 		std::cout << CONSOLE_GREEN << "> test passed :)" << CONSOLE_RESET << std::endl;
 	} else {
 		std::cout << CONSOLE_RED << "> test not passed :(" << CONSOLE_RESET << std::endl;
 	}
 }
 
-void compareVector(TEST_NAMESPACE::vector<ValiditySanitizer> &validity) {
-	TEST_NAMESPACE::vector<ValiditySanitizer> cmp(validity);
+void compare_vector(TEST_NAMESPACE::vector<validity_sanitizer> &validity) {
+	TEST_NAMESPACE::vector<validity_sanitizer> cmp(validity);
 
 	std::cout << "*** Compare (equals) ***" << std::endl;
-	execCompareVector(validity, cmp, CompareExpected::EQUALS);
+	exec_compare_vector(validity, cmp, compare_expected::EQUALS);
 
 	std::cout << "*** Compare (greater) ***" << std::endl;
 	validity.back().idx++;
-	execCompareVector(validity, cmp, CompareExpected::GREATER);
+	exec_compare_vector(validity, cmp, compare_expected::GREATER);
 
 	std::cout << "*** Compare (lower) ***" << std::endl;
 	validity.back().idx -= 2;
-	execCompareVector(validity, cmp, CompareExpected::LOWER);
+	exec_compare_vector(validity, cmp, compare_expected::LOWER);
 
 	std::cout << "*** Compare (lower size) ***" << std::endl;
 	validity.pop_back();
-	execCompareVector(validity, cmp, CompareExpected::LOWER);
+	exec_compare_vector(validity, cmp, compare_expected::LOWER);
 
 	std::cout << "*** Compare (greater size) ***" << std::endl;
 	validity.push_back(cmp.back());
 	validity.push_back(validity.back());
 	validity.back().idx--;
-	execCompareVector(validity, cmp, CompareExpected::GREATER);
+	exec_compare_vector(validity, cmp, compare_expected::GREATER);
 
 	std::cout << "*** Compare (both empty) ***" << std::endl;
 	validity.clear();
 	cmp.clear();
-	execCompareVector(validity, cmp, CompareExpected::EQUALS);
+	exec_compare_vector(validity, cmp, compare_expected::EQUALS);
 }
 
-void assignmentOperator(TEST_NAMESPACE::vector<ValiditySanitizer> &validity, std::size_t &testIdx) {
-	TEST_NAMESPACE::vector<ValiditySanitizer> v1;
+void assignment_operator(TEST_NAMESPACE::vector<validity_sanitizer> &validity, std::size_t &testIdx) {
+	TEST_NAMESPACE::vector<validity_sanitizer> v1;
 
 	// Java-style
 	for (int i = 0; i < 16; ++i) {
-		v1.push_back(ValiditySanitizer(i + 1000));
+		v1.push_back(validity_sanitizer(i + 1000));
 	}
 
 	VECTOR_TEST(validity = v1);
 }
 
-void testRemainingCtor(TEST_NAMESPACE::vector<ValiditySanitizer> &validity) {
-	TEST_NAMESPACE::vector<ValiditySanitizer> v0(validity.begin(), validity.end());
-	TEST_NAMESPACE::vector<ValiditySanitizer> v1(10, ValiditySanitizer(69420));
+void test_remaining_ctor(TEST_NAMESPACE::vector<validity_sanitizer> &validity) {
+	TEST_NAMESPACE::vector<validity_sanitizer> v0(validity.begin(), validity.end());
+	TEST_NAMESPACE::vector<validity_sanitizer> v1(10, validity_sanitizer(69420));
 
 	std::cout << "**** iterator CTOR TEST **** (vvvvvv)" << std::endl;
-	checkVector(v0, 0);
+	check_vector(v0, 0);
 
 	std::cout << "**** count-val CTOR TEST **** (vvvvvv)" << std::endl;
-	checkVector(v1, 0);
+	check_vector(v1, 0);
 }
 
-void vectorTest() {
-	typedef TEST_NAMESPACE::vector<ValiditySanitizer>::reverse_iterator riter;
-	TEST_NAMESPACE::vector<ValiditySanitizer> validity;
+void vector_test() {
+	typedef TEST_NAMESPACE::vector<validity_sanitizer>::reverse_iterator riter;
+	TEST_NAMESPACE::vector<validity_sanitizer> validity;
 	std::size_t testIdx = 0;
 
 	for (std::size_t i = 0; i < 5; ++i) {
-		validity.push_back(ValiditySanitizer(i));
+		validity.push_back(validity_sanitizer(i));
 	}
 
 	VECTOR_TEST();
 
-	VECTOR_TEST(validity.insert(validity.begin() + 5, ValiditySanitizer(666)));
+	VECTOR_TEST(validity.insert(validity.begin() + 5, validity_sanitizer(666)));
 
-	VECTOR_TEST(validity.insert(validity.begin() + 5, 6, ValiditySanitizer(667)));
+	VECTOR_TEST(validity.insert(validity.begin() + 5, 6, validity_sanitizer(667)));
 
-	VECTOR_TEST(validity.insert(validity.begin() + 2, 42, ValiditySanitizer(69420)));
+	VECTOR_TEST(validity.insert(validity.begin() + 2, 42, validity_sanitizer(69420)));
 
-	VECTOR_TEST(validity.insert(validity.begin() + 2, 0, ValiditySanitizer(99999)));
+	VECTOR_TEST(validity.insert(validity.begin() + 2, 0, validity_sanitizer(99999)));
 
-	VECTOR_TEST(insertFromOtherVector(validity, testIdx));
+	VECTOR_TEST(insert_from_other_vector(validity, testIdx));
 
 	VECTOR_TEST(validity.erase(validity.begin() + 5, validity.begin() + 10));
 
@@ -330,7 +330,7 @@ void vectorTest() {
 	VECTOR_TEST(validity.erase(validity.begin(), validity.end()));
 
 	for (std::size_t i = 0; i < 5; ++i) {
-		validity.push_back(ValiditySanitizer(i + 2000));
+		validity.push_back(validity_sanitizer(i + 2000));
 	}
 
 	VECTOR_TEST();
@@ -338,7 +338,7 @@ void vectorTest() {
 	VECTOR_TEST(validity.clear());
 
 	VECTOR_TEST(for (std::size_t i = 0; i < 20; ++i) {
-		validity.push_back(ValiditySanitizer(i + 3000));
+		validity.push_back(validity_sanitizer(i + 3000));
 	});
 
 	VECTOR_TEST(while (!validity.empty()) {
@@ -346,7 +346,7 @@ void vectorTest() {
 	});
 
 	VECTOR_TEST(for (std::size_t i = 0; i < 20; ++i) {
-		validity.push_back(ValiditySanitizer(i + 4000));
+		validity.push_back(validity_sanitizer(i + 4000));
 	});
 
 	std::cout << "== REV 0 ==" << std::endl;
@@ -359,10 +359,10 @@ void vectorTest() {
 		std::cout << "Rev'd " << it->idx << std::endl;
 	});
 
-	VECTOR_TEST(validity.assign(15, ValiditySanitizer(5000)));
-	VECTOR_TEST(assignFromOtherVector(validity, testIdx));
+	VECTOR_TEST(validity.assign(15, validity_sanitizer(5000)));
+	VECTOR_TEST(assign_from_other_vector(validity, testIdx));
 	VECTOR_TEST(validity.clear());
-	assignFromOtherVector(validity, testIdx);
+	assign_from_other_vector(validity, testIdx);
 
 	std::cout << "== at TEST ==" << std::endl;
 	VECTOR_TEST(for (std::size_t i = 0; i < validity.size(); ++i) {
@@ -411,20 +411,20 @@ void vectorTest() {
 	// Push_back, already tested.............................................
 	// Pop_back, already tested.................................................
 
-	VECTOR_TEST(validity.resize(15, ValiditySanitizer(7000)));
-	VECTOR_TEST(validity.resize(10, ValiditySanitizer(7000)));
-	VECTOR_TEST(validity.resize(16, ValiditySanitizer(7000)));
-	VECTOR_TEST(validity.resize(257, ValiditySanitizer(8000)));
-	VECTOR_TEST(swapFromOtherVector(validity, testIdx));
+	VECTOR_TEST(validity.resize(15, validity_sanitizer(7000)));
+	VECTOR_TEST(validity.resize(10, validity_sanitizer(7000)));
+	VECTOR_TEST(validity.resize(16, validity_sanitizer(7000)));
+	VECTOR_TEST(validity.resize(257, validity_sanitizer(8000)));
+	VECTOR_TEST(swap_from_other_vector(validity, testIdx));
 
-	VECTOR_TEST(compareVector(validity));
+	VECTOR_TEST(compare_vector(validity));
 
 	for (std::size_t i = 0; i < 20; ++i) {
-		validity.push_back(ValiditySanitizer(i));
+		validity.push_back(validity_sanitizer(i));
 	}
 
-	VECTOR_TEST(assignmentOperator(validity, testIdx));
-	VECTOR_TEST(testRemainingCtor(validity));
+	VECTOR_TEST(assignment_operator(validity, testIdx));
+	VECTOR_TEST(test_remaining_ctor(validity));
 }
 
 template<typename _Node>
@@ -440,10 +440,10 @@ void print_tree_branch(_Node *node, int depth) {
 		return;
 	}
 
-	std::cout << *(node->data) << " (" << (node->nodeColor == ft::__clsaad_impl::RED ? "R" : "B") << ")" << " ------- +" << std::endl;
+	std::cout << *(node->data) << " (" << (node->node_color == ft::__clsaad_impl::RED ? "R" : "B") << ")" << " ------- +" << std::endl;
 
-	print_tree_branch(node->rightNode, depth + 1);
-	print_tree_branch(node->leftNode, depth + 1);
+	print_tree_branch(node->right_node, depth + 1);
+	print_tree_branch(node->left_node, depth + 1);
 
 }
 
@@ -453,32 +453,32 @@ void sanitize_tree(_Node *root) {
 		return;
 	}
 
-	if (root->leftNode && root->leftNode->data != NULL) {
-		if (root->leftNode->parent != root) {
-			std::cerr << "Error at node " << *(root->leftNode->data) << std::endl;
+	if (root->left_node && root->left_node->data != NULL) {
+		if (root->left_node->parent != root) {
+			std::cerr << "Error at node " << *(root->left_node->data) << std::endl;
 			throw std::runtime_error("TREE_SANITIZER: Wrong parent");
 		}
 
-		if (root->leftNode->nodeColor == ft::__clsaad_impl::RED && root->leftNode->nodeColor == root->nodeColor) {
-			std::cerr << "Error at node " << *(root->leftNode->data) << std::endl;
+		if (root->left_node->node_color == ft::__clsaad_impl::RED && root->left_node->node_color == root->node_color) {
+			std::cerr << "Error at node " << *(root->left_node->data) << std::endl;
 			throw std::runtime_error("TREE_SANITIZER: Wrong color");
 		}
 	}
 
-	if (root->rightNode && root->rightNode->data != NULL) {
-		if (root->rightNode->parent != root) {
-			std::cerr << "Error at node " << *(root->rightNode->data) << std::endl;
+	if (root->right_node && root->right_node->data != NULL) {
+		if (root->right_node->parent != root) {
+			std::cerr << "Error at node " << *(root->right_node->data) << std::endl;
 			throw std::runtime_error("TREE_SANITIZER: Wrong parent");
 		}
 
-		if (root->rightNode->nodeColor == ft::__clsaad_impl::RED && root->rightNode->nodeColor == root->nodeColor) {
-			std::cerr << "Error at node " << *(root->rightNode->data) << std::endl;
+		if (root->right_node->node_color == ft::__clsaad_impl::RED && root->right_node->node_color == root->node_color) {
+			std::cerr << "Error at node " << *(root->right_node->data) << std::endl;
 			throw std::runtime_error("TREE_SANITIZER: Wrong color");
 		}
 	}
 
-	sanitize_tree(root->leftNode);
-	sanitize_tree(root->rightNode);
+	sanitize_tree(root->left_node);
+	sanitize_tree(root->right_node);
 }
 
 void test_tree() {
@@ -808,7 +808,7 @@ void preserving_map_test(_Map &map) {
 
 	std::cout << "** value_comp test **" << std::endl;
 	typename map_type::value_compare value_comp = map.value_comp();
-	if (value_comp(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("0", ValiditySanitizer(-1)), TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("1", ValiditySanitizer(-1))))
+	if (value_comp(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("0", validity_sanitizer(-1)), TEST_NAMESPACE::pair<std::string, validity_sanitizer>("1", validity_sanitizer(-1))))
 		std::cout << "works? " << CONSOLE_GREEN << "yes" << CONSOLE_RESET << std::endl;
 	else
 		std::cout << "works? " << CONSOLE_RED << "no" << CONSOLE_RESET << std::endl;
@@ -816,75 +816,75 @@ void preserving_map_test(_Map &map) {
 
 	std::cout << "** comparing operators test **" << std::endl;
 	{
-		TEST_NAMESPACE::map<std::string, ValiditySanitizer> _smaller;
-		TEST_NAMESPACE::map<std::string, ValiditySanitizer> _just_smaller;
-		TEST_NAMESPACE::map<std::string, ValiditySanitizer> _just_bigger;
-		TEST_NAMESPACE::map<std::string, ValiditySanitizer> _bigger;
-		TEST_NAMESPACE::map<std::string, ValiditySanitizer> _nearly_totally_different;
-		TEST_NAMESPACE::map<std::string, ValiditySanitizer> _totally_different;
+		TEST_NAMESPACE::map<std::string, validity_sanitizer> _smaller;
+		TEST_NAMESPACE::map<std::string, validity_sanitizer> _just_smaller;
+		TEST_NAMESPACE::map<std::string, validity_sanitizer> _just_bigger;
+		TEST_NAMESPACE::map<std::string, validity_sanitizer> _bigger;
+		TEST_NAMESPACE::map<std::string, validity_sanitizer> _nearly_totally_different;
+		TEST_NAMESPACE::map<std::string, validity_sanitizer> _totally_different;
 
-		_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
-		_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
-		_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
-		_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
-		_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
+		_smaller.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur ", validity_sanitizer(-1)));
+		_smaller.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur/", validity_sanitizer(-1)));
+		_smaller.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur0", validity_sanitizer(-1)));
+		_smaller.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur1", validity_sanitizer(-1)));
+		_smaller.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur2", validity_sanitizer(-1)));
 
-		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
-		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
-		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
-		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
-		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
-		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur3", ValiditySanitizer(-1)));
-		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur4", ValiditySanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur ", validity_sanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur/", validity_sanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur0", validity_sanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur1", validity_sanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur2", validity_sanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur3", validity_sanitizer(-1)));
+		_just_smaller.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur4", validity_sanitizer(-1)));
 
-		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
-		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
-		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
-		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
-		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
-		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur3", ValiditySanitizer(-1)));
-		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur4", ValiditySanitizer(-1)));
-		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur6", ValiditySanitizer(-1)));
-		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur7", ValiditySanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur ", validity_sanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur/", validity_sanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur0", validity_sanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur1", validity_sanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur2", validity_sanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur3", validity_sanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur4", validity_sanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur6", validity_sanitizer(-1)));
+		_just_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur7", validity_sanitizer(-1)));
 
-		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur ", ValiditySanitizer(-1)));
-		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur/", ValiditySanitizer(-1)));
-		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
-		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur1", ValiditySanitizer(-1)));
-		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur2", ValiditySanitizer(-1)));
-		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur3", ValiditySanitizer(-1)));
-		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur4", ValiditySanitizer(-1)));
-		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur6", ValiditySanitizer(-1)));
-		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur7", ValiditySanitizer(-1)));
-		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur8", ValiditySanitizer(-1)));
-		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur9", ValiditySanitizer(-1)));
-		_bigger.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur:", ValiditySanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur ", validity_sanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur/", validity_sanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur0", validity_sanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur1", validity_sanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur2", validity_sanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur3", validity_sanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur4", validity_sanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur6", validity_sanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur7", validity_sanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur8", validity_sanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur9", validity_sanitizer(-1)));
+		_bigger.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur:", validity_sanitizer(-1)));
 
-		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("frofbsjl", ValiditySanitizer(-1)));
-		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("52014520", ValiditySanitizer(-1)));
-		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("Bonchouuur0", ValiditySanitizer(-1)));
-		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("-09876545678_)(", ValiditySanitizer(-1)));
-		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("(*&^%^&*())", ValiditySanitizer(-1)));
-		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("JJHJBHJBN", ValiditySanitizer(-1)));
-		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("JJHJBHJBNfjrk", ValiditySanitizer(-1)));
-		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("ghirufghh", ValiditySanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("frofbsjl", validity_sanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("52014520", validity_sanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("Bonchouuur0", validity_sanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("-09876545678_)(", validity_sanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("(*&^%^&*())", validity_sanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("JJHJBHJBN", validity_sanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("JJHJBHJBNfjrk", validity_sanitizer(-1)));
+		_nearly_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("ghirufghh", validity_sanitizer(-1)));
 
-		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("frofbsjl", ValiditySanitizer(-1)));
-		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("52014520", ValiditySanitizer(-1)));
-		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("fjeiofhoehfoejfh", ValiditySanitizer(-1)));
-		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("-09876545678_)(", ValiditySanitizer(-1)));
-		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("(*&^%^&*())", ValiditySanitizer(-1)));
-		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("JJHJBHJBN", ValiditySanitizer(-1)));
-		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("JJHJBHJBNfjrk", ValiditySanitizer(-1)));
-		_totally_different.insert(TEST_NAMESPACE::pair<std::string, ValiditySanitizer>("ghirufghh", ValiditySanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("frofbsjl", validity_sanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("52014520", validity_sanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("fjeiofhoehfoejfh", validity_sanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("-09876545678_)(", validity_sanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("(*&^%^&*())", validity_sanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("JJHJBHJBN", validity_sanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("JJHJBHJBNfjrk", validity_sanitizer(-1)));
+		_totally_different.insert(TEST_NAMESPACE::pair<std::string, validity_sanitizer>("ghirufghh", validity_sanitizer(-1)));
 
 		// Yeah, weird-ass compiler ain't capable to find the right if it's not const *smh*
-		const TEST_NAMESPACE::map<std::string, ValiditySanitizer> &smaller = _smaller;
-		const TEST_NAMESPACE::map<std::string, ValiditySanitizer> &just_smaller = _just_smaller;
-		const TEST_NAMESPACE::map<std::string, ValiditySanitizer> &just_bigger = _just_bigger;
-		const TEST_NAMESPACE::map<std::string, ValiditySanitizer> &bigger = _bigger;
-		const TEST_NAMESPACE::map<std::string, ValiditySanitizer> &nearly_totally_different = _nearly_totally_different;
-		const TEST_NAMESPACE::map<std::string, ValiditySanitizer> &totally_different = _totally_different;
+		const TEST_NAMESPACE::map<std::string, validity_sanitizer> &smaller = _smaller;
+		const TEST_NAMESPACE::map<std::string, validity_sanitizer> &just_smaller = _just_smaller;
+		const TEST_NAMESPACE::map<std::string, validity_sanitizer> &just_bigger = _just_bigger;
+		const TEST_NAMESPACE::map<std::string, validity_sanitizer> &bigger = _bigger;
+		const TEST_NAMESPACE::map<std::string, validity_sanitizer> &nearly_totally_different = _nearly_totally_different;
+		const TEST_NAMESPACE::map<std::string, validity_sanitizer> &totally_different = _totally_different;
 
 
 		std::cout << "[+] operator==" << std::endl;
@@ -1015,7 +1015,7 @@ void preserving_map_test(_Map &map) {
 	}
 }
 
-void clear_map_test(TEST_NAMESPACE::map<std::string, ValiditySanitizer> &map) {
+void clear_map_test(TEST_NAMESPACE::map<std::string, validity_sanitizer> &map) {
 	bool already_failed = false;
 	map.clear();
 	if (map.begin() != map.end()) {
@@ -1076,7 +1076,7 @@ void insert_test(_Map &map, const _Key &key, const _Value &value, typename _Map:
 }
 
 void test_map() {
-	typedef TEST_NAMESPACE::map<std::string, ValiditySanitizer> map_type;
+	typedef TEST_NAMESPACE::map<std::string, validity_sanitizer> map_type;
 
 	map_type map;
 	std::size_t idx = 0;
@@ -1084,7 +1084,7 @@ void test_map() {
 	std::cout << "======= MAP - ALTERING TESTS =======" << std::endl;
 
 	std::cout << "** Basic insert on empty map **" << std::endl;
-	map.insert(map_type::value_type("Bonchouuur0", ValiditySanitizer(idx++)));
+	map.insert(map_type::value_type("Bonchouuur0", validity_sanitizer(idx++)));
 
 	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
 		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
@@ -1093,7 +1093,7 @@ void test_map() {
 
 
 	std::cout << "** Basic insert on map with size == 1 **" << std::endl;
-	map.insert(map_type::value_type("Bonchouuur1", ValiditySanitizer(idx++)));
+	map.insert(map_type::value_type("Bonchouuur1", validity_sanitizer(idx++)));
 
 	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
 		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
@@ -1102,8 +1102,8 @@ void test_map() {
 	check_map(map.begin(), map.end());
 
 	std::cout << "** 2 consecutive basic inserts on map with size > 1 **" << std::endl;
-	map.insert(map_type::value_type("Bonchouuur3", ValiditySanitizer(idx++ + 1)));
-	map.insert(map_type::value_type("Bonchouuur2", ValiditySanitizer(idx++ - 1)));
+	map.insert(map_type::value_type("Bonchouuur3", validity_sanitizer(idx++ + 1)));
+	map.insert(map_type::value_type("Bonchouuur2", validity_sanitizer(idx++ - 1)));
 
 	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
 		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
@@ -1145,27 +1145,27 @@ void test_map() {
 	std::cout << "** insert test post clear **" << std::endl;
 
 	std::cout << "[+] insert on empty map..." << std::endl;
-	insert_test(map, "val_san0", ValiditySanitizer(idx++), true);
+	insert_test(map, "val_san0", validity_sanitizer(idx++), true);
 
 	std::cout << "[+] insert already existing key (size = 1)..." << std::endl;
-	insert_test(map, "val_san0", ValiditySanitizer(idx), false);
+	insert_test(map, "val_san0", validity_sanitizer(idx), false);
 
 	std::cout << "[+] insert on non-empty map (size = 1)..." << std::endl;
-	insert_test(map, "val_san1", ValiditySanitizer(idx++), true);
+	insert_test(map, "val_san1", validity_sanitizer(idx++), true);
 
 	std::cout << "[+] insert already existing key (size = 2)..." << std::endl;
-	insert_test(map, "val_san1", ValiditySanitizer(idx), false);
+	insert_test(map, "val_san1", validity_sanitizer(idx), false);
 
 	{
 		std::cout << "[+] insert from iterators" << std::endl;
 		// Yep. Using the standard vector to fill it, just so we can confirm it works
-		std::vector< TEST_NAMESPACE::pair<std::string, ValiditySanitizer> > pairs;
+		std::vector< TEST_NAMESPACE::pair<std::string, validity_sanitizer> > pairs;
 
 		for (int i = 0; i < 8; ++i) {
 			std::stringstream ss;
 
 			ss << "val_san" << (i + 4);
-			pairs.push_back(TEST_NAMESPACE::make_pair(ss.str(), ValiditySanitizer((idx++) + i)));
+			pairs.push_back(TEST_NAMESPACE::make_pair(ss.str(), validity_sanitizer((idx++) + i)));
 		}
 
 		map.insert(pairs.begin(), pairs.end());
@@ -1173,14 +1173,14 @@ void test_map() {
 	}
 
 	std::cout << "[+] insert with hint next to expected place..." << std::endl;
-	insert_test(map, "val_san2", ValiditySanitizer(idx++), ++++(map.begin()));
+	insert_test(map, "val_san2", validity_sanitizer(idx++), ++++(map.begin()));
 
 	std::cout << "[+] insert with hint away to expected place..." << std::endl;
-	insert_test(map, "val_san3", ValiditySanitizer(idx++), map.begin());
+	insert_test(map, "val_san3", validity_sanitizer(idx++), map.begin());
 
 	std::cout << "** erase test **" << std::endl;
 	std::cout << "[+] insert with hint away to expected place..." << std::endl;
-	insert_test(map, "val_san3", ValiditySanitizer(idx++), map.begin());
+	insert_test(map, "val_san3", validity_sanitizer(idx++), map.begin());
 
 	std::cout << "[+] erase iterator 0" << std::endl;
 	map.erase(map.begin());
@@ -1210,11 +1210,11 @@ void test_map() {
 	std::cout << "** swap test **" << std::endl;
 	{
 		map_type::value_type pair[5] = {
-			map_type::value_type("swap_vsan0", ValiditySanitizer(0)),
-			map_type::value_type("swap_vsan1", ValiditySanitizer(1)),
-			map_type::value_type("swap_vsan2", ValiditySanitizer(2)),
-			map_type::value_type("swap_vsan3", ValiditySanitizer(3)),
-			map_type::value_type("swap_vsan4", ValiditySanitizer(4)),
+			map_type::value_type("swap_vsan0", validity_sanitizer(0)),
+			map_type::value_type("swap_vsan1", validity_sanitizer(1)),
+			map_type::value_type("swap_vsan2", validity_sanitizer(2)),
+			map_type::value_type("swap_vsan3", validity_sanitizer(3)),
+			map_type::value_type("swap_vsan4", validity_sanitizer(4)),
 		};
 		map_type other(&pair[0], &pair[5]);
 
@@ -1263,11 +1263,11 @@ int main(void) {
 
 	std::cout << "TEST_NAMESPACE=" << MACRO_TO_STRING(TEST_NAMESPACE) << std::endl;
 
-	vectorTest();
+	vector_test();
 
-	TEST_NAMESPACE::stack<ValiditySanitizer> s;
-	s.push(ValiditySanitizer(1));
-	s.push(ValiditySanitizer(2));
+	TEST_NAMESPACE::stack<validity_sanitizer> s;
+	s.push(validity_sanitizer(1));
+	s.push(validity_sanitizer(2));
 	s.pop();
 	s.pop();
 

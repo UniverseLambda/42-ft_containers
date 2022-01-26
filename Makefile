@@ -16,21 +16,18 @@ endif
 
 LD := $(CXX)
 
-# SAN_FLAGS := -fsanitize=address -fsanitize=undefined
+SAN_FLAGS := -fsanitize=address -fsanitize=undefined
 
 CXX_FLAGS := -DDSP_CHECK_VAL=false -g3 -Wall -Wextra -Werror -std=c++98 -I. $(SAN_FLAGS)
-LD_FLAGS := $(LD_FLAGS) -g3 -Wall -Wextra -Werror -std=c++98 $(SAN_FLAGS)
 LD_LIBS :=
 
-OBJS :=			$(SRCS:.cpp=.o)
+all:			$(NAME) $(STD_NAME)
 
-all:			$(NAME)
+$(NAME):
+	$(CXX) $(CXX_FLAGS) -o $@ $(SRCS) $(LD_LIBS)
 
-$(NAME):		$(OBJS)
-	$(LD) $(LD_FLAGS) -o $@ $(OBJS) $(LD_LIBS)
-
-%.o: %.cpp		$(INCS)
-	$(CXX) $(CXX_FLAGS) -c -o $@ $<
+$(STD_NAME):
+	$(CXX) $(CXX_FLAGS) -DTEST_NAMESPACE=std -o $@ $(SRCS) $(LD_LIBS)
 
 clean:
 	rm -f $(OBJS)
@@ -46,13 +43,4 @@ re: 			distclean all
 
 uldl:			LD_LIBS += -L. -luldl
 uldl:			CXX_FLAGS += -DULDL_DBG
-uldl:			$(NAME)
-
-std:			$(STD_NAME)
-
-$(STD_NAME):	CXX_FLAGS += -DTEST_NAMESPACE=std
-$(STD_NAME):	$(OBJS)
-	$(LD) $(LD_FLAGS) -o $@ $(OBJS) $(LD_LIBS)
-
-leak_test:		leak_test.cpp Vector.hpp
-	$(CXX) -g3 -Wall -Wextra -Werror -std=c++98 leak_test.cpp -o leak_test -luldl
+uldl:			all

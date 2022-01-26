@@ -1,7 +1,6 @@
 #!/bin/sh
-make fclean std
+make fclean uldl
 ./std_test > std_result
-make fclean all
 ./container_test > ft_result
 
 diff ft_result std_result | less

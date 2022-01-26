@@ -1,8 +1,8 @@
 #pragma once
 
-#ifndef __FT_BITS_INC
-# error "You included a bits header"
-#endif
+// #ifndef __FT_BITS_INC
+// # error "You included a bits header"
+// #endif
 
 #include "../iterator.hpp"
 

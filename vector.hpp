@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "bits/PtrIterator.hpp"
+#include "bits/ptr_iterator.hpp"
 
 #include "iterator.hpp"
 
@@ -23,70 +23,72 @@ namespace ft {
 		typedef const value_type &const_reference;
 		typedef typename _Allocator::pointer pointer;
 		typedef typename _Allocator::const_pointer const_pointer;
-		typedef __clsaad_impl::PtrIterator<value_type, vector<value_type, allocator_type> > iterator;
-		typedef __clsaad_impl::PtrIterator<const value_type, vector<value_type, allocator_type> > const_iterator;
+		typedef __clsaad_impl::ptr_iterator<value_type, vector<value_type, allocator_type> > iterator;
+		typedef __clsaad_impl::ptr_iterator<const value_type, vector<value_type, allocator_type> > const_iterator;
 		typedef ft::reverse_iterator<iterator> reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
 	private:
-		allocator_type mAlloc;
-		size_type mCapacity;
-		pointer mData;
-		size_type mSize;
+		// Well, can't name just capacity, data and size (because, you know, methods), so...
+		// For this container, I'll just put m_ in front of every member variable
+		allocator_type m_alloc;
+		size_type m_capacity;
+		pointer m_data;
+		size_type m_size;
 
 	public:
 		vector():
-			mAlloc(),
-			mCapacity(16),
-			mData(mAlloc.allocate(mCapacity)),
-			mSize(0) {}
+			m_alloc(),
+			m_capacity(16),
+			m_data(m_alloc.allocate(m_capacity)),
+			m_size(0) {}
 
 		explicit vector(const allocator_type &alloc):
-			mAlloc(alloc),
-			mCapacity(16),
-			mData(mAlloc.allocate(mCapacity)),
-			mSize(0) {}
+			m_alloc(alloc),
+			m_capacity(16),
+			m_data(m_alloc.allocate(m_capacity)),
+			m_size(0) {}
 
 		explicit vector(size_type count, const value_type &value = value_type(), const allocator_type &alloc = allocator_type()):
-			mAlloc(alloc),
-			mCapacity(calc_capacity(count)),
-			mData(mAlloc.allocate(mCapacity)),
-			mSize(count) {
+			m_alloc(alloc),
+			m_capacity(calc_capacity(count)),
+			m_data(m_alloc.allocate(m_capacity)),
+			m_size(count) {
 
 			for (size_type i = 0; i < count; ++i) {
-				mAlloc.construct(&mData[i], value);
+				m_alloc.construct(&m_data[i], value);
 			}
 		}
 
 		explicit vector(size_type count):
-			mAlloc(),
-			mCapacity(calc_capacity(count)),
-			mData(mAlloc.allocate(mCapacity)),
-			mSize(count) {
+			m_alloc(),
+			m_capacity(calc_capacity(count)),
+			m_data(m_alloc.allocate(m_capacity)),
+			m_size(count) {
 
 			for (size_type i = 0; i < count; ++i) {
-				mAlloc.construct(&(mData[i]));
+				m_alloc.construct(&(m_data[i]));
 			}
 		}
 
 		template<typename _InputIt>
 		vector(_InputIt first, _InputIt last, const allocator_type &alloc = allocator_type()):
-			mAlloc(alloc),
-			mCapacity(16),
-			mData(mAlloc.allocate(mCapacity)),
-			mSize(0) {
+			m_alloc(alloc),
+			m_capacity(16),
+			m_data(m_alloc.allocate(m_capacity)),
+			m_size(0) {
 			for (; first != last; ++first) {
 				push_back(*first);
 			}
 		}
 
-		vector(const vector &other): mAlloc(other.mAlloc) {
-			mData = mAlloc.allocate(other.mCapacity);
-			mSize = other.mSize;
-			mCapacity = other.mCapacity;
+		vector(const vector &other): m_alloc(other.m_alloc) {
+			m_data = m_alloc.allocate(other.m_capacity);
+			m_size = other.m_size;
+			m_capacity = other.m_capacity;
 
-			for (size_type i = 0; i < mSize; ++i) {
-				mAlloc.construct(&(mData[i]), other.mData[i]);
+			for (size_type i = 0; i < m_size; ++i) {
+				m_alloc.construct(&(m_data[i]), other.m_data[i]);
 			}
 		}
 
@@ -97,114 +99,114 @@ namespace ft {
 		vector &operator=(const vector &rhs) {
 			free_data();
 
-			mAlloc = rhs.mAlloc;
-			mData = mAlloc.allocate(rhs.mCapacity);
-			mSize = rhs.mSize;
-			mCapacity = rhs.mCapacity;
+			m_alloc = rhs.m_alloc;
+			m_data = m_alloc.allocate(rhs.m_capacity);
+			m_size = rhs.m_size;
+			m_capacity = rhs.m_capacity;
 
 
-			for (size_type i = 0; i < mSize; ++i) {
-				mAlloc.construct(&mData[i], rhs.mData[i]);
+			for (size_type i = 0; i < m_size; ++i) {
+				m_alloc.construct(&m_data[i], rhs.m_data[i]);
 			}
 
 			return (*this);
 		}
 
 		void assign(size_type count, const _Tp &value) {
-			size_type validCopies = ensure_replacing_allocation(count);
-			for (size_type i = 0; i < mSize; ++i) {
-				if (i < validCopies) {
-					mData[i] = value;
+			size_type valid_copies = ensure_replacing_allocation(count);
+			for (size_type i = 0; i < m_size; ++i) {
+				if (i < valid_copies) {
+					m_data[i] = value;
 				} else {
-					mAlloc.construct(&mData[i], value);
+					m_alloc.construct(&m_data[i], value);
 				}
 			}
 		}
 
 		template<typename _InputIt>
 		void assign(_InputIt first, _InputIt last) {
-			size_type previousSize = mSize;
+			size_type previous_size = m_size;
 
-			mSize = 0;
-			for (size_type i = 0; i < previousSize && first != last; ++first, ++i, ++mSize) {
-				mData[i] = *first;
+			m_size = 0;
+			for (size_type i = 0; i < previous_size && first != last; ++first, ++i, ++m_size) {
+				m_data[i] = *first;
 			}
 
 			for (; first != last; ++first) {
 				push_back(*first);
 			}
 
-			while (previousSize-- > mSize) {
-				mAlloc.destroy(&(mData[previousSize]));
+			while (previous_size-- > m_size) {
+				m_alloc.destroy(&(m_data[previous_size]));
 			}
 		}
 
 		allocator_type get_allocator() const {
-			return mAlloc;
+			return m_alloc;
 		}
 
 		reference at(size_type idx) {
-			if (idx >= mSize) {
-				throw std::out_of_range("Vector::at: idx out-of-range");
+			if (idx >= m_size) {
+				throw std::out_of_range("vector::at: idx out-of-range");
 			}
 
-			return mData[idx];
+			return m_data[idx];
 		}
 
 		const_reference at(size_type idx) const {
-			if (idx >= mSize) {
-				throw std::out_of_range("Vector::at: idx out-of-range");
+			if (idx >= m_size) {
+				throw std::out_of_range("vector::at: idx out-of-range");
 			}
 
-			return mData[idx];
+			return m_data[idx];
 		}
 
 		reference operator[](size_type idx) {
-			return mData[idx];
+			return m_data[idx];
 		}
 
 		const_reference operator[](size_type idx) const {
-			return mData[idx];
+			return m_data[idx];
 		}
 
 		reference front() {
-			return mData[0];
+			return m_data[0];
 		}
 
 		const_reference front() const {
-			return mData[0];
+			return m_data[0];
 		}
 
 		reference back() {
-			return mData[mSize - 1];
+			return m_data[m_size - 1];
 		}
 
 		const_reference back() const {
-			return mData[mSize - 1];
+			return m_data[m_size - 1];
 		}
 
 		_Tp *data() {
-			return mData;
+			return m_data;
 		}
 
 		const _Tp *data() const {
-			return mData;
+			return m_data;
 		}
 
 		iterator begin() {
-			return iterator(mData);
+			return iterator(m_data);
 		}
 
 		const_iterator begin() const {
-			return const_iterator(mData);
+			return const_iterator(m_data);
 		}
 
 		iterator end() {
-			return iterator(mData + mSize);
+			return iterator(m_data + m_size);
 		}
 
 		const_iterator end() const {
-			return const_iterator(mData + mSize);
+			return const_iterator(m_data + m_size);
 		}
 
 		reverse_iterator rbegin() {
@@ -224,54 +226,54 @@ namespace ft {
 		}
 
 		bool empty() const {
-			return (mSize == 0);
+			return (m_size == 0);
 		}
 
 		size_type size() const {
-			return mSize;
+			return m_size;
 		}
 
 		size_type max_size() const {
 			return std::numeric_limits<difference_type>::max() / sizeof(_Tp);
 		}
 
-		void reserve(size_type newCapacity) {
-			if (newCapacity <= mCapacity) {
+		void reserve(size_type new_capacity) {
+			if (new_capacity <= m_capacity) {
 				return;
 			}
 
-			if (newCapacity > max_size()) {
-				throw std::length_error("Vector::reserve: requested capacity greater than max_size()");
+			if (new_capacity > max_size()) {
+				throw std::length_error("vector::reserve: requested capacity greater than max_size()");
 			}
 
-			newCapacity = calc_capacity(newCapacity);
-			_Tp *newData = mAlloc.allocate(newCapacity);
+			new_capacity = calc_capacity(new_capacity);
+			_Tp *new_data = m_alloc.allocate(new_capacity);
 
-			move_data(newData);
+			move_data(new_data);
 
-			mAlloc.deallocate(mData, mCapacity);
+			m_alloc.deallocate(m_data, m_capacity);
 
-			mData = newData;
-			mCapacity = newCapacity;
+			m_data = new_data;
+			m_capacity = new_capacity;
 		}
 
 		size_type capacity() const {
-			return mCapacity;
+			return m_capacity;
 		}
 
 		void clear() {
-			for (size_type i = 0; i < mSize; ++i) {
-				mAlloc.destroy(&mData[i]);
+			for (size_type i = 0; i < m_size; ++i) {
+				m_alloc.destroy(&m_data[i]);
 			}
 
-			mSize = 0;
+			m_size = 0;
 		}
 
 		iterator insert(iterator pos, const _Tp &value) {
 			size_type idx = pos - begin();
 
 			insert(pos, 1, value);
-			return iterator(mData + idx);
+			return iterator(m_data + idx);
 		}
 
 		void insert(iterator pos, size_type count, const _Tp &value) {
@@ -280,7 +282,7 @@ namespace ft {
 			make_hole(idx, count);
 
 			for (size_type i = 0; i < count; ++i) {
-				mAlloc.construct(&mData[idx + i], value);
+				m_alloc.construct(&m_data[idx + i], value);
 			}
 		}
 
@@ -289,18 +291,18 @@ namespace ft {
 			for (size_type idx = pos - begin(); first != last; ++idx, ++first) {
 				make_hole(idx, 1);
 
-				mAlloc.construct(&mData[idx], *first);
+				m_alloc.construct(&m_data[idx], *first);
 			}
 		}
 
 		iterator erase(iterator pos) {
-			for (size_type i = pos - begin(); i < (mSize - 1); ++i) {
-				mData[i] = mData[i + 1];
+			for (size_type i = pos - begin(); i < (m_size - 1); ++i) {
+				m_data[i] = m_data[i + 1];
 			}
 
-			--mSize;
+			--m_size;
 
-			mAlloc.destroy(&mData[mSize]);
+			m_alloc.destroy(&m_data[m_size]);
 
 			// Yeah, nice trick lmao
 			return pos;
@@ -310,64 +312,49 @@ namespace ft {
 			size_type erased = last - first;
 			size_type idx = first - begin();
 
-			for (size_type i = idx + erased; i < mSize; ++i) {
-				mData[i - erased] = mData[i];
+			for (size_type i = idx + erased; i < m_size; ++i) {
+				m_data[i - erased] = m_data[i];
 			}
 
 			for (size_type i = 0; i < erased; ++i) {
-				mAlloc.destroy(&mData[(mSize - erased) + i]);
+				m_alloc.destroy(&m_data[(m_size - erased) + i]);
 			}
 
-			mSize -= erased;
+			m_size -= erased;
 
-			return iterator(mData + idx);
+			return iterator(m_data + idx);
 		}
 
 		void push_back(const _Tp &value) {
 			reserve(size() + 1);
 
-			mAlloc.construct(&mData[mSize], value);
-			++mSize;
+			m_alloc.construct(&m_data[m_size], value);
+			++m_size;
 		}
 
 		void pop_back() {
-			--mSize;
-			mAlloc.destroy(&mData[mSize]);
+			--m_size;
+			m_alloc.destroy(&m_data[m_size]);
 		}
 
 		void resize(size_type count, _Tp value = _Tp()) {
 			reserve(count);
-			if (count < mSize) {
-				while (mSize > count) {
+			if (count < m_size) {
+				while (m_size > count) {
 					pop_back();
 				}
 			} else {
-				for (size_type i = mSize; i < count; ++i) {
+				for (size_type i = m_size; i < count; ++i) {
 					push_back(value);
 				}
 			}
 		}
 
 		void swap(vector &other) {
-			allocator_type allocator;
-			size_type capacity;
-			pointer data;
-			size_type size;
-
-			allocator = mAlloc;
-			capacity = mCapacity;
-			data = mData;
-			size = mSize;
-
-			mAlloc = other.mAlloc;
-			mCapacity = other.mCapacity;
-			mData = other.mData;
-			mSize = other.mSize;
-
-			other.mAlloc = allocator;
-			other.mCapacity = capacity;
-			other.mData = data;
-			other.mSize = size;
+			std::swap(m_alloc, other.m_alloc);
+			std::swap(m_capacity, other.m_capacity);
+			std::swap(m_data, other.m_data);
+			std::swap(m_size, other.m_size);
 		}
 
 	private:
@@ -386,10 +373,10 @@ namespace ft {
 		}
 
 		void free_data() {
-			for (size_type i = 0; i < mSize; ++i) {
-				mAlloc.destroy(&(mData[i]));
+			for (size_type i = 0; i < m_size; ++i) {
+				m_alloc.destroy(&(m_data[i]));
 			}
-			mAlloc.deallocate(mData, mCapacity);
+			m_alloc.deallocate(m_data, m_capacity);
 		}
 
 		void make_hole(size_type idx, size_type holeSize = 1) {
@@ -397,65 +384,65 @@ namespace ft {
 				return;
 			}
 
-			if (mSize + holeSize > mCapacity) {
-				size_type newCapacity = calc_capacity(mSize + holeSize);
+			if (m_size + holeSize > m_capacity) {
+				size_type new_capacity = calc_capacity(m_size + holeSize);
 
-				_Tp *newData = mAlloc.allocate(newCapacity);
+				_Tp *new_data = m_alloc.allocate(new_capacity);
 
-				for (size_type i = 0; i < mSize; ++i) {
-					mAlloc.construct(&newData[i + (holeSize * (i >= idx))], mData[i]);
-					mAlloc.destroy(&mData[i]);
+				for (size_type i = 0; i < m_size; ++i) {
+					m_alloc.construct(&new_data[i + (holeSize * (i >= idx))], m_data[i]);
+					m_alloc.destroy(&m_data[i]);
 				}
 
-				mAlloc.deallocate(mData, mCapacity);
+				m_alloc.deallocate(m_data, m_capacity);
 
-				mCapacity = newCapacity;
-				mData = newData;
+				m_capacity = new_capacity;
+				m_data = new_data;
 			} else {
-				for (size_type i = mSize; i > idx; --i) {
-					if ((i + holeSize) <= mSize) {
-						mData[(i - 1) + holeSize] = mData[(i - 1)];
+				for (size_type i = m_size; i > idx; --i) {
+					if ((i + holeSize) <= m_size) {
+						m_data[(i - 1) + holeSize] = m_data[(i - 1)];
 					} else {
-						mAlloc.construct(&mData[(i - 1) + holeSize], mData[(i - 1)]);
+						m_alloc.construct(&m_data[(i - 1) + holeSize], m_data[(i - 1)]);
 					}
 				}
 
 				for (size_type i = 0; i < holeSize; ++i) {
-					if ((i + idx) >= mSize) {
+					if ((i + idx) >= m_size) {
 						break;
 					}
-					mAlloc.destroy(&mData[idx + i]);
+					m_alloc.destroy(&m_data[idx + i]);
 				}
 			}
-			mSize += holeSize;
+			m_size += holeSize;
 		}
 
-		void move_data(_Tp *newData) {
-			for (size_type i = 0; i < mSize; ++i) {
-				mAlloc.construct(&newData[i], mData[i]);
-				mAlloc.destroy(&mData[i]);
+		void move_data(_Tp *new_data) {
+			for (size_type i = 0; i < m_size; ++i) {
+				m_alloc.construct(&new_data[i], m_data[i]);
+				m_alloc.destroy(&m_data[i]);
 			}
 		}
 
 		/**
-		 * @return true if mData was reallocated (so it contains only stall memory);
-		 * 	false mData was reused (so it still contains valid copies)
+		 * @return true if m_data was reallocated (so it contains only stall memory);
+		 * 	false m_data was reused (so it still contains valid copies)
 		 */
 		size_type ensure_replacing_allocation(size_type count) {
-			if (mCapacity < count) {
+			if (m_capacity < count) {
 				free_data();
-				mCapacity = calc_capacity(count);
-				mAlloc.allocate(mCapacity);
-				mSize = count;
+				m_capacity = calc_capacity(count);
+				m_data = m_alloc.allocate(m_capacity);
+				m_size = count;
 				return 0;
 			}
 
-			for (size_type i = count; i < mSize; ++i) {
-				mAlloc.destroy(&(mData[i]));
+			for (size_type i = count; i < m_size; ++i) {
+				m_alloc.destroy(&(m_data[i]));
 			}
 
-			size_type retValue = (mSize < count) ? mSize : count;
-			mSize = count;
+			size_type retValue = (m_size < count) ? m_size : count;
+			m_size = count;
 			return retValue;
 		}
 	};
