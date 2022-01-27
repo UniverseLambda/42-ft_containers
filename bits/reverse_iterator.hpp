@@ -8,18 +8,15 @@
 
 namespace ft {
 	template<typename _Iter>
-	struct reverse_iterator:
-		public iterator<
-			typename iterator_traits<_Iter>::iterator_category,
-			typename iterator_traits<_Iter>::value_type,
-			typename iterator_traits<_Iter>::difference_type,
-			typename iterator_traits<_Iter>::pointer,
-			typename iterator_traits<_Iter>::reference> {
+	struct reverse_iterator {
+	public:
 		typedef _Iter iterator_type;
 		typedef typename iterator_traits<_Iter>::value_type value_type;
 		typedef typename iterator_traits<_Iter>::difference_type difference_type;
 		typedef typename iterator_traits<_Iter>::pointer pointer;
 		typedef typename iterator_traits<_Iter>::reference reference;
+		typedef typename iterator_traits<_Iter>::iterator_category iterator_category;
+
 	protected:
 		iterator_type current;
 
@@ -55,7 +52,7 @@ namespace ft {
 		}
 
 		reference operator[](difference_type n) const {
-			return current[n - 1];
+			return current[-n - 1];
 		}
 
 		reverse_iterator &operator++() {
@@ -72,14 +69,15 @@ namespace ft {
 			reverse_iterator res(*this);
 
 			--current;
-			return (*this);
+
+			return res;
 		}
 
 		reverse_iterator operator--(int) {
 			reverse_iterator res(*this);
 
 			++current;
-			return (*this);
+			return res;
 		}
 
 		reverse_iterator operator+(difference_type n) const {
@@ -98,16 +96,14 @@ namespace ft {
 			return res;
 		}
 
-		reverse_iterator operator+=(difference_type n) const {
+		reverse_iterator operator+=(difference_type n) {
 			current -= n;
 
 			return (*this);
 		}
 
-		reverse_iterator operator-=(difference_type n) const {
-			for (difference_type i = 0; i != n; ((n < 0) ? --i : ++i)) {
-				++current;
-			}
+		reverse_iterator operator-=(difference_type n) {
+			current += n;
 			return (*this);
 		}
 	};
@@ -124,22 +120,22 @@ namespace ft {
 
 	template<typename _Iterator0, typename _Iterator1>
 	bool operator<=(const reverse_iterator<_Iterator0> &lhs, const reverse_iterator<_Iterator1> &rhs) {
-		return lhs.base() <= rhs.base();
-	}
-
-	template<typename _Iterator0, typename _Iterator1>
-	bool operator>=(const reverse_iterator<_Iterator0> &lhs, const reverse_iterator<_Iterator1> &rhs) {
 		return lhs.base() >= rhs.base();
 	}
 
 	template<typename _Iterator0, typename _Iterator1>
+	bool operator>=(const reverse_iterator<_Iterator0> &lhs, const reverse_iterator<_Iterator1> &rhs) {
+		return lhs.base() <= rhs.base();
+	}
+
+	template<typename _Iterator0, typename _Iterator1>
 	bool operator<(const reverse_iterator<_Iterator0> &lhs, const reverse_iterator<_Iterator1> &rhs) {
-		return lhs.base() < rhs.base();
+		return lhs.base() > rhs.base();
 	}
 
 	template<typename _Iterator0, typename _Iterator1>
 	bool operator>(const reverse_iterator<_Iterator0> &lhs, const reverse_iterator<_Iterator1> &rhs) {
-		return lhs.base() > rhs.base();
+		return lhs.base() < rhs.base();
 	}
 
 	template<typename _Iterator>

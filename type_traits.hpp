@@ -2,7 +2,7 @@
 
 namespace ft {
 	template<bool B, class _Tp = void>
-	struct enable_if;
+	struct enable_if {};
 
 	template<class _Tp>
 	struct enable_if<true, _Tp> {
@@ -44,6 +44,9 @@ namespace ft {
 	struct is_integral<signed char>: integral_constant<bool, true> {};
 
 	template<>
+	struct is_integral<wchar_t>: integral_constant<bool, true> {};
+
+	template<>
 	struct is_integral<short int>: integral_constant<bool, true> {};
 
 	template<>
@@ -72,6 +75,9 @@ namespace ft {
 
 	template<>
 	struct is_integral<const char>: integral_constant<bool, true> {};
+
+	template<>
+	struct is_integral<const wchar_t>: integral_constant<bool, true> {};
 
 	template<>
 	struct is_integral<const unsigned char>: integral_constant<bool, true> {};

@@ -18,7 +18,7 @@ LD := $(CXX)
 
 SAN_FLAGS := -fsanitize=address -fsanitize=undefined
 
-CXX_FLAGS := -DDSP_CHECK_VAL=false -g3 -Wall -Wextra -Werror -std=c++98 -I. $(SAN_FLAGS)
+CXX_FLAGS := -DDSP_CHECK_VAL=true -g3 -Wall -Wextra -Werror -std=c++98 -I. $(SAN_FLAGS)
 LD_LIBS :=
 
 all:			$(NAME) $(STD_NAME)

@@ -1,15 +1,9 @@
 #pragma once
 
 #include <cstddef>
+#include <iterator>
 
 namespace ft {
-	struct input_iterator_tag {};
-	struct output_iterator_tag {};
-	struct forward_iterator_tag: public input_iterator_tag {};
-	struct bidirectional_iterator_tag: public forward_iterator_tag {};
-	struct random_access_iterator_tag: public bidirectional_iterator_tag {};
-	struct contiguous_iterator_tag: public random_access_iterator_tag {};
-
 	template<typename _Iterator>
 	struct iterator_traits {
 		typedef typename _Iterator::difference_type difference_type;
@@ -25,7 +19,7 @@ namespace ft {
 		typedef _Tp value_type;
 		typedef _Tp *pointer;
 		typedef _Tp &reference;
-		typedef random_access_iterator_tag iterator_category;
+		typedef std::random_access_iterator_tag iterator_category;
 	};
 
 	template<typename _Tp>
@@ -34,16 +28,7 @@ namespace ft {
 		typedef _Tp value_type;
 		typedef const _Tp *pointer;
 		typedef const _Tp &reference;
-		typedef random_access_iterator_tag iterator_category;
-	};
-
-	template<typename _Category, typename _Tp, typename _Distance = std::ptrdiff_t, typename _Pointer = _Tp *, typename _Reference = _Tp &>
-	struct iterator {
-		typedef _Category iterator_category;
-		typedef _Tp value_type;
-		typedef _Distance difference_type;
-		typedef _Pointer pointer;
-		typedef _Reference reference;
+		typedef std::random_access_iterator_tag iterator_category;
 	};
 } // namespace ft
 

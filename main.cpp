@@ -18,6 +18,8 @@
 #include <vector>
 #include <stack>
 #include <map>
+#include <iterator>
+#include <utility>
 
 #include <sstream>
 
@@ -69,6 +71,9 @@
 #else
 # define DSP_ORIGIN(X) "ign_for_diff"
 #endif
+
+#define _SUB_MAKE_NAME(A, B) A##B
+#define MAKE_NAME(A, B) _SUB_MAKE_NAME(A, B)
 
 struct compare_expected {
 	enum _compare_expected_v {
@@ -145,8 +150,92 @@ std::ostream &operator<<(std::ostream &os, const validity_sanitizer::origin_v or
 }
 
 std::ostream &operator<<(std::ostream &os, const validity_sanitizer &san) {
-	return (os << " {idx: " << san.idx << ", origin: " << san.origin << ", valid: " << san.valid << "}");
+	return (os << "validity_sanitizer {idx: " << san.idx << ", origin: " << san.origin << ", valid: " << san.valid << "}");
 }
+
+template<typename _T0, typename _T1>
+std::ostream &operator<<(std::ostream &os, const TEST_NAMESPACE::pair<_T0, _T1> &p) {
+	return (os << " pair {first: " << p.first << ", second: " << p.second << "}");
+}
+
+template<typename _Iterator>
+void test_iterator_if_rai(_Iterator it, std::random_access_iterator_tag) {
+	std::cout << "[+] *(iterator += 2): " << *(it += 2) << std::endl;
+	std::cout << "[+] *(iterator -= 2): " << *(it -= 2) << std::endl;
+	std::cout << "[+] *(iterator + 2): " << *(it + 2) << std::endl;
+	std::cout << "[+] *iterator: " << *it << std::endl;
+	std::cout << "[+] *(2 + iterator): " << *(2 + it) << std::endl;
+	std::cout << "[+] *iterator: " << *it << std::endl;
+	std::cout << "[+] *(iterator - 2): " << *(it - 2) << std::endl;
+	std::cout << "[+] (iterator - (iterator + 2)): " << (it - (it + 2)) << std::endl;
+	std::cout << "[+] iterator[2]: " << it[2] << std::endl;
+	std::cout << "[+] iterator[-2]: " << it[-2] << std::endl;
+	std::cout << "[+] iterator < (iterator - 2): " << (it < (it - 2)) << std::endl;
+	std::cout << "[+] iterator > (iterator - 2): " << (it > (it - 2)) << std::endl;
+	std::cout << "[+] iterator <= (iterator - 2): " << (it <= (it - 2)) << std::endl;
+	std::cout << "[+] iterator >= (iterator - 2): " << (it >= (it - 2)) << std::endl;
+	std::cout << "[+] iterator < (iterator + 2): " << (it < (it + 2)) << std::endl;
+	std::cout << "[+] iterator > (iterator + 2): " << (it > (it + 2)) << std::endl;
+	std::cout << "[+] iterator <= (iterator + 2): " << (it <= (it + 2)) << std::endl;
+	std::cout << "[+] iterator >= (iterator + 2): " << (it >= (it + 2)) << std::endl;
+	std::cout << "[+] iterator < iterator: " << (it < it) << std::endl;
+	std::cout << "[+] iterator > iterator: " << (it > it) << std::endl;
+	std::cout << "[+] iterator <= iterator: " << (it <= it) << std::endl;
+	std::cout << "[+] iterator >= iterator: " << (it >= it) << std::endl;
+}
+
+template<typename _Iterator>
+void test_iterator_if_rai(_Iterator, std::input_iterator_tag) {}
+
+template<typename _Iterator>
+void test_iterator(_Iterator it) {
+	const _Iterator &const_it = it;
+	_Iterator copy = it;
+	_Iterator default_constructible;
+
+	std::cout << "[+] *iterator" << *it << std::endl;
+	std::cout << "[+] *const_it" << *const_it << std::endl;
+	std::cout << "[+] *(++iterator)" << *(++it) << std::endl;
+	std::cout << "[+] iterator == iterator: " << (it == it) << std::endl;
+	std::cout << "[+] iterator == copy: " << (it == copy) << std::endl;
+	std::cout << "[+] iterator == const_it: " << (it == const_it) << std::endl;
+	std::cout << "[+] iterator == default_constructible: " << (it == default_constructible) << std::endl;
+	std::cout << "[+] const_it == const_it: " << (const_it == const_it) << std::endl;
+	std::cout << "[+] const_it == copy: " << (const_it == copy) << std::endl;
+	std::cout << "[+] const_it == default_constructible: " << (const_it == default_constructible) << std::endl;
+	std::cout << "[+] default_constructible == default_constructible: " << (default_constructible == default_constructible) << std::endl;
+	std::cout << "[+] *(iterator++)" << *(it++) << std::endl;
+	std::cout << "[+] *(copy++)" << *(copy++) << std::endl;
+	std::cout << "[+] *iterator" << *(it) << std::endl;
+	std::cout << "[+] *copy" << *(copy) << std::endl;
+	copy = it++;
+	std::cout << "[+] *iterator" << *(it) << std::endl;
+	std::cout << "[+] *assigned copy" << *(copy) << std::endl;
+	std::cout << "[+] *(--iterator)" << *(--it) << std::endl;
+	std::cout << "[+] *(iterator--)" << *(it--) << std::endl;
+	std::cout << "[+] *(copy--)" << *(copy--) << std::endl;
+
+	test_iterator_if_rai(it, typename _Iterator::iterator_category());
+}
+
+template<typename _Iterator>
+void test_rbegin(TEST_NAMESPACE::reverse_iterator<_Iterator> it) {
+	const TEST_NAMESPACE::reverse_iterator<_Iterator> &const_it = it;
+	++it;
+	std::cout << "[+] *(iterator.base()): " << *(it.base()) << std::endl;
+	std::cout << "[+] *(const_it.base()): " << *(const_it.base()) << std::endl;
+
+	std::cout << "[+] *(iterator.base()): " << *(it.base()) << std::endl;
+
+	TEST_NAMESPACE::reverse_iterator<_Iterator> copy(it);
+	std::cout << "[+] *(copy.base()): " << *(copy.base()) << std::endl;
+	std::cout << "[+] *copy: " << *copy << std::endl;
+
+	copy = ++it;
+	std::cout << "[+] *(assigned.base()): " << *(copy.base()) << std::endl;
+	std::cout << "[+] *assigned: " << *copy << std::endl;
+}
+
 
 void check_vector(const TEST_NAMESPACE::vector<validity_sanitizer> &validity, std::size_t testIdx) {
 	typedef TEST_NAMESPACE::vector<validity_sanitizer>::const_iterator iter;
@@ -348,6 +437,56 @@ void vector_test() {
 	VECTOR_TEST(for (std::size_t i = 0; i < 20; ++i) {
 		validity.push_back(validity_sanitizer(i + 4000));
 	});
+
+	std::cout << "** test_iterator on begin() **" << std::endl;
+	test_iterator(validity.begin() + 3);
+
+	std::cout << "** test_iterator on rbegin() **" << std::endl;
+	test_iterator(validity.rbegin() + 3);
+
+	std::cout << "** test_rbegin **" << std::endl;
+	test_rbegin(validity.rbegin());
+
+	std::cout << "** output iterator test **" << std::endl;
+	std::cout << "[+] insert at begin" << std::endl;
+	{
+		std::cout << "Before: " << *(validity.begin()) << std::endl;
+		validity_sanitizer old = *(validity.begin());
+		*(validity.begin()) = validity_sanitizer(-1);
+		std::cout << "After: " << *(validity.begin()) << std::endl;
+		VECTOR_TEST();
+		*(validity.begin()) = old;
+	}
+
+	std::cout << "[+] insert at end - 1" << std::endl;
+	{
+		std::cout << "Before: " << *(validity.end() - 1) << std::endl;
+		validity_sanitizer old = *(validity.end() - 1);
+		*(validity.end() - 1) = validity_sanitizer(-1);
+		std::cout << "After: " << *(validity.end() - 1) << std::endl;
+		VECTOR_TEST();
+		*(validity.end() - 1) = old;
+	}
+
+	std::cout << "[+] insert at rbegin" << std::endl;
+	{
+		std::cout << "Before: " << *(validity.rbegin()) << std::endl;
+		validity_sanitizer old = *(validity.rbegin());
+		*(validity.rbegin()) = validity_sanitizer(-1);
+		std::cout << "After: " << *(validity.rbegin()) << std::endl;
+		VECTOR_TEST();
+		*(validity.rbegin()) = old;
+	}
+
+	std::cout << "[+] insert at rend - 1" << std::endl;
+	{
+		std::cout << "Before: " << *(validity.rend() - 1) << std::endl;
+		validity_sanitizer old = *(validity.rend() - 1);
+		*(validity.rend() - 1) = validity_sanitizer(-1);
+		std::cout << "After: " << *(validity.rend() - 1) << std::endl;
+		VECTOR_TEST();
+		*(validity.rend() - 1) = old;
+	}
 
 	std::cout << "== REV 0 ==" << std::endl;
 	VECTOR_TEST(for (riter it = validity.rbegin(); it != validity.rend(); ++it) {
@@ -886,7 +1025,6 @@ void preserving_map_test(_Map &map) {
 		const TEST_NAMESPACE::map<std::string, validity_sanitizer> &nearly_totally_different = _nearly_totally_different;
 		const TEST_NAMESPACE::map<std::string, validity_sanitizer> &totally_different = _totally_different;
 
-
 		std::cout << "[+] operator==" << std::endl;
 
 		std::cout << "Same input: ";
@@ -930,8 +1068,8 @@ void preserving_map_test(_Map &map) {
 			std::cout << CONSOLE_RED << "equal" << CONSOLE_RESET << std::endl;
 		else
 			std::cout << CONSOLE_GREEN << "different" << CONSOLE_RESET << std::endl;
-		
-	
+
+
 		std::cout << "[+] operator!=" << std::endl;
 
 		std::cout << "Same input: ";
@@ -1118,6 +1256,56 @@ void test_map() {
 	std::cout << "operator[] with non-existent element (lowest after end of the map) = " << map["Bonchouuur4"] << std::endl;
 	std::cout << "operator[] with non-existent element (gap from the end) = " << map["Bonchouuur6"] << std::endl;
 
+	std::cout << "** test_iterator on begin() **" << std::endl;
+	test_iterator(++++++(map.begin()));
+
+	std::cout << "** test_iterator on rbegin() **" << std::endl;
+	test_iterator(++++++(map.rbegin()));
+
+	std::cout << "** test_rbegin **" << std::endl;
+	test_rbegin(map.rbegin());
+
+	std::cout << "** output iterator test **" << std::endl;
+	std::cout << "[+] insert at begin" << std::endl;
+	{
+		std::cout << "Before: " << *(map.begin()) << std::endl;
+		validity_sanitizer old = map.begin()->second;
+		map.begin()->second = validity_sanitizer(-1);
+		std::cout << "After: " << *(map.begin()) << std::endl;
+		(*(map.begin())).second = old;
+		std::cout << "Reset: " << *(map.begin()) << std::endl;
+	}
+
+	std::cout << "[+] insert at --end" << std::endl;
+	{
+		std::cout << "Before: " << *(--map.end()) << std::endl;
+		validity_sanitizer old = (--map.end())->second;
+		(--map.end())->second = validity_sanitizer(-1);
+		std::cout << "After: " << *(--map.end()) << std::endl;
+		(*(--map.end())).second = old;
+		std::cout << "Reset: " << *(--map.end()) << std::endl;
+	}
+
+	std::cout << "[+] insert at rbegin" << std::endl;
+	{
+		std::cout << "Before: " << *(map.rbegin()) << std::endl;
+		validity_sanitizer old = map.rbegin()->second;
+		map.rbegin()->second = validity_sanitizer(-1);
+		std::cout << "After: " << *(map.rbegin()) << std::endl;
+		(*(map.rbegin())).second = old;
+		std::cout << "Reset: " << *(map.rbegin()) << std::endl;
+	}
+
+	std::cout << "[+] insert at --rend" << std::endl;
+	{
+		std::cout << "Before: " << *(--map.rend()) << std::endl;
+		validity_sanitizer old = (--map.rend())->second;
+		(--map.rend())->second = validity_sanitizer(-1);
+		std::cout << "After: " << *(--map.rend()) << std::endl;
+		(*(--map.rend())).second = old;
+		std::cout << "Reset: " << *(--map.rend()) << std::endl;
+	}
+
 	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
 		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
 	}
@@ -1268,7 +1456,7 @@ void test_map() {
 		display_map(copy.begin(), copy.end());
 		check_map(copy.begin(), copy.end());
 	}
-	
+
 	std::cout << "[+] default with Compare and Allocator" << std::endl;
 	{
 		std::cout << "Original" << std::endl;
@@ -1280,7 +1468,7 @@ void test_map() {
 		display_map(dfl_cmp_alloc.begin(), dfl_cmp_alloc.end());
 		check_map(dfl_cmp_alloc.begin(), dfl_cmp_alloc.end());
 	}
-	
+
 	std::cout << "[+] iterator constructor" << std::endl;
 	{
 		std::cout << "Original" << std::endl;
@@ -1299,7 +1487,7 @@ void test_one_iterator_trait() {
 	std::cout << "sizeof iterator_traits::value_type: "			<< sizeof(typename TEST_NAMESPACE::iterator_traits<_Iterator>::value_type) << std::endl;
 	std::cout << "sizeof iterator_traits::pointer: "			<< sizeof(typename TEST_NAMESPACE::iterator_traits<_Iterator>::pointer) << std::endl;
 	std::cout << "sizeof iterator_traits::reference: "			<< sizeof(typename TEST_NAMESPACE::iterator_traits<_Iterator>::reference) << std::endl;
-	std::cout << "sizeof iterator_traits::iterator_category: "	<< sizeof(typename TEST_NAMESPACE::iterator_traits<_Iterator>::difference_type) << std::endl;
+	std::cout << "sizeof iterator_traits::iterator_category: "	<< sizeof(typename TEST_NAMESPACE::iterator_traits<_Iterator>::iterator_category) << std::endl;
 }
 
 void test_iterator_traits() {
@@ -1463,64 +1651,410 @@ void test_iterator_traits() {
 	test_one_iterator_trait<const std::string *>();
 }
 
-template<typename _Iterator>
-void test_iterator_if_rai(_Iterator it, TEST_NAMESPACE::random_access_iterator_tag) {
-	std::cout << "[+] *(iterator += 2): " << *(it += 2) << std::endl;
-	std::cout << "[+] *(iterator -= 2): " << *(it -= 2) << std::endl;
-	std::cout << "[+] *(iterator + 2): " << *(it + 2) << std::endl;
-	std::cout << "[+] *iterator: " << *it << std::endl;
-	std::cout << "[+] *(2 + iterator): " << *(2 + it) << std::endl;
-	std::cout << "[+] *iterator: " << *it << std::endl;
-	std::cout << "[+] *(iterator - 2): " << *(it - 2) << std::endl;
-	std::cout << "[+] (iterator - (iterator + 2)): " << (it - (it + 2)) << std::endl;
-	std::cout << "[+] iterator[2]: " << it[2] << std::endl;
-	std::cout << "[+] iterator[-2]: " << it[-2] << std::endl;
-	std::cout << "[+] iterator < (iterator - 2): " << (it < (it - 2)) << std::endl;
-	std::cout << "[+] iterator > (iterator - 2): " << (it > (it - 2)) << std::endl;
-	std::cout << "[+] iterator <= (iterator - 2): " << (it <= (it - 2)) << std::endl;
-	std::cout << "[+] iterator >= (iterator - 2): " << (it >= (it - 2)) << std::endl;
-	std::cout << "[+] iterator < (iterator + 2): " << (it < (it + 2)) << std::endl;
-	std::cout << "[+] iterator > (iterator + 2): " << (it > (it + 2)) << std::endl;
-	std::cout << "[+] iterator <= (iterator + 2): " << (it <= (it + 2)) << std::endl;
-	std::cout << "[+] iterator >= (iterator + 2): " << (it >= (it + 2)) << std::endl;
-	std::cout << "[+] iterator < iterator: " << (it < it) << std::endl;
-	std::cout << "[+] iterator > iteraor: " << (it > it) << std::endl;
-	std::cout << "[+] iterator <= iteraor: " << (it <= it) << std::endl;
-	std::cout << "[+] iterator >= iteraor: " << (it >= it) << std::endl;
+
+template<typename _Tp>
+void ft_enable_if(typename ft::enable_if< std::is_integral<_Tp>::value >::type* /* Yeah, weird-ass SFINAE from C++98 */) {
+	std::cout << "It IS integral" << std::endl;
 }
 
-template<typename _Iterator>
-void test_iterator_if_rai(_Iterator, TEST_NAMESPACE::input_iterator_tag) {}
+template<typename _Tp>
+void ft_enable_if(...) {
+	std::cout << "It is NOT integral" << std::endl;
+}
 
-template<typename _Iterator>
-void test_iterator(_Iterator it) {
-	const _Iterator &const_it = it;
-	_Iterator copy = it;
-	_Iterator default_constructible;
+template<typename _Tp>
+void std_enable_if(typename std::enable_if< std::is_integral<_Tp>::value >::type* /* .............. */) {
+	std::cout << "It IS integral" << std::endl;
+}
 
-	std::cout << "[+] *iterator" << *it << std::endl;
-	std::cout << "[+] *const_it" << *const_it << std::endl;
-	std::cout << "[+] *(++iterator)" << *(++it) << std::endl;
-	std::cout << "[+] iterator == iterator: " << (it == it) << std::endl;
-	std::cout << "[+] iterator == copy: " << (it == copy) << std::endl;
-	std::cout << "[+] iterator == const_it: " << (it == const_it) << std::endl;
-	std::cout << "[+] iterator == default_constructible: " << (it == default_constructible) << std::endl;
-	std::cout << "[+] const_it == const_it: " << (const_it == const_it) << std::endl;
-	std::cout << "[+] const_it == copy: " << (const_it == copy) << std::endl;
-	std::cout << "[+] const_it == default_constructible: " << (const_it == default_constructible) << std::endl;
-	std::cout << "[+] default_constructible == default_constructible: " << (default_constructible == default_constructible) << std::endl;
-	std::cout << "[+] *(iterator++)" << *(it++) << std::endl;
-	std::cout << "[+] *(copy++)" << *(copy++) << std::endl;
-	std::cout << "[+] *iterator" << *(it) << std::endl;
-	std::cout << "[+] *copy" << *(copy) << std::endl;
-	copy = it++;
-	std::cout << "[+] *iterator" << *(it) << std::endl;
-	std::cout << "[+] *assigned copy" << *(copy) << std::endl;
-	std::cout << "[+] *(--iterator)" << *(--it) << std::endl;
-	std::cout << "[+] *(iterator--)" << *(it--) << std::endl;
-	std::cout << "[+] *(copy--)" << *(copy--) << std::endl;
+template<typename _Tp>
+void std_enable_if(...) {
+	std::cout << "It is NOT integral" << std::endl;
+}
 
-	test_iterator_if_rai(it, typename _Iterator::iterator_category());
+void test_enable_if() {
+	std::cout << "========== ENABLE_IF TESTS ==========" << std::endl;
+	std::cout << "[+] int: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)<int>(NULL);
+	std::cout << "[+] bool: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)<bool>(NULL);
+	std::cout << "[+] std::string: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)<std::string>(NULL);
+	std::cout << "[+] ft::vector<int>: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)< ft::vector<int> >(NULL);
+	std::cout << "[+] ft::vector<std::string>: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)< ft::vector<std::string> >(NULL);
+	std::cout << "[+] float: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)<float>(NULL);
+	std::cout << "[+] double: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)<double>(NULL);
+	std::cout << "[+] short: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)<short>(NULL);
+	std::cout << "[+] long long int: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)<long long int>(NULL);
+	std::cout << "[+] unsigned long long int: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)<unsigned long long int>(NULL);
+	std::cout << "[+] wchar_t: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)<wchar_t>(NULL);
+	std::cout << "[+] char32_t: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)<char32_t>(NULL);
+	std::cout << "[+] std::map<int, int>: "; MAKE_NAME(TEST_NAMESPACE, _enable_if)< std::map<int, int> >(NULL);
+}
+
+void test_is_integral() {
+	std::cout << "========== IS_INTEGRAL TESTS ==========" << std::endl;
+	std::cout << "[+] bool: " << TEST_NAMESPACE::is_integral<bool>::value << std::endl;
+	std::cout << "[+] char: " << TEST_NAMESPACE::is_integral<char>::value << std::endl;
+	std::cout << "[+] wchar_t: " << TEST_NAMESPACE::is_integral<wchar_t>::value << std::endl;
+	std::cout << "[+] short: " << TEST_NAMESPACE::is_integral<short>::value << std::endl;
+	std::cout << "[+] int: " << TEST_NAMESPACE::is_integral<int>::value << std::endl;
+	std::cout << "[+] long: " << TEST_NAMESPACE::is_integral<long>::value << std::endl;
+	std::cout << "[+] long long: " << TEST_NAMESPACE::is_integral<long long>::value << std::endl;
+	std::cout << "[+] unsigned char: " << TEST_NAMESPACE::is_integral<unsigned char>::value << std::endl;
+	std::cout << "[+] unsigned short: " << TEST_NAMESPACE::is_integral<unsigned short>::value << std::endl;
+	std::cout << "[+] unsigned int: " << TEST_NAMESPACE::is_integral<unsigned int>::value << std::endl;
+	std::cout << "[+] unsigned long: " << TEST_NAMESPACE::is_integral<unsigned long>::value << std::endl;
+	std::cout << "[+] unsigned long long: " << TEST_NAMESPACE::is_integral<unsigned long long>::value << std::endl;
+	std::cout << "[+] signed char: " << TEST_NAMESPACE::is_integral<signed char>::value << std::endl;
+	std::cout << "[+] signed short: " << TEST_NAMESPACE::is_integral<signed short>::value << std::endl;
+	std::cout << "[+] signed int: " << TEST_NAMESPACE::is_integral<signed int>::value << std::endl;
+	std::cout << "[+] signed long: " << TEST_NAMESPACE::is_integral<signed long>::value << std::endl;
+	std::cout << "[+] signed long long: " << TEST_NAMESPACE::is_integral<signed long long>::value << std::endl;
+	std::cout << "[+] const bool: " << TEST_NAMESPACE::is_integral<const bool>::value << std::endl;
+	std::cout << "[+] const char: " << TEST_NAMESPACE::is_integral<const char>::value << std::endl;
+	std::cout << "[+] const wchar_t: " << TEST_NAMESPACE::is_integral<const wchar_t>::value << std::endl;
+	std::cout << "[+] const short: " << TEST_NAMESPACE::is_integral<const short>::value << std::endl;
+	std::cout << "[+] const int: " << TEST_NAMESPACE::is_integral<const int>::value << std::endl;
+	std::cout << "[+] const long: " << TEST_NAMESPACE::is_integral<const long>::value << std::endl;
+	std::cout << "[+] const long long: " << TEST_NAMESPACE::is_integral<const long long>::value << std::endl;
+	std::cout << "[+] const unsigned char: " << TEST_NAMESPACE::is_integral<const unsigned char>::value << std::endl;
+	std::cout << "[+] const unsigned short: " << TEST_NAMESPACE::is_integral<const unsigned short>::value << std::endl;
+	std::cout << "[+] const unsigned int: " << TEST_NAMESPACE::is_integral<const unsigned int>::value << std::endl;
+	std::cout << "[+] const unsigned long: " << TEST_NAMESPACE::is_integral<const unsigned long>::value << std::endl;
+	std::cout << "[+] const unsigned long long: " << TEST_NAMESPACE::is_integral<const unsigned long long>::value << std::endl;
+	std::cout << "[+] const signed char: " << TEST_NAMESPACE::is_integral<const signed char>::value << std::endl;
+	std::cout << "[+] const signed short: " << TEST_NAMESPACE::is_integral<const signed short>::value << std::endl;
+	std::cout << "[+] const signed int: " << TEST_NAMESPACE::is_integral<const signed int>::value << std::endl;
+	std::cout << "[+] const signed long: " << TEST_NAMESPACE::is_integral<const signed long>::value << std::endl;
+	std::cout << "[+] const signed long long: " << TEST_NAMESPACE::is_integral<const signed long long>::value << std::endl;
+
+	std::cout << "[+] std::string: " << TEST_NAMESPACE::is_integral<std::string>::value << std::endl;
+	std::cout << "[+] std::string: " << TEST_NAMESPACE::is_integral<std::ofstream>::value << std::endl;
+}
+
+template<typename _Iterator0, typename _Iterator1>
+void test_lexico_it(_Iterator0 begin0, _Iterator0 end0, _Iterator1 begin1, _Iterator1 end1) {
+	std::cout << "[+] lexico (begin0, end0, begin1, end1): " << TEST_NAMESPACE::lexicographical_compare(begin0, end0, begin1, end1) << std::endl;
+	std::cout << "[+] lexico (begin1, end1, begin0, end0): " << TEST_NAMESPACE::lexicographical_compare(begin1, end1, begin0, end0) << std::endl;
+	std::cout << "[+] lexico (begin0, end0, begin0, end0): " << TEST_NAMESPACE::lexicographical_compare(begin0, end0, begin0, end0) << std::endl;
+	std::cout << "[+] lexico (begin1, end1, begin1, end1): " << TEST_NAMESPACE::lexicographical_compare(begin1, end1, begin1, end1) << std::endl;
+}
+
+template<typename _Iterator0, typename _Iterator1>
+void test_equal_lexico_it(_Iterator0 begin0, _Iterator0 end0, _Iterator1 begin1, _Iterator1 end1) {
+	std::cout << "[+] equal  (begin0, end0, begin1): " << TEST_NAMESPACE::equal(begin0, end0, begin1) << std::endl;
+	std::cout << "[+] equal  (begin1, end1, begin0): " << TEST_NAMESPACE::equal(begin1, end1, begin0) << std::endl;
+	std::cout << "[+] equal  (begin0, end0, begin0): " << TEST_NAMESPACE::equal(begin0, end0, begin0) << std::endl;
+	std::cout << "[+] equal  (begin1, end1, begin1): " << TEST_NAMESPACE::equal(begin1, end1, begin1) << std::endl;
+
+	test_lexico_it(begin0, end0, begin1, end1);
+}
+
+void test_equal_lexico() {
+	std::cout << "========== EQUAL/LEXICOGRAPHICAL_COMPARE TESTS ==========" << std::endl;
+
+	std::vector<int> std_v_int_0;
+	std::vector<int> std_v_int_1;
+	std::vector<int> std_v_int_2;
+	std::vector<int> std_v_int_3;
+	std::vector<int> std_v_int_4;
+	std::vector<int> std_v_int_5;
+	std::vector<int> std_v_int_6;
+
+	for (int i = 0; i < 30; ++i) {
+		std_v_int_0.push_back(i);
+		std_v_int_1.push_back(i);
+		std_v_int_2.push_back((i * 3) ^ 42);
+
+		if (i < 20) {
+			std_v_int_3.push_back(i);
+			std_v_int_4.push_back((i * 3) ^ 42);
+		}
+	}
+
+	std::cout << "** same content, same vector **" << std::endl;
+	test_equal_lexico_it(std_v_int_0.begin(), std_v_int_0.end(), std_v_int_0.begin(), std_v_int_0.end());
+
+	std::cout << "** same content, different vector **" << std::endl;
+	test_equal_lexico_it(std_v_int_0.begin(), std_v_int_0.end(), std_v_int_1.begin(), std_v_int_1.end());
+
+	std::cout << "** different content, same size, different vector **" << std::endl;
+	test_equal_lexico_it(std_v_int_0.begin(), std_v_int_0.end(), std_v_int_2.begin(), std_v_int_2.end());
+
+	std::cout << "** different content, same size, different vector **" << std::endl;
+	test_equal_lexico_it(std_v_int_2.begin(), std_v_int_2.end(), std_v_int_1.begin(), std_v_int_1.end());
+
+	std::cout << "** different content, same size, different vector **" << std::endl;
+	test_equal_lexico_it(std_v_int_0.begin(), std_v_int_0.end(), std_v_int_2.begin(), std_v_int_2.end());
+
+	std::cout << "** same content, different size, different vector **" << std::endl;
+	test_lexico_it(std_v_int_0.begin(), std_v_int_0.end(), std_v_int_3.begin(), std_v_int_3.end());
+
+	std::cout << "** different content, different size, different vector **" << std::endl;
+	test_lexico_it(std_v_int_0.begin(), std_v_int_0.end(), std_v_int_4.begin(), std_v_int_4.end());
+
+	std::cout << "** one empty, different vector **" << std::endl;
+	test_lexico_it(std_v_int_0.begin(), std_v_int_0.end(), std_v_int_5.begin(), std_v_int_5.end());
+
+	std::cout << "** both empty, same vector **" << std::endl;
+	test_equal_lexico_it(std_v_int_6.begin(), std_v_int_6.end(), std_v_int_5.begin(), std_v_int_5.end());
+
+	std::cout << "** both empty, different vector **" << std::endl;
+	test_equal_lexico_it(std_v_int_5.begin(), std_v_int_5.end(), std_v_int_5.begin(), std_v_int_5.end());
+}
+
+void test_pair() {
+	std::cout << "========== EQUAL/LEXICOGRAPHICAL_COMPARE TESTS ==========" << std::endl;
+	TEST_NAMESPACE::pair<int, int> p0;
+	TEST_NAMESPACE::pair<int, int> p1(-69, 420);
+	TEST_NAMESPACE::pair<short, short> p_tmp(1, 2);
+	TEST_NAMESPACE::pair<short, int> p2(p_tmp);
+	TEST_NAMESPACE::pair<int, int> p3(p_tmp);
+	TEST_NAMESPACE::pair<int, int> p4(p1);
+	TEST_NAMESPACE::pair<int, int> p5(0, 0);
+	TEST_NAMESPACE::pair<short, int> p6(0, 0);
+	TEST_NAMESPACE::pair<int, int> p7(0, 0);
+	p5 = p2;
+	p6 = p_tmp;
+	p7 = p_tmp;
+
+	std::cout << "[+] default initialized: " << p0 << " (!! differences expected !!)" << std::endl;
+	std::cout << "[+] values initialized: " << p1 << std::endl;
+	std::cout << "[+] copy (same _T0, different _T1): " << p2 << std::endl;
+	std::cout << "[+] copy (different but constructible _T0 and _T1): " << p3 << std::endl;
+	std::cout << "[+] copy (same _T0 and _T1): " << p4 << std::endl;
+	std::cout << "[+] assigned (same _T0 and _T1): " << p5 << std::endl;
+	std::cout << "[+] assigned (same _T0 and different _T1): " << p6 << std::endl;
+	std::cout << "[+] assigned (different _T0 and _T1): " << p7 << std::endl;
+	std::cout << "[+] make_pair (same _T0 and _T1): " << TEST_NAMESPACE::make_pair(50, 69);
+	std::cout << "[+] make_pair (different _T0 and _T1): " << TEST_NAMESPACE::make_pair("BONCHOUR", 69);
+
+	std::cout << "** == operator **" << std::endl;
+	std::cout << "[+] p0 == p0: " << (p0 == p0) << std::endl;
+	// std::cout << "[+] p0 == p1: " << (p0 == p1) << std::endl;
+	// std::cout << "[+] p0 == p3: " << (p0 == p3) << std::endl;
+	// std::cout << "[+] p0 == p4: " << (p0 == p4) << std::endl;
+	// std::cout << "[+] p0 == p5: " << (p0 == p5) << std::endl;
+	// std::cout << "[+] p0 == p7: " << (p0 == p7) << std::endl;
+	// std::cout << "[+] p1 == p0: " << (p1 == p0) << std::endl;
+	std::cout << "[+] p1 == p1: " << (p1 == p1) << std::endl;
+	std::cout << "[+] p1 == p3: " << (p1 == p3) << std::endl;
+	std::cout << "[+] p1 == p4: " << (p1 == p4) << std::endl;
+	std::cout << "[+] p1 == p5: " << (p1 == p5) << std::endl;
+	std::cout << "[+] p1 == p7: " << (p1 == p7) << std::endl;
+	// std::cout << "[+] p3 == p0: " << (p3 == p0) << std::endl;
+	std::cout << "[+] p3 == p1: " << (p3 == p1) << std::endl;
+	std::cout << "[+] p3 == p3: " << (p3 == p3) << std::endl;
+	std::cout << "[+] p3 == p4: " << (p3 == p4) << std::endl;
+	std::cout << "[+] p3 == p5: " << (p3 == p5) << std::endl;
+	std::cout << "[+] p3 == p7: " << (p3 == p7) << std::endl;
+	// std::cout << "[+] p4 == p0: " << (p4 == p0) << std::endl;
+	std::cout << "[+] p4 == p1: " << (p4 == p1) << std::endl;
+	std::cout << "[+] p4 == p3: " << (p4 == p3) << std::endl;
+	std::cout << "[+] p4 == p4: " << (p4 == p4) << std::endl;
+	std::cout << "[+] p4 == p5: " << (p4 == p5) << std::endl;
+	std::cout << "[+] p4 == p7: " << (p4 == p7) << std::endl;
+	// std::cout << "[+] p5 == p0: " << (p5 == p0) << std::endl;
+	std::cout << "[+] p5 == p1: " << (p5 == p1) << std::endl;
+	std::cout << "[+] p5 == p3: " << (p5 == p3) << std::endl;
+	std::cout << "[+] p5 == p4: " << (p5 == p4) << std::endl;
+	std::cout << "[+] p5 == p5: " << (p5 == p5) << std::endl;
+	std::cout << "[+] p5 == p7: " << (p5 == p7) << std::endl;
+	// std::cout << "[+] p7 == p0: " << (p7 == p0) << std::endl;
+	std::cout << "[+] p7 == p1: " << (p7 == p1) << std::endl;
+	std::cout << "[+] p7 == p3: " << (p7 == p3) << std::endl;
+	std::cout << "[+] p7 == p4: " << (p7 == p4) << std::endl;
+	std::cout << "[+] p7 == p5: " << (p7 == p5) << std::endl;
+	std::cout << "[+] p7 == p7: " << (p7 == p7) << std::endl;
+
+	std::cout << "** != operator **" << std::endl;
+	std::cout << "[+] p0 != p0: " << (p0 != p0) << std::endl;
+	// std::cout << "[+] p0 != p1: " << (p0 != p1) << std::endl;
+	// std::cout << "[+] p0 != p3: " << (p0 != p3) << std::endl;
+	// std::cout << "[+] p0 != p4: " << (p0 != p4) << std::endl;
+	// std::cout << "[+] p0 != p5: " << (p0 != p5) << std::endl;
+	// std::cout << "[+] p0 != p7: " << (p0 != p7) << std::endl;
+	// std::cout << "[+] p1 != p0: " << (p1 != p0) << std::endl;
+	std::cout << "[+] p1 != p1: " << (p1 != p1) << std::endl;
+	std::cout << "[+] p1 != p3: " << (p1 != p3) << std::endl;
+	std::cout << "[+] p1 != p4: " << (p1 != p4) << std::endl;
+	std::cout << "[+] p1 != p5: " << (p1 != p5) << std::endl;
+	std::cout << "[+] p1 != p7: " << (p1 != p7) << std::endl;
+	// std::cout << "[+] p3 != p0: " << (p3 != p0) << std::endl;
+	std::cout << "[+] p3 != p1: " << (p3 != p1) << std::endl;
+	std::cout << "[+] p3 != p3: " << (p3 != p3) << std::endl;
+	std::cout << "[+] p3 != p4: " << (p3 != p4) << std::endl;
+	std::cout << "[+] p3 != p5: " << (p3 != p5) << std::endl;
+	std::cout << "[+] p3 != p7: " << (p3 != p7) << std::endl;
+	// std::cout << "[+] p4 != p0: " << (p4 != p0) << std::endl;
+	std::cout << "[+] p4 != p1: " << (p4 != p1) << std::endl;
+	std::cout << "[+] p4 != p3: " << (p4 != p3) << std::endl;
+	std::cout << "[+] p4 != p4: " << (p4 != p4) << std::endl;
+	std::cout << "[+] p4 != p5: " << (p4 != p5) << std::endl;
+	std::cout << "[+] p4 != p7: " << (p4 != p7) << std::endl;
+	// std::cout << "[+] p5 != p0: " << (p5 != p0) << std::endl;
+	std::cout << "[+] p5 != p1: " << (p5 != p1) << std::endl;
+	std::cout << "[+] p5 != p3: " << (p5 != p3) << std::endl;
+	std::cout << "[+] p5 != p4: " << (p5 != p4) << std::endl;
+	std::cout << "[+] p5 != p5: " << (p5 != p5) << std::endl;
+	std::cout << "[+] p5 != p7: " << (p5 != p7) << std::endl;
+	// std::cout << "[+] p7 != p0: " << (p7 != p0) << std::endl;
+	std::cout << "[+] p7 != p1: " << (p7 != p1) << std::endl;
+	std::cout << "[+] p7 != p3: " << (p7 != p3) << std::endl;
+	std::cout << "[+] p7 != p4: " << (p7 != p4) << std::endl;
+	std::cout << "[+] p7 != p5: " << (p7 != p5) << std::endl;
+	std::cout << "[+] p7 != p7: " << (p7 != p7) << std::endl;
+
+	std::cout << "** < operator **" << std::endl;
+	std::cout << "[+] p0 < p0: " << (p0 < p0) << std::endl;
+	// std::cout << "[+] p0 < p1: " << (p0 < p1) << std::endl;
+	// std::cout << "[+] p0 < p3: " << (p0 < p3) << std::endl;
+	// std::cout << "[+] p0 < p4: " << (p0 < p4) << std::endl;
+	// std::cout << "[+] p0 < p5: " << (p0 < p5) << std::endl;
+	// std::cout << "[+] p0 < p7: " << (p0 < p7) << std::endl;
+	// std::cout << "[+] p1 < p0: " << (p1 < p0) << std::endl;
+	std::cout << "[+] p1 < p1: " << (p1 < p1) << std::endl;
+	std::cout << "[+] p1 < p3: " << (p1 < p3) << std::endl;
+	std::cout << "[+] p1 < p4: " << (p1 < p4) << std::endl;
+	std::cout << "[+] p1 < p5: " << (p1 < p5) << std::endl;
+	std::cout << "[+] p1 < p7: " << (p1 < p7) << std::endl;
+	// std::cout << "[+] p3 < p0: " << (p3 < p0) << std::endl;
+	std::cout << "[+] p3 < p1: " << (p3 < p1) << std::endl;
+	std::cout << "[+] p3 < p3: " << (p3 < p3) << std::endl;
+	std::cout << "[+] p3 < p4: " << (p3 < p4) << std::endl;
+	std::cout << "[+] p3 < p5: " << (p3 < p5) << std::endl;
+	std::cout << "[+] p3 < p7: " << (p3 < p7) << std::endl;
+	// std::cout << "[+] p4 < p0: " << (p4 < p0) << std::endl;
+	std::cout << "[+] p4 < p1: " << (p4 < p1) << std::endl;
+	std::cout << "[+] p4 < p3: " << (p4 < p3) << std::endl;
+	std::cout << "[+] p4 < p4: " << (p4 < p4) << std::endl;
+	std::cout << "[+] p4 < p5: " << (p4 < p5) << std::endl;
+	std::cout << "[+] p4 < p7: " << (p4 < p7) << std::endl;
+	// std::cout << "[+] p5 < p0: " << (p5 < p0) << std::endl;
+	std::cout << "[+] p5 < p1: " << (p5 < p1) << std::endl;
+	std::cout << "[+] p5 < p3: " << (p5 < p3) << std::endl;
+	std::cout << "[+] p5 < p4: " << (p5 < p4) << std::endl;
+	std::cout << "[+] p5 < p5: " << (p5 < p5) << std::endl;
+	std::cout << "[+] p5 < p7: " << (p5 < p7) << std::endl;
+	std::cout << "[+] p7 < p0: " << (p7 < p0) << std::endl;
+	std::cout << "[+] p7 < p1: " << (p7 < p1) << std::endl;
+	std::cout << "[+] p7 < p3: " << (p7 < p3) << std::endl;
+	std::cout << "[+] p7 < p4: " << (p7 < p4) << std::endl;
+	std::cout << "[+] p7 < p5: " << (p7 < p5) << std::endl;
+	std::cout << "[+] p7 < p7: " << (p7 < p7) << std::endl;
+
+	std::cout << "** <= operator **" << std::endl;
+	std::cout << "[+] p0 <= p0: " << (p0 <= p0) << std::endl;
+	// std::cout << "[+] p0 <= p1: " << (p0 <= p1) << std::endl;
+	// std::cout << "[+] p0 <= p3: " << (p0 <= p3) << std::endl;
+	// std::cout << "[+] p0 <= p4: " << (p0 <= p4) << std::endl;
+	// std::cout << "[+] p0 <= p5: " << (p0 <= p5) << std::endl;
+	// std::cout << "[+] p0 <= p7: " << (p0 <= p7) << std::endl;
+	// std::cout << "[+] p1 <= p0: " << (p1 <= p0) << std::endl;
+	std::cout << "[+] p1 <= p1: " << (p1 <= p1) << std::endl;
+	std::cout << "[+] p1 <= p3: " << (p1 <= p3) << std::endl;
+	std::cout << "[+] p1 <= p4: " << (p1 <= p4) << std::endl;
+	std::cout << "[+] p1 <= p5: " << (p1 <= p5) << std::endl;
+	std::cout << "[+] p1 <= p7: " << (p1 <= p7) << std::endl;
+	// std::cout << "[+] p3 <= p0: " << (p3 <= p0) << std::endl;
+	std::cout << "[+] p3 <= p1: " << (p3 <= p1) << std::endl;
+	std::cout << "[+] p3 <= p3: " << (p3 <= p3) << std::endl;
+	std::cout << "[+] p3 <= p4: " << (p3 <= p4) << std::endl;
+	std::cout << "[+] p3 <= p5: " << (p3 <= p5) << std::endl;
+	std::cout << "[+] p3 <= p7: " << (p3 <= p7) << std::endl;
+	// std::cout << "[+] p4 <= p0: " << (p4 <= p0) << std::endl;
+	std::cout << "[+] p4 <= p1: " << (p4 <= p1) << std::endl;
+	std::cout << "[+] p4 <= p3: " << (p4 <= p3) << std::endl;
+	std::cout << "[+] p4 <= p4: " << (p4 <= p4) << std::endl;
+	std::cout << "[+] p4 <= p5: " << (p4 <= p5) << std::endl;
+	std::cout << "[+] p4 <= p7: " << (p4 <= p7) << std::endl;
+	// std::cout << "[+] p5 <= p0: " << (p5 <= p0) << std::endl;
+	std::cout << "[+] p5 <= p1: " << (p5 <= p1) << std::endl;
+	std::cout << "[+] p5 <= p3: " << (p5 <= p3) << std::endl;
+	std::cout << "[+] p5 <= p4: " << (p5 <= p4) << std::endl;
+	std::cout << "[+] p5 <= p5: " << (p5 <= p5) << std::endl;
+	std::cout << "[+] p5 <= p7: " << (p5 <= p7) << std::endl;
+	// std::cout << "[+] p7 <= p0: " << (p7 <= p0) << std::endl;
+	std::cout << "[+] p7 <= p1: " << (p7 <= p1) << std::endl;
+	std::cout << "[+] p7 <= p3: " << (p7 <= p3) << std::endl;
+	std::cout << "[+] p7 <= p4: " << (p7 <= p4) << std::endl;
+	std::cout << "[+] p7 <= p5: " << (p7 <= p5) << std::endl;
+	std::cout << "[+] p7 <= p7: " << (p7 <= p7) << std::endl;
+
+	std::cout << "** > operator **" << std::endl;
+	std::cout << "[+] p0 > p0: " << (p0 > p0) << std::endl;
+	// std::cout << "[+] p0 > p1: " << (p0 > p1) << std::endl;
+	// std::cout << "[+] p0 > p3: " << (p0 > p3) << std::endl;
+	// std::cout << "[+] p0 > p4: " << (p0 > p4) << std::endl;
+	// std::cout << "[+] p0 > p5: " << (p0 > p5) << std::endl;
+	// std::cout << "[+] p0 > p7: " << (p0 > p7) << std::endl;
+	// std::cout << "[+] p1 > p0: " << (p1 > p0) << std::endl;
+	std::cout << "[+] p1 > p1: " << (p1 > p1) << std::endl;
+	std::cout << "[+] p1 > p3: " << (p1 > p3) << std::endl;
+	std::cout << "[+] p1 > p4: " << (p1 > p4) << std::endl;
+	std::cout << "[+] p1 > p5: " << (p1 > p5) << std::endl;
+	std::cout << "[+] p1 > p7: " << (p1 > p7) << std::endl;
+	// std::cout << "[+] p3 > p0: " << (p3 > p0) << std::endl;
+	std::cout << "[+] p3 > p1: " << (p3 > p1) << std::endl;
+	std::cout << "[+] p3 > p3: " << (p3 > p3) << std::endl;
+	std::cout << "[+] p3 > p4: " << (p3 > p4) << std::endl;
+	std::cout << "[+] p3 > p5: " << (p3 > p5) << std::endl;
+	std::cout << "[+] p3 > p7: " << (p3 > p7) << std::endl;
+	// std::cout << "[+] p4 > p0: " << (p4 > p0) << std::endl;
+	std::cout << "[+] p4 > p1: " << (p4 > p1) << std::endl;
+	std::cout << "[+] p4 > p3: " << (p4 > p3) << std::endl;
+	std::cout << "[+] p4 > p4: " << (p4 > p4) << std::endl;
+	std::cout << "[+] p4 > p5: " << (p4 > p5) << std::endl;
+	std::cout << "[+] p4 > p7: " << (p4 > p7) << std::endl;
+	// std::cout << "[+] p5 > p0: " << (p5 > p0) << std::endl;
+	std::cout << "[+] p5 > p1: " << (p5 > p1) << std::endl;
+	std::cout << "[+] p5 > p3: " << (p5 > p3) << std::endl;
+	std::cout << "[+] p5 > p4: " << (p5 > p4) << std::endl;
+	std::cout << "[+] p5 > p5: " << (p5 > p5) << std::endl;
+	std::cout << "[+] p5 > p7: " << (p5 > p7) << std::endl;
+	// std::cout << "[+] p7 > p0: " << (p7 > p0) << std::endl;
+	std::cout << "[+] p7 > p1: " << (p7 > p1) << std::endl;
+	std::cout << "[+] p7 > p3: " << (p7 > p3) << std::endl;
+	std::cout << "[+] p7 > p4: " << (p7 > p4) << std::endl;
+	std::cout << "[+] p7 > p5: " << (p7 > p5) << std::endl;
+	std::cout << "[+] p7 > p7: " << (p7 > p7) << std::endl;
+
+	std::cout << "** >= operator **" << std::endl;
+	std::cout << "[+] p0 >= p0: " << (p0 >= p0) << std::endl;
+	// std::cout << "[+] p0 >= p1: " << (p0 >= p1) << std::endl;
+	// std::cout << "[+] p0 >= p3: " << (p0 >= p3) << std::endl;
+	// std::cout << "[+] p0 >= p4: " << (p0 >= p4) << std::endl;
+	// std::cout << "[+] p0 >= p5: " << (p0 >= p5) << std::endl;
+	// std::cout << "[+] p0 >= p7: " << (p0 >= p7) << std::endl;
+	// std::cout << "[+] p1 >= p0: " << (p1 >= p0) << std::endl;
+	std::cout << "[+] p1 >= p1: " << (p1 >= p1) << std::endl;
+	std::cout << "[+] p1 >= p3: " << (p1 >= p3) << std::endl;
+	std::cout << "[+] p1 >= p4: " << (p1 >= p4) << std::endl;
+	std::cout << "[+] p1 >= p5: " << (p1 >= p5) << std::endl;
+	std::cout << "[+] p1 >= p7: " << (p1 >= p7) << std::endl;
+	// std::cout << "[+] p3 >= p0: " << (p3 >= p0) << std::endl;
+	std::cout << "[+] p3 >= p1: " << (p3 >= p1) << std::endl;
+	std::cout << "[+] p3 >= p3: " << (p3 >= p3) << std::endl;
+	std::cout << "[+] p3 >= p4: " << (p3 >= p4) << std::endl;
+	std::cout << "[+] p3 >= p5: " << (p3 >= p5) << std::endl;
+	std::cout << "[+] p3 >= p7: " << (p3 >= p7) << std::endl;
+	// std::cout << "[+] p4 >= p0: " << (p4 >= p0) << std::endl;
+	std::cout << "[+] p4 >= p1: " << (p4 >= p1) << std::endl;
+	std::cout << "[+] p4 >= p3: " << (p4 >= p3) << std::endl;
+	std::cout << "[+] p4 >= p4: " << (p4 >= p4) << std::endl;
+	std::cout << "[+] p4 >= p5: " << (p4 >= p5) << std::endl;
+	std::cout << "[+] p4 >= p7: " << (p4 >= p7) << std::endl;
+	// std::cout << "[+] p5 >= p0: " << (p5 >= p0) << std::endl;
+	std::cout << "[+] p5 >= p1: " << (p5 >= p1) << std::endl;
+	std::cout << "[+] p5 >= p3: " << (p5 >= p3) << std::endl;
+	std::cout << "[+] p5 >= p4: " << (p5 >= p4) << std::endl;
+	std::cout << "[+] p5 >= p5: " << (p5 >= p5) << std::endl;
+	std::cout << "[+] p5 >= p7: " << (p5 >= p7) << std::endl;
+	// std::cout << "[+] p7 >= p0: " << (p7 >= p0) << std::endl;
+	std::cout << "[+] p7 >= p1: " << (p7 >= p1) << std::endl;
+	std::cout << "[+] p7 >= p3: " << (p7 >= p3) << std::endl;
+	std::cout << "[+] p7 >= p4: " << (p7 >= p4) << std::endl;
+	std::cout << "[+] p7 >= p5: " << (p7 >= p5) << std::endl;
+	std::cout << "[+] p7 >= p7: " << (p7 >= p7) << std::endl;
+
 }
 
 int main(void) {
@@ -1540,6 +2074,13 @@ int main(void) {
 	test_map();
 
 	test_iterator_traits();
+
+	test_enable_if();
+	test_is_integral();
+
+	test_equal_lexico();
+
+	test_pair();
 
 	return 0;
 }

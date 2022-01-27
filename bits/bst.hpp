@@ -887,10 +887,16 @@ namespace ft {
 		};
 
 		template<typename _Node, typename _Tp>
-		class bst_iterator: public ft::iterator<typename ft::bidirectional_iterator_tag, _Tp> {
+		class bst_iterator {
+		public:
+			typedef _Tp value_type;
+			typedef std::ptrdiff_t difference_type;
+			typedef _Tp *pointer;
+			typedef _Tp &reference;
+			typedef std::bidirectional_iterator_tag iterator_category;
+
 		private:
 			typedef _Node node_type;
-			typedef ft::iterator_traits< ft::iterator<typename ft::bidirectional_iterator_tag, _Tp> > it_trait;
 
 			node_type *node;
 
@@ -913,11 +919,11 @@ namespace ft {
 				return !(*this == rhs);
 			}
 
-			typename it_trait::reference operator*() const {
+			reference operator*() const {
 				return *(node->data);
 			}
 
-			typename it_trait::pointer operator->() const {
+			pointer operator->() const {
 				return node->data;
 			}
 

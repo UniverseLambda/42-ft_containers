@@ -16,7 +16,8 @@ namespace ft {
 		template<typename _U0, typename _U1>
 		pair(const pair<_U0, _U1> &p): first(p.first), second(p.second) {}
 
-		pair(const pair &other): first(other.first), second(other.second) {}
+		// Is implicitly defined until C++11 as stated in https://en.cppreference.com/w/cpp/utility/pair/pair and in https://www.cplusplus.com/reference/utility/pair/pair/
+		// pair(const pair &other): first(other.first), second(other.second) {}
 
 		pair &operator=(const pair &rhs) {
 			first = rhs.first;
