@@ -146,7 +146,7 @@ namespace ft {
 		}
 
 		size_type max_size() const {
-			return std::numeric_limits<difference_type>::max() / (sizeof(*this) + sizeof(typename tree_type::node_type) + sizeof(value_type));
+			return std::numeric_limits<difference_type>::max() / sizeof(value_type);
 		}
 
 		void clear() {

@@ -527,12 +527,11 @@ namespace ft {
 			bool erase(const _Key &key) {
 				node_type *node = retrieve_node_key(key);
 
-				if (!node) {
+				if (node == NULL) {
 					return false;
 				}
 
 				erase(node);
-				--element_cout;
 				return true;
 			}
 
@@ -569,6 +568,7 @@ namespace ft {
 				node->left_node = NULL;
 				node->right_node = NULL;
 				destroy_from_dyn_storage(node);
+				--element_cout;
 			}
 
 			_Allocator &get_allocator() {

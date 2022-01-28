@@ -524,7 +524,7 @@ void vector_test() {
 	// Well, already tested vectors in and out (:
 	// Empty, tested
 	// Size...
-	std::cout << "Max size  " << validity.max_size() << std::endl;
+	std::cout << "Max size  " << validity.max_size() << " (difference expected)" << std::endl;
 
 	// Reserve is used internally, but let's try with shaddy values
 	VECTOR_TEST();
@@ -714,7 +714,9 @@ void test_tree() {
 }
 
 template<typename _Iterator>
-void display_map(_Iterator begin, _Iterator end, std::string name = "map") {
+void display_map(std::size_t size, _Iterator begin, _Iterator end, std::string name = "map") {
+	std::cout << "(map size: " << size << ")" << std::endl;
+
 	for (_Iterator it = begin; it != end; ++it) {
 		std::cout << name << "[" << it->first << "] = " << it->second << std::endl;
 	}
@@ -759,33 +761,33 @@ void preserving_map_test(_Map &map) {
 	{
 		map_type copy(map);
 
-		display_map(copy.begin(), copy.end(), "copy");
+		display_map(copy.size(), copy.begin(), copy.end(), "copy");
 	}
 
 	std::cout << "** test post copy destruction ** " << std::endl;
-	display_map(map.begin(), map.end());
+	display_map(map.size(), map.begin(), map.end());
 
 	std::cout << "** test copy of [begin + 1, end] ** " << std::endl;
 	// Otherwise, it's undefined behavior
 	if (map.begin() != map.end()) {
 		map_type copy(++(map.begin()), map.end());
 
-		display_map(copy.begin(), copy.end(), "copy");
+		display_map(copy.size(), copy.begin(), copy.end(), "copy");
 	}
 
 	std::cout << "** test post copy destruction ** " << std::endl;
-	display_map(map.begin(), map.end());
+	display_map(map.size(), map.begin(), map.end());
 
 	std::cout << "** test copy of [begin, end-1] ** " << std::endl;
 	// Otherwise, it's undefined behavior
 	if (map.begin() != map.end()) {
 		map_type copy(map.begin(), --(map.end()));
 
-		display_map(copy.begin(), copy.end(), "copy");
+		display_map(copy.size(), copy.begin(), copy.end(), "copy");
 	}
 
 	std::cout << "** test post copy destruction ** " << std::endl;
-	display_map(map.begin(), map.end());
+	display_map(map.size(), map.begin(), map.end());
 
 	std::cout << "** test for get_allocator ** " << std::endl;
 	{
@@ -930,11 +932,14 @@ void preserving_map_test(_Map &map) {
 		} else {
 			std::cout << "* returned [end(), end()] *" << std::endl;
 		}
+
+		std::cout << "** max_size **" << std::endl;
+		std::cout << "max size: " << map.max_size() << " (difference expected)" << std::endl;
 	}
 
 
 	std::cout << "** reverse iterator test **" << std::endl;
-	display_map(map.rbegin(), map.rend());
+	display_map(map.size(), map.rbegin(), map.rend());
 
 	std::cout << "is map empty: " << ((map.empty() == (map.size() == 0)) ? CONSOLE_GREEN : CONSOLE_RED) << (map.empty() ? "yes" : "no") << CONSOLE_RESET << std::endl;
 
@@ -1197,7 +1202,7 @@ void insert_test(_Map &map, const _Key &key, const _Value &value, bool should_su
 	<< CONSOLE_RESET << std::endl;
 
 	std::cout << "map content: " << std::endl;
-	display_map(map.begin(), map.end());
+	display_map(map.size(), map.begin(), map.end());
 }
 
 template<typename _Map, typename _Key, typename _Value>
@@ -1210,7 +1215,7 @@ void insert_test(_Map &map, const _Key &key, const _Value &value, typename _Map:
 	<< std::endl;
 
 	std::cout << "map content: " << std::endl;
-	display_map(map.begin(), map.end());
+	display_map(map.size(), map.begin(), map.end());
 }
 
 void test_map() {
@@ -1221,31 +1226,26 @@ void test_map() {
 
 	std::cout << "======= MAP - ALTERING TESTS =======" << std::endl;
 
+	std::cout << "** Empty map display **" << std::endl;
+	display_map(map.size(), map.begin(), map.end());
+
 	std::cout << "** Basic insert on empty map **" << std::endl;
 	map.insert(map_type::value_type("Bonchouuur0", validity_sanitizer(idx++)));
-
-	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
-		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
-	}
+	display_map(map.size(), map.begin(), map.end());
 	check_map(map.begin(), map.end());
 
 
 	std::cout << "** Basic insert on map with size == 1 **" << std::endl;
 	map.insert(map_type::value_type("Bonchouuur1", validity_sanitizer(idx++)));
-
-	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
-		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
-	}
-
+	display_map(map.size(), map.begin(), map.end());
 	check_map(map.begin(), map.end());
 
 	std::cout << "** 2 consecutive basic inserts on map with size > 1 **" << std::endl;
 	map.insert(map_type::value_type("Bonchouuur3", validity_sanitizer(idx++ + 1)));
 	map.insert(map_type::value_type("Bonchouuur2", validity_sanitizer(idx++ - 1)));
 
-	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
-		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
-	}
+	display_map(map.size(), map.begin(), map.end());
+	check_map(map.begin(), map.end());
 
 	std::cout << "** operator[] test **" << std::endl;
 	std::cout << "operator[] with 1st element = " << map["Bonchouuur0"] << std::endl;
@@ -1256,6 +1256,9 @@ void test_map() {
 	std::cout << "operator[] with non-existent element (lowest after end of the map) = " << map["Bonchouuur4"] << std::endl;
 	std::cout << "operator[] with non-existent element (gap from the end) = " << map["Bonchouuur6"] << std::endl;
 
+	display_map(map.size(), map.begin(), map.end());
+	check_map(map.begin(), map.end());
+
 	std::cout << "** test_iterator on begin() **" << std::endl;
 	test_iterator(++++++(map.begin()));
 
@@ -1264,6 +1267,9 @@ void test_map() {
 
 	std::cout << "** test_rbegin **" << std::endl;
 	test_rbegin(map.rbegin());
+
+	display_map(map.size(), map.begin(), map.end());
+	check_map(map.begin(), map.end());
 
 	std::cout << "** output iterator test **" << std::endl;
 	std::cout << "[+] insert at begin" << std::endl;
@@ -1309,6 +1315,9 @@ void test_map() {
 	for (map_type::iterator it = map.begin(); it != map.end(); ++it) {
 		std::cout << "map[" << it->first << "] = " << it->second << std::endl;
 	}
+
+	display_map(map.size(), map.begin(), map.end());
+	check_map(map.begin(), map.end());
 
 	std::cout << "======= MAP - PRESERVING TESTS (on non-const reference) =======" << std::endl;
 	preserving_map_test<map_type::iterator>(map);
@@ -1357,7 +1366,8 @@ void test_map() {
 		}
 
 		map.insert(pairs.begin(), pairs.end());
-		display_map(map.begin(), map.end());
+		check_map(map.begin(), map.end());
+		display_map(map.size(), map.begin(), map.end());
 	}
 
 	std::cout << "[+] insert with hint next to expected place..." << std::endl;
@@ -1372,22 +1382,22 @@ void test_map() {
 
 	std::cout << "[+] erase iterator 0" << std::endl;
 	map.erase(map.begin());
-	display_map(map.begin(), map.end());
+	display_map(map.size(), map.begin(), map.end());
 	check_map(map.begin(), map.end());
 
 	std::cout << "[+] erase iterator 1" << std::endl;
 	map.erase(++map.begin());
-	display_map(map.begin(), map.end());
+	display_map(map.size(), map.begin(), map.end());
 	check_map(map.begin(), map.end());
 
 	std::cout << "[+] erase range" << std::endl;
 	map.erase(++map.begin(), ++++map.begin());
-	display_map(map.begin(), map.end());
+	display_map(map.size(), map.begin(), map.end());
 	check_map(map.begin(), map.end());
 
 	std::cout << "[+] erase range (end, end)" << std::endl;
 	map.erase(map.end(), map.end());
-	display_map(map.begin(), map.end());
+	display_map(map.size(), map.begin(), map.end());
 	check_map(map.begin(), map.end());
 
 	std::cout << "[+] erase key" << std::endl;
@@ -1408,40 +1418,40 @@ void test_map() {
 
 		std::cout << "[+] member swap" << std::endl;
 		std::cout << "Main map (before swap)" << std::endl;
-		display_map(map.begin(), map.end());
+		display_map(map.size(), map.begin(), map.end());
 		check_map(map.begin(), map.end());
 
 		std::cout << "Other map (before swap)" << std::endl;
-		display_map(other.begin(), other.end());
+		display_map(other.size(), other.begin(), other.end());
 		check_map(other.begin(), other.end());
 
 		map.swap(other);
 
 		std::cout << "Main map (after swap)" << std::endl;
-		display_map(map.begin(), map.end());
+		display_map(map.size(), map.begin(), map.end());
 		check_map(map.begin(), map.end());
 
 		std::cout << "Other map (after swap)" << std::endl;
-		display_map(other.begin(), other.end());
+		display_map(other.size(), other.begin(), other.end());
 		check_map(other.begin(), other.end());
 
 		std::cout << "[+] non-member swap" << std::endl;
 		std::cout << "Main map (before swap)" << std::endl;
-		display_map(map.begin(), map.end());
+		display_map(map.size(), map.begin(), map.end());
 		check_map(map.begin(), map.end());
 
 		std::cout << "Other map (before swap)" << std::endl;
-		display_map(other.begin(), other.end());
+		display_map(other.size(), other.begin(), other.end());
 		check_map(other.begin(), other.end());
 
 		swap(other, map);
 
 		std::cout << "Main map (after swap)" << std::endl;
-		display_map(map.begin(), map.end());
+		display_map(map.size(), map.begin(), map.end());
 		check_map(map.begin(), map.end());
 
 		std::cout << "Other map (after swap)" << std::endl;
-		display_map(other.begin(), other.end());
+		display_map(other.size(), other.begin(), other.end());
 		check_map(other.begin(), other.end());
 	}
 
@@ -1449,34 +1459,34 @@ void test_map() {
 	std::cout << "[+] copy constructor" << std::endl;
 	{
 		std::cout << "Original" << std::endl;
-		display_map(map.begin(), map.end());
+		display_map(map.size(), map.begin(), map.end());
 
 		std::cout << "Copy" << std::endl;
 		map_type copy(map);
-		display_map(copy.begin(), copy.end());
+		display_map(copy.size(), copy.begin(), copy.end());
 		check_map(copy.begin(), copy.end());
 	}
 
 	std::cout << "[+] default with Compare and Allocator" << std::endl;
 	{
 		std::cout << "Original" << std::endl;
-		display_map(map.begin(), map.end());
+		display_map(map.size(), map.begin(), map.end());
 
 		std::cout << "Cmp and Alloc" << std::endl;
 		map_type dfl_cmp_alloc = map_type(std::less<std::string>(), std::allocator<map_type::value_type>());
 		dfl_cmp_alloc.insert(dfl_cmp_alloc.begin(), dfl_cmp_alloc.end());
-		display_map(dfl_cmp_alloc.begin(), dfl_cmp_alloc.end());
+		display_map(dfl_cmp_alloc.size(), dfl_cmp_alloc.begin(), dfl_cmp_alloc.end());
 		check_map(dfl_cmp_alloc.begin(), dfl_cmp_alloc.end());
 	}
 
 	std::cout << "[+] iterator constructor" << std::endl;
 	{
 		std::cout << "Original" << std::endl;
-		display_map(map.begin(), map.end());
+		display_map(map.size(), map.begin(), map.end());
 
 		std::cout << "Iterator" << std::endl;
 		map_type copy(map.begin(), --(map.end()));
-		display_map(copy.begin(), copy.end());
+		display_map(copy.size(), copy.begin(), copy.end());
 		check_map(copy.begin(), copy.end());
 	}
 }
@@ -2057,18 +2067,283 @@ void test_pair() {
 
 }
 
+template<typename _Container>
+void sub_test_stack() {
+	_Container strs;
+	_Container no_strs;
+
+	strs.push_back("ABC");
+	strs.push_back("0123");
+	strs.push_back("fejdofejwklfeklfnle");
+	strs.push_back("0000000000000000000");
+	strs.push_back("UwU");
+	strs.push_back("OwO");
+
+	TEST_NAMESPACE::stack<std::string, _Container> dfl;
+	TEST_NAMESPACE::stack<std::string, _Container> already_filled(strs);
+	TEST_NAMESPACE::stack<std::string, _Container> specified_empty(no_strs);
+	TEST_NAMESPACE::stack<std::string, _Container> copy(already_filled);
+	TEST_NAMESPACE::stack<std::string, _Container> assigned(no_strs);
+
+	const TEST_NAMESPACE::stack<std::string, _Container> &const_dfl = dfl;
+	const TEST_NAMESPACE::stack<std::string, _Container> &const_already_filled = already_filled;
+	const TEST_NAMESPACE::stack<std::string, _Container> &const_specified_empty = specified_empty;
+	const TEST_NAMESPACE::stack<std::string, _Container> &const_copy = copy;
+	const TEST_NAMESPACE::stack<std::string, _Container> &const_assigned = assigned;
+
+	assigned = already_filled;
+
+	std::cout << "sizeof container_type: "		<< sizeof(typename TEST_NAMESPACE::stack<std::string, _Container>::container_type) << std::endl;
+	std::cout << "sizeof value_type: "			<< sizeof(typename TEST_NAMESPACE::stack<std::string, _Container>::value_type) << std::endl;
+	std::cout << "sizeof size_type: "			<< sizeof(typename TEST_NAMESPACE::stack<std::string, _Container>::size_type) << std::endl;
+	std::cout << "sizeof reference: "			<< sizeof(typename TEST_NAMESPACE::stack<std::string, _Container>::reference) << std::endl;
+	std::cout << "sizeof const_reference: "		<< sizeof(typename TEST_NAMESPACE::stack<std::string, _Container>::const_reference) << std::endl;
+
+	std::cout << "** top test **" << std::endl;
+	std::cout << "[+] already_filled: "			<< already_filled.top() << std::endl;
+	std::cout << "[+] copy: "					<< copy.top() << std::endl;
+	std::cout << "[+] assigned: "				<< assigned.top() << std::endl;
+	std::cout << "[+] const_already_filled: "	<< const_already_filled.top() << std::endl;
+	std::cout << "[+] const_copy: "				<< const_copy.top() << std::endl;
+	std::cout << "[+] const_assigned: "			<< const_assigned.top() << std::endl;
+
+	std::cout << "** empty test **" << std::endl;
+	std::cout << "[+] dfl: "					<< dfl.empty() << std::endl;
+	std::cout << "[+] already_filled: "			<< already_filled.empty() << std::endl;
+	std::cout << "[+] specified_empty: "		<< specified_empty.empty() << std::endl;
+	std::cout << "[+] copy: "					<< copy.empty() << std::endl;
+	std::cout << "[+] assigned: "				<< assigned.empty() << std::endl;
+	std::cout << "[+] const_dfl: "				<< const_dfl.empty() << std::endl;
+	std::cout << "[+] const_already_filled: "	<< const_already_filled.empty() << std::endl;
+	std::cout << "[+] const_specified_empty: "	<< const_specified_empty.empty() << std::endl;
+	std::cout << "[+] const_copy: "				<< const_copy.empty() << std::endl;
+	std::cout << "[+] const_assigned: "			<< const_assigned.empty() << std::endl;
+
+	std::cout << "** size test **" << std::endl;
+	std::cout << "[+] dfl: "					<< dfl.size() << std::endl;
+	std::cout << "[+] already_filled: "			<< already_filled.size() << std::endl;
+	std::cout << "[+] specified_empty: "		<< specified_empty.size() << std::endl;
+	std::cout << "[+] copy: "					<< copy.size() << std::endl;
+	std::cout << "[+] assigned: "				<< assigned.size() << std::endl;
+	std::cout << "[+] const_dfl: "				<< const_dfl.size() << std::endl;
+	std::cout << "[+] const_already_filled: "	<< const_already_filled.size() << std::endl;
+	std::cout << "[+] const_specified_empty: "	<< const_specified_empty.size() << std::endl;
+	std::cout << "[+] const_copy: "				<< const_copy.size() << std::endl;
+	std::cout << "[+] const_assigned: "			<< const_assigned.size() << std::endl;
+
+	std::cout << "** push test 0 **" << std::endl;
+	dfl.push("MDR0");
+	already_filled.push("MDR1");
+	specified_empty.push("MDR2");
+	copy.push("MDR3");
+	assigned.push("MDR4");
+
+	std::cout << "[+] dfl: "							<< dfl.top() << std::endl;
+	std::cout << "[+] already_filled: "					<< already_filled.top() << std::endl;
+	std::cout << "[+] specified_empty: "				<< specified_empty.top() << std::endl;
+	std::cout << "[+] copy: "							<< copy.top() << std::endl;
+	std::cout << "[+] assigned: "						<< assigned.top() << std::endl;
+	std::cout << "[+] const_dfl: "						<< const_dfl.top() << std::endl;
+	std::cout << "[+] const_already_filled: "			<< const_already_filled.top() << std::endl;
+	std::cout << "[+] const_specified_empty: "			<< const_specified_empty.top() << std::endl;
+	std::cout << "[+] const_copy: "						<< const_copy.top() << std::endl;
+	std::cout << "[+] const_assigned: "					<< const_assigned.top() << std::endl;
+	std::cout << "[+] dfl (size): "						<< dfl.size() << std::endl;
+	std::cout << "[+] already_filled (size): "			<< already_filled.size() << std::endl;
+	std::cout << "[+] specified_empty (size): "			<< specified_empty.size() << std::endl;
+	std::cout << "[+] copy (size): "					<< copy.size() << std::endl;
+	std::cout << "[+] assigned (size): "				<< assigned.size() << std::endl;
+	std::cout << "[+] const_dfl (size): "				<< const_dfl.size() << std::endl;
+	std::cout << "[+] const_already_filled (size): "	<< const_already_filled.size() << std::endl;
+	std::cout << "[+] const_specified_empty (size): "	<< const_specified_empty.size() << std::endl;
+	std::cout << "[+] const_copy (size): "				<< const_copy.size() << std::endl;
+	std::cout << "[+] const_assigned (size): "			<< const_assigned.size() << std::endl;
+
+	std::cout << "** push test 1 **" << std::endl;
+	dfl.push("LOL0");
+	already_filled.push("LOL1");
+	specified_empty.push("LOL2");
+	copy.push("LOL3");
+	assigned.push("LOL4");
+	std::cout << "[+] dfl: "							<< dfl.top() << std::endl;
+	std::cout << "[+] already_filled: "					<< already_filled.top() << std::endl;
+	std::cout << "[+] specified_empty: "				<< specified_empty.top() << std::endl;
+	std::cout << "[+] copy: "							<< copy.top() << std::endl;
+	std::cout << "[+] assigned: "						<< assigned.top() << std::endl;
+	std::cout << "[+] const_dfl: "						<< const_dfl.top() << std::endl;
+	std::cout << "[+] const_already_filled: "			<< const_already_filled.top() << std::endl;
+	std::cout << "[+] const_specified_empty: "			<< const_specified_empty.top() << std::endl;
+	std::cout << "[+] const_copy: "						<< const_copy.top() << std::endl;
+	std::cout << "[+] const_assigned: "					<< const_assigned.top() << std::endl;
+	std::cout << "[+] dfl (size): "						<< dfl.size() << std::endl;
+	std::cout << "[+] already_filled (size): "			<< already_filled.size() << std::endl;
+	std::cout << "[+] specified_empty (size): "			<< specified_empty.size() << std::endl;
+	std::cout << "[+] copy (size): "					<< copy.size() << std::endl;
+	std::cout << "[+] assigned (size): "				<< assigned.size() << std::endl;
+	std::cout << "[+] const_dfl (size): "				<< const_dfl.size() << std::endl;
+	std::cout << "[+] const_already_filled (size): "	<< const_already_filled.size() << std::endl;
+	std::cout << "[+] const_specified_empty (size): "	<< const_specified_empty.size() << std::endl;
+	std::cout << "[+] const_copy (size): "				<< const_copy.size() << std::endl;
+	std::cout << "[+] const_assigned (size): "			<< const_assigned.size() << std::endl;
+
+	std::cout << "** pop test 0 **" << std::endl;
+	dfl.pop();
+	already_filled.pop();
+	specified_empty.pop();
+	copy.pop();
+	assigned.pop();
+	std::cout << "[+] dfl: "							<< dfl.top() << std::endl;
+	std::cout << "[+] already_filled: "					<< already_filled.top() << std::endl;
+	std::cout << "[+] specified_empty: "				<< specified_empty.top() << std::endl;
+	std::cout << "[+] copy: "							<< copy.top() << std::endl;
+	std::cout << "[+] assigned: "						<< assigned.top() << std::endl;
+	std::cout << "[+] const_dfl: "						<< const_dfl.top() << std::endl;
+	std::cout << "[+] const_already_filled: "			<< const_already_filled.top() << std::endl;
+	std::cout << "[+] const_specified_empty: "			<< const_specified_empty.top() << std::endl;
+	std::cout << "[+] const_copy: "						<< const_copy.top() << std::endl;
+	std::cout << "[+] const_assigned: "					<< const_assigned.top() << std::endl;
+	std::cout << "[+] dfl (size): "						<< dfl.size() << std::endl;
+	std::cout << "[+] already_filled (size): "			<< already_filled.size() << std::endl;
+	std::cout << "[+] specified_empty (size): "			<< specified_empty.size() << std::endl;
+	std::cout << "[+] copy (size): "					<< copy.size() << std::endl;
+	std::cout << "[+] assigned (size): "				<< assigned.size() << std::endl;
+	std::cout << "[+] const_dfl (size): "				<< const_dfl.size() << std::endl;
+	std::cout << "[+] const_already_filled (size): "	<< const_already_filled.size() << std::endl;
+	std::cout << "[+] const_specified_empty (size): "	<< const_specified_empty.size() << std::endl;
+	std::cout << "[+] const_copy (size): "				<< const_copy.size() << std::endl;
+	std::cout << "[+] const_assigned (size): "			<< const_assigned.size() << std::endl;
+
+	std::cout << "** == operator **" << std::endl;
+	std::cout << "[+] dfl == dfl: " << (dfl == dfl) << std::endl;
+	std::cout << "[+] dfl == already_filled: " << (dfl == already_filled) << std::endl;
+	std::cout << "[+] dfl == copy: " << (dfl == copy) << std::endl;
+	std::cout << "[+] dfl == assigned: " << (dfl == assigned) << std::endl;
+	std::cout << "[+] already_filled == dfl: " << (already_filled == dfl) << std::endl;
+	std::cout << "[+] already_filled == already_filled: " << (already_filled == already_filled) << std::endl;
+	std::cout << "[+] already_filled == copy: " << (already_filled == copy) << std::endl;
+	std::cout << "[+] already_filled == assigned: " << (already_filled == assigned) << std::endl;
+	std::cout << "[+] copy == dfl: " << (copy == dfl) << std::endl;
+	std::cout << "[+] copy == already_filled: " << (copy == already_filled) << std::endl;
+	std::cout << "[+] copy == copy: " << (copy == copy) << std::endl;
+	std::cout << "[+] copy == assigned: " << (copy == assigned) << std::endl;
+	std::cout << "[+] assigned == dfl: " << (assigned == dfl) << std::endl;
+	std::cout << "[+] assigned == already_filled: " << (assigned == already_filled) << std::endl;
+	std::cout << "[+] assigned == specified_empty: " << (assigned == specified_empty) << std::endl;
+	std::cout << "[+] assigned == copy: " << (assigned == copy) << std::endl;
+	std::cout << "[+] assigned == assigned: " << (assigned == assigned) << std::endl;
+
+	std::cout << "** != operator **" << std::endl;
+	std::cout << "[+] dfl != dfl: " << (dfl != dfl) << std::endl;
+	std::cout << "[+] dfl != already_filled: " << (dfl != already_filled) << std::endl;
+	std::cout << "[+] dfl != copy: " << (dfl != specified_empty) << std::endl;
+	std::cout << "[+] dfl != assigned: " << (dfl != assigned) << std::endl;
+	std::cout << "[+] already_filled != dfl: " << (already_filled != dfl) << std::endl;
+	std::cout << "[+] already_filled != already_filled: " << (already_filled != already_filled) << std::endl;
+	std::cout << "[+] already_filled != specified_empty: " << (already_filled != specified_empty) << std::endl;
+	std::cout << "[+] already_filled != assigned: " << (already_filled != assigned) << std::endl;
+	std::cout << "[+] specified_empty != dfl: " << (specified_empty != dfl) << std::endl;
+	std::cout << "[+] specified_empty != already_filled: " << (specified_empty != already_filled) << std::endl;
+	std::cout << "[+] specified_empty != specified_empty: " << (specified_empty != specified_empty) << std::endl;
+	std::cout << "[+] specified_empty != assigned: " << (specified_empty != assigned) << std::endl;
+	std::cout << "[+] copy != dfl: " << (copy != dfl) << std::endl;
+	std::cout << "[+] copy != already_filled: " << (copy != already_filled) << std::endl;
+	std::cout << "[+] copy != copy: " << (copy != copy) << std::endl;
+	std::cout << "[+] copy != assigned: " << (copy != assigned) << std::endl;
+	std::cout << "[+] assigned != dfl: " << (assigned != dfl) << std::endl;
+	std::cout << "[+] assigned != already_filled: " << (assigned != already_filled) << std::endl;
+	std::cout << "[+] assigned != specified_empty: " << (assigned != specified_empty) << std::endl;
+	std::cout << "[+] assigned != copy: " << (assigned != copy) << std::endl;
+	std::cout << "[+] assigned != assigned: " << (assigned != assigned) << std::endl;
+
+	std::cout << "** < operator **" << std::endl;
+	std::cout << "[+] dfl < dfl: " << (dfl < dfl) << std::endl;
+	std::cout << "[+] dfl < already_filled: " << (dfl < already_filled) << std::endl;
+	std::cout << "[+] dfl < specified_empty: " << (dfl < specified_empty) << std::endl;
+	std::cout << "[+] dfl < assigned: " << (dfl < assigned) << std::endl;
+	std::cout << "[+] already_filled < dfl: " << (already_filled < dfl) << std::endl;
+	std::cout << "[+] already_filled < already_filled: " << (already_filled < already_filled) << std::endl;
+	std::cout << "[+] already_filled < specified_empty: " << (already_filled < specified_empty) << std::endl;
+	std::cout << "[+] already_filled < assigned: " << (already_filled < assigned) << std::endl;
+	std::cout << "[+] specified_empty < dfl: " << (specified_empty < dfl) << std::endl;
+	std::cout << "[+] specified_empty < already_filled: " << (specified_empty < already_filled) << std::endl;
+	std::cout << "[+] specified_empty < specified_empty: " << (specified_empty < specified_empty) << std::endl;
+	std::cout << "[+] specified_empty < assigned: " << (specified_empty < assigned) << std::endl;
+	std::cout << "[+] assigned < dfl: " << (assigned < dfl) << std::endl;
+	std::cout << "[+] assigned < already_filled: " << (assigned < already_filled) << std::endl;
+	std::cout << "[+] assigned < specified_empty: " << (assigned < specified_empty) << std::endl;
+	std::cout << "[+] assigned < assigned: " << (assigned < assigned) << std::endl;
+
+	std::cout << "** <= operator **" << std::endl;
+	std::cout << "[+] dfl <= dfl: " << (dfl <= dfl) << std::endl;
+	std::cout << "[+] dfl <= already_filled: " << (dfl <= already_filled) << std::endl;
+	std::cout << "[+] dfl <= specified_empty: " << (dfl <= specified_empty) << std::endl;
+	std::cout << "[+] dfl <= assigned: " << (dfl <= assigned) << std::endl;
+	std::cout << "[+] already_filled <= dfl: " << (already_filled <= dfl) << std::endl;
+	std::cout << "[+] already_filled <= already_filled: " << (already_filled <= already_filled) << std::endl;
+	std::cout << "[+] already_filled <= specified_empty: " << (already_filled <= specified_empty) << std::endl;
+	std::cout << "[+] already_filled <= assigned: " << (already_filled <= assigned) << std::endl;
+	std::cout << "[+] specified_empty <= dfl: " << (specified_empty <= dfl) << std::endl;
+	std::cout << "[+] specified_empty <= already_filled: " << (specified_empty <= already_filled) << std::endl;
+	std::cout << "[+] specified_empty <= specified_empty: " << (specified_empty <= specified_empty) << std::endl;
+	std::cout << "[+] specified_empty <= assigned: " << (specified_empty <= assigned) << std::endl;
+	std::cout << "[+] assigned <= dfl: " << (assigned <= dfl) << std::endl;
+	std::cout << "[+] assigned <= already_filled: " << (assigned <= already_filled) << std::endl;
+	std::cout << "[+] assigned <= specified_empty: " << (assigned <= specified_empty) << std::endl;
+	std::cout << "[+] assigned <= assigned: " << (assigned <= assigned) << std::endl;
+
+	std::cout << "** > operator **" << std::endl;
+	std::cout << "[+] dfl > dfl: " << (dfl > dfl) << std::endl;
+	std::cout << "[+] dfl > already_filled: " << (dfl > already_filled) << std::endl;
+	std::cout << "[+] dfl > specified_empty: " << (dfl > specified_empty) << std::endl;
+	std::cout << "[+] dfl > assigned: " << (dfl > assigned) << std::endl;
+	std::cout << "[+] already_filled > dfl: " << (already_filled > dfl) << std::endl;
+	std::cout << "[+] already_filled > already_filled: " << (already_filled > already_filled) << std::endl;
+	std::cout << "[+] already_filled > specified_empty: " << (already_filled > specified_empty) << std::endl;
+	std::cout << "[+] already_filled > assigned: " << (already_filled > assigned) << std::endl;
+	std::cout << "[+] specified_empty > dfl: " << (specified_empty > dfl) << std::endl;
+	std::cout << "[+] specified_empty > already_filled: " << (specified_empty > already_filled) << std::endl;
+	std::cout << "[+] specified_empty > specified_empty: " << (specified_empty > specified_empty) << std::endl;
+	std::cout << "[+] specified_empty > assigned: " << (specified_empty > assigned) << std::endl;
+	std::cout << "[+] assigned > dfl: " << (assigned > dfl) << std::endl;
+	std::cout << "[+] assigned > already_filled: " << (assigned > already_filled) << std::endl;
+	std::cout << "[+] assigned > specified_empty: " << (assigned > specified_empty) << std::endl;
+	std::cout << "[+] assigned > assigned: " << (assigned > assigned) << std::endl;
+
+	std::cout << "** >= operator **" << std::endl;
+	std::cout << "[+] dfl >= dfl: " << (dfl >= dfl) << std::endl;
+	std::cout << "[+] dfl >= already_filled: " << (dfl >= already_filled) << std::endl;
+	std::cout << "[+] dfl >= specified_empty: " << (dfl >= specified_empty) << std::endl;
+	std::cout << "[+] dfl >= assigned: " << (dfl >= assigned) << std::endl;
+	std::cout << "[+] already_filled >= dfl: " << (already_filled >= dfl) << std::endl;
+	std::cout << "[+] already_filled >= already_filled: " << (already_filled >= already_filled) << std::endl;
+	std::cout << "[+] already_filled >= specified_empty: " << (already_filled >= specified_empty) << std::endl;
+	std::cout << "[+] already_filled >= assigned: " << (already_filled >= assigned) << std::endl;
+	std::cout << "[+] specified_empty >= dfl: " << (specified_empty >= dfl) << std::endl;
+	std::cout << "[+] specified_empty >= already_filled: " << (specified_empty >= already_filled) << std::endl;
+	std::cout << "[+] specified_empty >= specified_empty: " << (specified_empty >= specified_empty) << std::endl;
+	std::cout << "[+] specified_empty >= assigned: " << (specified_empty >= assigned) << std::endl;
+	std::cout << "[+] assigned >= dfl: " << (assigned >= dfl) << std::endl;
+	std::cout << "[+] assigned >= already_filled: " << (assigned >= already_filled) << std::endl;
+	std::cout << "[+] assigned >= specified_empty: " << (assigned >= specified_empty) << std::endl;
+	std::cout << "[+] assigned >= assigned: " << (assigned >= assigned) << std::endl;
+
+}
+
+void test_stack() {
+	std::cout << "========== STACK TESTS ==========" << std::endl;
+	std::cout << "=== with std::vector<std::string> > ===" << std::endl;
+	sub_test_stack< std::vector<std::string> >();
+
+	std::cout << "=== with ft::vector<std::string> > ===" << std::endl;
+	sub_test_stack< ft::vector<std::string> >();
+}
+
 int main(void) {
 	ULDL_INIT
 
 	std::cout << "TEST_NAMESPACE=" << MACRO_TO_STRING(TEST_NAMESPACE) << std::endl;
 
 	vector_test();
-
-	TEST_NAMESPACE::stack<validity_sanitizer> s;
-	s.push(validity_sanitizer(1));
-	s.push(validity_sanitizer(2));
-	s.pop();
-	s.pop();
 
 	test_tree();
 	test_map();
@@ -2081,6 +2356,8 @@ int main(void) {
 	test_equal_lexico();
 
 	test_pair();
+
+	test_stack();
 
 	return 0;
 }

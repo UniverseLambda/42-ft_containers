@@ -9,7 +9,7 @@ namespace ft {
 		_T0 first;
 		_T1 second;
 
-		pair() {}
+		pair(): first(), second() {}
 
 		pair(const _T0 &a, const _T1 &b): first(a), second(b) {}
 

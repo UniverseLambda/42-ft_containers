@@ -51,35 +51,35 @@ namespace ft {
 		void pop() {
 			c.pop_back();
 		}
+
+		template<typename _FTp, typename _FContainer>
+		friend bool operator==(const ft::stack<_FTp, _FContainer> &lhs, const ft::stack<_FTp, _FContainer> &rhs) {
+			return lhs.c == rhs.c;
+		}
+
+		template<typename _FTp, typename _FContainer>
+		friend bool operator!=(const ft::stack<_FTp, _FContainer> &lhs, const ft::stack<_FTp, _FContainer> &rhs) {
+			return lhs.c != rhs.c;
+		}
+
+		template<typename _FTp, typename _FContainer>
+		friend bool operator<(const ft::stack<_FTp, _FContainer> &lhs, const ft::stack<_FTp, _FContainer> &rhs) {
+			return lhs.c < rhs.c;
+		}
+
+		template<typename _FTp, typename _FContainer>
+		friend bool operator<=(const ft::stack<_FTp, _FContainer> &lhs, const ft::stack<_FTp, _FContainer> &rhs) {
+			return lhs.c <= rhs.c;
+		}
+
+		template<typename _FTp, typename _FContainer>
+		friend bool operator>(const ft::stack<_FTp, _FContainer> &lhs, const ft::stack<_FTp, _FContainer> &rhs) {
+			return lhs.c > rhs.c;
+		}
+
+		template<typename _FTp, typename _FContainer>
+		friend bool operator>=(const ft::stack<_FTp, _FContainer> &lhs, const ft::stack<_FTp, _FContainer> &rhs) {
+			return lhs.c >= rhs.c;
+		}
 	};
-
-	template<typename _Tp, typename _Container>
-	bool operator==(const ft::stack<_Tp, _Container> &lhs, const ft::stack<_Tp, _Container> &rhs) {
-		return lhs == rhs;
-	}
-
-	template<typename _Tp, typename _Container>
-	bool operator!=(const ft::stack<_Tp, _Container> &lhs, const ft::stack<_Tp, _Container> &rhs) {
-		return lhs != rhs;
-	}
-
-	template<typename _Tp, typename _Container>
-	bool operator<(const ft::stack<_Tp, _Container> &lhs, const ft::stack<_Tp, _Container> &rhs) {
-		return lhs < rhs;
-	}
-
-	template<typename _Tp, typename _Container>
-	bool operator<=(const ft::stack<_Tp, _Container> &lhs, const ft::stack<_Tp, _Container> &rhs) {
-		return lhs <= rhs;
-	}
-
-	template<typename _Tp, typename _Container>
-	bool operator>(const ft::stack<_Tp, _Container> &lhs, const ft::stack<_Tp, _Container> &rhs) {
-		return lhs > rhs;
-	}
-
-	template<typename _Tp, typename _Container>
-	bool operator>=(const ft::stack<_Tp, _Container> &lhs, const ft::stack<_Tp, _Container> &rhs) {
-		return lhs >= rhs;
-	}
 } // namespace ft

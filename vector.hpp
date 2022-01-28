@@ -234,7 +234,7 @@ namespace ft {
 		}
 
 		size_type max_size() const {
-			return std::numeric_limits<difference_type>::max() / sizeof(_Tp);
+			return std::numeric_limits<difference_type>::max() / sizeof(value_type);
 		}
 
 		void reserve(size_type new_capacity) {
@@ -463,40 +463,12 @@ namespace ft {
 
 	template<typename _Tp, typename _Alloc>
 	bool operator<(const vector<_Tp, _Alloc> &v0, const vector<_Tp, _Alloc> &v1) {
-		typedef typename vector<_Tp, _Alloc>::const_iterator iter;
-
-		iter it0 = v0.begin();
-		iter it1 = v1.begin();
-
-		for (; it0 != v0.end() && it1 != v1.end(); ++it0, ++it1) {
-			if (!(*it0 == *it1)) {
-				return *it0 < *it1;
-			}
-		}
-
-		if (it0 == v0.end()) {
-			if (it1 == v1.end())
-				return false;
-			return true;
-		}
-
-		return false;
+		return ft::lexicographical_compare(v0.begin(), v0.end(), v1.begin(), v1.end());
 	}
 
 	template<typename _Tp, typename _Alloc>
 	bool operator<=(const vector<_Tp, _Alloc> &v0, const vector<_Tp, _Alloc> &v1) {
-		typedef typename vector<_Tp, _Alloc>::const_iterator iter;
-
-		iter it0 = v0.begin();
-		iter it1 = v1.begin();
-
-		for (; it0 != v0.end() && it1 != v1.end(); ++it0, ++it1) {
-			if (*it1 < *it0) {
-				return false;
-			}
-		}
-
-		return it0 == v0.end();
+		return !(v1 < v0);
 	}
 
 	template<typename _Tp, typename _Alloc>
@@ -506,7 +478,7 @@ namespace ft {
 
 	template<typename _Tp, typename _Alloc>
 	bool operator>=(const vector<_Tp, _Alloc> &v0, const vector<_Tp, _Alloc> &v1) {
-		return v1 <= v0;
+		return !(v0 < v1);
 	}
 
 	template<typename _Tp, typename _Alloc>
