@@ -1,5 +1,5 @@
 #!/bin/sh
-make fclean uldl
+make fclean all
 ./std_test > std_result
 ./container_test > ft_result
 
