@@ -387,6 +387,90 @@ void test_remaining_ctor(TEST_NAMESPACE::vector<validity_sanitizer> &validity) {
 	check_vector(v1, 0);
 }
 
+template<typename _Iterator, typename _Vec>
+void vector_preserving_test(_Vec &vec) {
+	std::cout << "** typedefs (checking if it compiles) **"	<< std::endl;
+	std::cout << "value_type: " << typeid(typename _Vec::value_type).name() << std::endl;
+	std::cout << "allocator_type: " << typeid(typename _Vec::allocator_type).name() << std::endl;
+	std::cout << "size_type: " << typeid(typename _Vec::size_type).name() << std::endl;
+	std::cout << "difference_type: " << typeid(typename _Vec::difference_type).name() << std::endl;
+	std::cout << "reference: " << typeid(typename _Vec::reference).name() << std::endl;
+	std::cout << "const_reference: " << typeid(typename _Vec::const_reference).name() << std::endl;
+	std::cout << "pointer: " << typeid(typename _Vec::pointer).name() << std::endl;
+	std::cout << "const_pointer: " << typeid(typename _Vec::const_pointer).name() << std::endl;
+	std::cout << "iterator: " << typeid(typename _Vec::iterator).name() << " (difference expected)" << std::endl;
+	std::cout << "const_iterator: " << typeid(typename _Vec::const_iterator).name() << " (difference expected)" << std::endl;
+	std::cout << "reverse_iterator: " << typeid(typename _Vec::reverse_iterator).name() << " (difference expected)" << std::endl;
+	std::cout << "const_reverse_iterator: " << typeid(typename _Vec::const_reverse_iterator).name() << " (difference expected)" << std::endl;
+
+	std::cout << "** get_allocator **" << std::endl;
+	std::cout << typeid(vec.get_allocator()).name() << std::endl;
+
+	std::cout << "** at **" << std::endl;
+	if (!vec.empty()) {
+		std::cout << "[+] vec.at(0): " << vec.at(0) << std::endl;
+		std::cout << "[+] vec.at(1): " << vec.at(1) << std::endl;
+		std::cout << "[+] vec.at(size - 1): " << vec.at(vec.size() - 1) << std::endl;
+
+	}
+	try {
+		std::cout << "[+] vec.at(size): " << vec.at(vec.size()) << std::endl;
+		std::cout << CONSOLE_RED << "no exception caught (shit)" << CONSOLE_RESET << std::endl;
+	} catch (std::exception &e) {
+		std::cout << CONSOLE_GREEN << "caught an exception: " << typeid(e).name() << " (that's good)" << CONSOLE_RESET << std::endl;
+	}
+
+	try {
+		std::cout << "[+] vec.at(size + 5): " << vec.at(vec.size() + 5) << std::endl;
+		std::cout << CONSOLE_RED << "no exception caught (shit)" << CONSOLE_RESET << std::endl;
+	} catch (std::exception &e) {
+		std::cout << CONSOLE_GREEN << "caught an exception: " << typeid(e).name() << " (that's good)" << CONSOLE_RESET << std::endl;
+	}
+
+	if (!vec.empty()) {
+		std::cout << "** operator[] **" << std::endl;
+		std::cout << "[+] vec[0]: " << vec[0] << std::endl;
+		std::cout << "[+] vec[1]: " << vec[1] << std::endl;
+		std::cout << "[+] vec[size - 1]: " << vec[vec.size() - 1] << std::endl;
+
+		std::cout << "** front **" << std::endl;
+		std::cout << "[+] front: " << vec.front() << std::endl;
+
+		std::cout << "** back **" << std::endl;
+		std::cout << "[+] back: " << vec.back() << std::endl;
+	}
+
+	if (!vec.empty()) {
+		std::cout << "** data **" << std::endl;
+		std::cout << "[+] *(vec.data): " << *(vec.data()) << std::endl;
+		std::cout << "[+] vec.data()[1]: " << vec.data()[1] << std::endl;
+		std::cout << "[+] vec.data()[size - 1]: " << vec.data()[vec.size() - 1] << std::endl;
+	}
+
+	if (!vec.empty()) {
+		std::cout << "** data **" << std::endl;
+		std::cout << "[+] *(vec.data): " << *(vec.data()) << std::endl;
+		std::cout << "[+] vec.data()[1]: " << vec.data()[1] << std::endl;
+		std::cout << "[+] vec.data()[size - 1]: " << vec.data()[vec.size() - 1] << std::endl;
+	}
+
+	std::cout << "** begin/end **" << std::endl;
+	for (_Iterator it = vec.begin(); it != vec.end(); ++it) {
+		std::cout << "it: " << *it << std::endl;
+	}
+
+	std::cout << "** rbegin/rend **" << std::endl;
+	for (TEST_NAMESPACE::reverse_iterator<_Iterator> it = vec.rbegin(); it != vec.rend(); ++it) {
+		std::cout << "it: " << *it << std::endl;
+	}
+
+	std::cout << "** size-ish related **" << std::endl;
+	std::cout << "[+] empty: " << vec.empty() << std::endl;
+	std::cout << "[+] size: " << vec.size() << std::endl;
+	std::cout << "[+] max_size: " << vec.max_size() << " (difference expected)" << std::endl;
+	std::cout << "[+] capacity: " << vec.capacity() << " (difference expected)" << std::endl;
+}
+
 void vector_test() {
 	typedef TEST_NAMESPACE::vector<validity_sanitizer>::reverse_iterator riter;
 	TEST_NAMESPACE::vector<validity_sanitizer> validity;
@@ -423,8 +507,27 @@ void vector_test() {
 	}
 
 	VECTOR_TEST();
+
+	std::cout << "================= NON-EMPTY VECTOR - PRESERVING TESTS =================" << std::endl;
+	vector_preserving_test<TEST_NAMESPACE::vector<validity_sanitizer>::iterator>(validity);
+
+	std::cout << "================= NON-EMPTY CONST VECTOR - PRESERVING TESTS =================" << std::endl;
+	{
+		const TEST_NAMESPACE::vector<validity_sanitizer> &cv = validity;
+		vector_preserving_test<TEST_NAMESPACE::vector<validity_sanitizer>::const_iterator>(cv);
+	}
+
 	VECTOR_TEST(validity.clear());
 	VECTOR_TEST(validity.clear());
+
+	std::cout << "================= EMPTY VECTOR - PRESERVING TESTS =================" << std::endl;
+	vector_preserving_test<TEST_NAMESPACE::vector<validity_sanitizer>::iterator>(validity);
+
+	std::cout << "================= EMPTY CONST VECTOR - PRESERVING TESTS =================" << std::endl;
+	{
+		const TEST_NAMESPACE::vector<validity_sanitizer> &cv = validity;
+		vector_preserving_test<TEST_NAMESPACE::vector<validity_sanitizer>::const_iterator>(cv);
+	}
 
 	VECTOR_TEST(for (std::size_t i = 0; i < 20; ++i) {
 		validity.push_back(validity_sanitizer(i + 3000));
@@ -537,7 +640,7 @@ void vector_test() {
 		validity.reserve(validity.max_size() + 1);
 		std::cout << CONSOLE_RED << "/!\\ No exception caught (shit)" << CONSOLE_RESET << std::endl;
 	} catch (std::exception &e) {
-		std::cout << CONSOLE_GREEN << "/!\\ Caught an exception: " << e.what() << " (that's good)" << CONSOLE_RESET << std::endl;
+		std::cout << CONSOLE_GREEN << "/!\\ Caught an exception: " << typeid(e).name() << " (that's good)" << CONSOLE_RESET << std::endl;
 	});
 
 	VECTOR_TEST(std::cout << "Shitty vector test: " << (2 + validity.begin())->idx << std::endl);

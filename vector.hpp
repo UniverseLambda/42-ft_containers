@@ -222,7 +222,7 @@ namespace ft {
 		}
 
 		const_reverse_iterator rend() const {
-			return reverse_iterator(begin());
+			return const_reverse_iterator(begin());
 		}
 
 		bool empty() const {

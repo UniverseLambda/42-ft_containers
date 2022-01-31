@@ -6,7 +6,17 @@ STD_NAME := std_test
 
 SRCS :=	main.cpp \
 
-INCS :=
+INCS := ./algorithm.hpp \
+		./bits/bst.hpp \
+		./bits/ptr_iterator.hpp \
+		./bits/reverse_iterator.hpp \
+		./iterator.hpp \
+		./map.hpp \
+		./stack.hpp \
+		./type_traits.hpp \
+		./uldl/uldl.hpp \
+		./utility.hpp \
+		./vector.hpp
 
 ifeq ($(shell uname), Linux)
 CXX :=	g++
@@ -23,10 +33,10 @@ LD_LIBS :=
 
 all:			$(NAME) $(STD_NAME)
 
-$(NAME):		$(SRCS)
+$(NAME):		$(SRCS) $(INCS)
 	$(CXX) $(CXX_FLAGS) -o $@ $(SRCS) $(LD_LIBS)
 
-$(STD_NAME):	$(SRCS)
+$(STD_NAME):	$(SRCS) $(INCS)
 	$(CXX) $(CXX_FLAGS) -DTEST_NAMESPACE=std -o $@ $(SRCS) $(LD_LIBS)
 
 clean:
